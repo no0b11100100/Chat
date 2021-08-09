@@ -1,16 +1,16 @@
 package main
 
 import (
-	"net"
-	"fmt"
 	"bufio"
-	"time"
+	"fmt"
+	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type server struct {
-	listener net.Listener
+	listener    net.Listener
 	connections []net.Conn
 }
 
@@ -22,12 +22,12 @@ func NewServer() *server {
 	}
 
 	return &server{
-		listener: ln,
+		listener:    ln,
 		connections: make([]net.Conn, 0),
 	}
 }
 
-func (s* server) Close() {
+func (s *server) Close() {
 	for _, c := range s.connections {
 		c.Close()
 	}
@@ -35,28 +35,40 @@ func (s* server) Close() {
 }
 
 func (s *server) isAlive() {
-	for _ = range time.Tick(10*time.Second) {
+	for _ = range time.Tick(10 * time.Second) {
 		fmt.Println("alive", strconv.Itoa(len(s.connections)))
 	}
 }
 
-func (s *server) Run() {
-	go s.isAlive()
+func (s *server) handleRequest(conn net.Conn) {
+	reader := bufio.NewReader(conn)
 	for {
-		conn, err := s.listener.Accept()
-		fmt.Print("Run\n")
 
-		if err != nil {
-			fmt.Println("cannot accept")
+		message, _ := reader.ReadString('\n')
+		if message == "\n" {
+			continue
 		}
-
-		message, _ := bufio.NewReader(conn).ReadString('\n')
 		fmt.Print("Recieved message: ", string(message))
 
-		conn.Write([]byte("Response\n"));
+		conn.Write([]byte("Response\n"))
 
 		if strings.HasPrefix(string(message), "start client") {
 			s.connections = append(s.connections, conn)
 		}
 	}
+}
+
+func (s *server) Run() {
+
+	go s.isAlive()
+
+	for {
+		conn, err := s.listener.Accept()
+		if err != nil {
+			fmt.Println("cannot accept")
+		}
+
+		go s.handleRequest(conn)
+	}
+
 }

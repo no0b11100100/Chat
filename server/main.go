@@ -4,5 +4,5 @@ func main() {
 
 	server := NewServer()
 	server.Run()
-  	defer server.Close()
+	defer server.Close()
 }
