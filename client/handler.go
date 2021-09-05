@@ -9,16 +9,10 @@ import (
 	"strings"
 )
 
-func readResponse(conn net.Conn) (string, error) {
-	message, err := bufio.NewReader(conn).ReadString('\n')
-	fmt.Print("Message from server: " + message)
-	return message, err
-}
-
-func HandleStartUp(conn net.Conn) {
+func HandleStartUp(conn net.Conn, serverReader *bufio.Reader) {
 	payload, _ := json.Marshal(command.Command{ID: command.StartConnection})
 	fmt.Fprintf(conn, string(payload)+"\n")
-	_, _ = readResponse(conn)
+	_, _ = serverReader.ReadString('\n')
 }
 
 func HandleLogIn(conn net.Conn, userReader *bufio.Reader, serverReader *bufio.Reader) {
@@ -28,6 +22,7 @@ func HandleLogIn(conn net.Conn, userReader *bufio.Reader, serverReader *bufio.Re
 		Register = "Register"
 	)
 
+	fmt.Print("Hello\nWhat action would you do?\nLogIn\nGuest\nRegister\n")
 	text, _ := userReader.ReadString('\n')
 	fmt.Println("user input", text)
 	text = strings.TrimSuffix(text, "\n")
@@ -98,6 +93,17 @@ func HandleActiveusers(conn net.Conn, serverReader *bufio.Reader) {
 	response, _ := json.Marshal(command)
 	fmt.Fprintf(conn, string(response)+"\n")
 	// TODO: read responce
+	message, _ := serverReader.ReadString('\n')
+	fmt.Print("Message from server: " + message)
+}
+
+func HandleSendMessage(conn net.Conn, userReader *bufio.Reader, serverReader *bufio.Reader) {
+	fmt.Print("Message: ")
+	text, _ := userReader.ReadString('\n')
+	commandPayload, _ := json.Marshal(command.MessagePayload{Message: text})
+	command := command.Command{ID: command.SendMessage, Payload: commandPayload}
+	response, _ := json.Marshal(command)
+	fmt.Fprintf(conn, string(response)+"\n")
 	message, _ := serverReader.ReadString('\n')
 	fmt.Print("Message from server: " + message)
 }

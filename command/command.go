@@ -30,7 +30,6 @@ type UserLoginPayload struct {
 }
 
 type MessagePayload struct {
-	Sender  string `json:"sender"`
 	Message string `json:"message"`
 	// Recievers
 }

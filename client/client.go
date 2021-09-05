@@ -22,15 +22,6 @@ func NewClient(conn net.Conn) *client {
 	}
 }
 
-func (c *client) logIn() {
-	fmt.Print("Hello\nWhat action would you do?\nLogIn\nGuest\nRegister\n")
-	HandleLogIn(c.Connection, c.UserReader, c.ServerReader)
-}
-
-func (c *client) sendStartUpRequest() {
-	HandleStartUp(c.Connection)
-}
-
 func (c *client) handleInput(input string) {
 	input = strings.TrimSuffix(input, "\n")
 	switch input {
@@ -40,7 +31,8 @@ func (c *client) handleInput(input string) {
 		os.Exit(1)
 	case "/activeUsers":
 		HandleActiveusers(c.Connection, c.ServerReader)
-		// case "/send":
+	case "/send":
+		HandleSendMessage(c.Connection, c.UserReader, c.ServerReader)
 		// case "/changePassword":
 		// case "/changeNickName":
 		// case "/changeEmail":
@@ -48,8 +40,17 @@ func (c *client) handleInput(input string) {
 }
 
 func (c *client) Run() {
-	c.sendStartUpRequest()
-	c.logIn()
+	HandleStartUp(c.Connection, c.ServerReader)
+	HandleLogIn(c.Connection, c.UserReader, c.ServerReader)
+
+	go func() {
+		for {
+			text, _ := c.ServerReader.ReadString('\n')
+			if text != "" {
+				fmt.Print("Message from ", text)
+			}
+		}
+	}()
 
 	for {
 		fmt.Print("Enter command: ")

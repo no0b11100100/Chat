@@ -72,7 +72,6 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 		return err.Error()
 	case command.RegisterUser:
 		payload := command.UserLoginPayload{}
-		s.setUserStatus(true, conn.RemoteAddr().String())
 		if err := json.Unmarshal(c.Payload, &payload); err != nil {
 			return err.Error() + "\n"
 		}
@@ -125,6 +124,20 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 		}
 
 		return strings.TrimSuffix(result, ",") + "\n"
+	case command.SendMessage:
+		sender, _ := s.DB.Select(conn.RemoteAddr().String())
+		payload := command.MessagePayload{}
+		if err := json.Unmarshal(c.Payload, &payload); err != nil {
+			return err.Error() + "\n"
+		}
+		message := sender.NickName + ": " + payload.Message + "\n"
+		for _, client := range s.connections {
+			if client.isActive && (client.connection.RemoteAddr().String() != sender.IP) {
+				client.connection.Write([]byte(message))
+			}
+		}
+
+		return "\n"
 	}
 
 	return "\n"
