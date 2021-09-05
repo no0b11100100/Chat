@@ -2,28 +2,14 @@ package main
 
 import (
 	"bufio"
+	"command"
 	"encoding/json"
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 )
-
-type CommandID int
-
-const (
-	LogIn CommandID = iota
-	LogInUser
-	LogInGuest
-	AllActiveUsers
-	Send
-	Quit
-)
-
-type Command struct {
-	ID      CommandID       `json:"id"`
-	Payload json.RawMessage `json:"payload"`
-}
 
 type connectionInfo struct {
 	isActive   bool
@@ -31,8 +17,10 @@ type connectionInfo struct {
 }
 
 type server struct {
-	listener    net.Listener
-	connections []connectionInfo
+	listener      net.Listener
+	connections   []connectionInfo
+	CommandReader *bufio.Reader
+	DB            DBInterface
 }
 
 func NewServer() *server {
@@ -43,8 +31,10 @@ func NewServer() *server {
 	}
 
 	return &server{
-		listener:    ln,
-		connections: make([]connectionInfo, 0),
+		listener:      ln,
+		connections:   make([]connectionInfo, 0),
+		CommandReader: bufio.NewReader(nil),
+		DB:            NewDB(),
 	}
 }
 
@@ -61,64 +51,112 @@ func (s *server) isAlive() {
 	}
 }
 
-func (s *server) handleCommand(c Command, conn net.Conn) string {
+func (s *server) handleCommand(c command.Command, conn net.Conn) string {
+	fmt.Print("command ", c.ID, "\n")
 	switch c.ID {
-	case LogIn:
-		go s.addConnection(conn)
-		return "Hello. Would you like to loggin as a guest?[Yes\\No]\n"
-	case Quit:
-		go s.removeConnection(conn)
-		return ":(\n"
-	default:
+	case command.StartConnection:
 		return "\n"
-	}
-}
-
-func (s *server) addConnection(conn net.Conn) {
-	if len(s.connections) == 0 {
-		s.connections = append(s.connections, connectionInfo{true, conn})
-		return
-	}
-
-	for _, c := range s.connections {
-		if c.connection.RemoteAddr() != conn.RemoteAddr() {
-			s.connections = append(s.connections, connectionInfo{true, conn})
+	case command.LogInUser:
+		payload := command.UserLoginPayload{}
+		if err := json.Unmarshal(c.Payload, &payload); err != nil {
+			return err.Error() + "\n"
 		}
+		record, err := s.DB.Select(conn.RemoteAddr().String())
+		if err == nil {
+			if payload.Password != record.Password || payload.Email != record.Email {
+				return "Invalid data\n"
+			}
+			s.setUserStatus(true, conn.RemoteAddr().String())
+			return "Welcome " + record.NickName + "\n"
+		}
+		return err.Error()
+	case command.RegisterUser:
+		payload := command.UserLoginPayload{}
+		s.setUserStatus(true, conn.RemoteAddr().String())
+		if err := json.Unmarshal(c.Payload, &payload); err != nil {
+			return err.Error() + "\n"
+		}
+		record := Record{
+			IP:       conn.RemoteAddr().String(),
+			Email:    payload.Email,
+			Password: payload.Password,
+			NickName: payload.NickName,
+		}
+		s.DB.AddRecord(record)
+		s.connections = append(s.connections, connectionInfo{isActive: true, connection: conn})
+		return "Welcome " + payload.NickName + "\n"
+	case command.GuestUser:
+		payload := command.UserLoginPayload{}
+		if err := json.Unmarshal(c.Payload, &payload); err != nil {
+			return err.Error() + "\n"
+		}
+
+		record, err := s.DB.Select(conn.RemoteAddr().String())
+		if err != nil {
+			record = Record{
+				IP:       conn.RemoteAddr().String(),
+				NickName: "guest_1",
+			}
+			s.DB.AddRecord(record)
+			s.connections = append(s.connections, connectionInfo{isActive: true, connection: conn})
+		} else {
+			s.setUserStatus(true, conn.RemoteAddr().String())
+		}
+
+		return "Welcome " + record.NickName + "\n"
+	case command.Quit:
+		s.setUserStatus(false, conn.RemoteAddr().String())
+		record, err := s.DB.Select(conn.RemoteAddr().String())
+		if err != nil {
+			return "Bye\n"
+		}
+		return "Bye " + record.NickName + "\n"
+	case command.ActiveUsers:
+		result := ""
+		for _, c := range s.connections {
+			if c.isActive {
+				record, err := s.DB.Select(c.connection.RemoteAddr().String())
+				if err != nil {
+					fmt.Println("err", err)
+					continue
+				}
+				result += record.NickName + ","
+			}
+		}
+
+		return strings.TrimSuffix(result, ",") + "\n"
 	}
+
+	return "\n"
 }
 
-func (s *server) removeConnection(conn net.Conn) {
-	if len(s.connections) == 0 {
-		return
-	}
-
+func (s *server) setUserStatus(status bool, connection string) {
 	for index, c := range s.connections {
-		if c.connection.RemoteAddr() == conn.RemoteAddr() {
-			s.connections = s.connections[index : index+1]
+		if c.connection.RemoteAddr().String() == connection {
+			s.connections[index].isActive = status
 		}
 	}
 }
 
 func (s *server) handleRequest(conn net.Conn) {
-	reader := bufio.NewReader(conn)
+	s.CommandReader.Reset(conn)
 	for {
-
-		message, _ := reader.ReadString('\n')
-		if message == "\n" {
+		message, _ := s.CommandReader.ReadString('\n')
+		if message == "\n" || message == "" {
 			continue
 		}
 		fmt.Print("Recieved message: ", string(message))
 
-		command := Command{}
-		err := json.Unmarshal([]byte(message), &command)
+		cmd := command.Command{}
+		err := json.Unmarshal([]byte(message), &cmd)
 		if err != nil {
-			fmt.Print("error parse command", err)
+			fmt.Print("error parse command ", err)
 			conn.Write([]byte("Error\n"))
 			continue
 		}
 
-		responce := s.handleCommand(command, conn)
-		conn.Write([]byte(responce))
+		response := s.handleCommand(cmd, conn)
+		conn.Write([]byte(response))
 	}
 }
 

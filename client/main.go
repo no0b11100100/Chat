@@ -11,12 +11,12 @@ func main() {
 
 	// Подключаемся к сокету
 	conn, err := net.Dial("tcp", "127.0.0.1:8081")
+	// defer conn.Close()
 	if err != nil {
-		fmt.Print(err)
+		fmt.Print("error", err)
 	}
 
-	c := client{Connection: conn}
-	c.sendStartUpRequest()
+	c := NewClient(conn)
+
 	c.Run()
-	defer conn.Close()
 }
