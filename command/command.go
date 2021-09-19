@@ -7,20 +7,15 @@ type CommandID int
 const (
 	StartConnection CommandID = iota
 	LogInUser
-	GuestUser
 	RegisterUser
-	ConfirmPasswd
 	ActiveUsers
-	ChangeNickName
-	ChangePasswd
 	SendMessage
 	Quit
 )
 
 type Command struct {
-	ID      CommandID       `json:"id"`
-	Error   string          `json:"error"`
-	Payload json.RawMessage `json:"payload"`
+	ID      CommandID `json:"id"`
+	Payload []byte    `json:"payload"`
 }
 
 type UserLoginPayload struct {
@@ -29,7 +24,38 @@ type UserLoginPayload struct {
 	NickName string `json:"nickname"`
 }
 
-type MessagePayload struct {
-	Message string `json:"message"`
-	// Recievers
+type SereverStaus uint32
+
+const (
+	OK SereverStaus = iota
+	Fail
+)
+
+type Response struct {
+	Status  SereverStaus `json:"status"`
+	Payload string       `json:"payload,omitempty"`
+}
+
+func (p *UserLoginPayload) Marshal() []byte {
+	if payload, err := json.Marshal(p); err == nil {
+		return payload
+	}
+	return []byte{}
+}
+
+func (r *Response) Marshal() []byte {
+	if payload, err := json.Marshal(r); err == nil {
+		return payload
+	}
+	return []byte{}
+}
+
+func (r *Response) SetError(errorString string) {
+	r.Status = Fail
+	r.Payload = errorString
+}
+
+func (r *Response) SetPayload(payload string) {
+	r.Status = OK
+	r.Payload = payload
 }
