@@ -80,7 +80,7 @@ func (c *client) handleInput(input string) {
 	} else {
 		// send message
 		fmt.Println("user message", input)
-		command := command.Command{ID: command.SendMessage, Payload: json.RawMessage("hello")}
+		command := command.Command{ID: command.SendMessage, Payload: []byte(input)}
 		payload, err := json.Marshal(command)
 		if err == nil {
 			c.send(payload)

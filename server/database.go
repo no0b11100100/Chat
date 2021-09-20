@@ -66,7 +66,7 @@ func (db *InmemoryDB) Select(request string) (Record, error) {
 
 type DataBase struct {
 	db *sql.DB
-	m  sync.RWMutex
+	// m  sync.RWMutex
 }
 
 const tableName = "users"
@@ -87,17 +87,35 @@ func (db *DataBase) Close() {
 
 // https://metanit.com/go/tutorial/10.4.php
 func (db *DataBase) AddRecord(record Record) {
-	_, err := db.db.Exec("insert into "+tableName+" (IP, Email, Password, NickName) values ($1, $2, $3, $4)",
-		record.IP, record.Email, record.Password, record.NickName)
+	_, err := db.db.Exec("insert into "+tableName+" (email, password, nickName) values ($1, $2, $3)",
+		record.Email, record.Password, record.NickName)
 	if err != nil {
 		panic(err)
 	}
 }
 
+var CannotFind = errors.New("can not find")
+
 func (db *DataBase) Select(request string) (Record, error) {
-	return Record{}, errors.New("invalid reuqest")
+	rows, err := db.db.Query("select * from Products where email=" + request)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	record := Record{}
+	err = CannotFind
+	if rows.Next() {
+		err = rows.Scan(&record.Email, &record.Password, &record.NickName)
+		if err == nil {
+			return record, nil
+		}
+	}
+
+	return Record{}, err
 }
 
 func (db *DataBase) IsEmailUnique(email string) bool {
-	return false
+	_, err := db.Select(email)
+	return err == CannotFind
 }
