@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"command"
+
+	// . "crypto/sha512"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -21,7 +23,8 @@ type server struct {
 	Connections   map[string]connectionInfo
 	CommandReader *bufio.Reader
 	DB            DBInterface
-	SQL_DB        DBInterface
+	clientIDs     uint64
+	// SQL_DB        DBInterface
 }
 
 func NewServer() *server {
@@ -35,8 +38,8 @@ func NewServer() *server {
 		listener:      ln,
 		Connections:   make(map[string]connectionInfo),
 		CommandReader: bufio.NewReader(nil),
-		DB:            NewDB(),
-		SQL_DB:        NewDataBase(),
+		DB:            NewDataBase(), //NewDB(),
+		clientIDs:     0,
 	}
 }
 
@@ -53,11 +56,15 @@ func (s *server) isAlive() {
 	}
 }
 
+func (s *server) makeClientID() string {
+	s.clientIDs = s.clientIDs + 1
+	return strconv.FormatUint(s.clientIDs, 10)
+}
+
 func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 	fmt.Println("command ", c.ID)
 	switch c.ID {
 	case command.StartConnection:
-		s.Connections[conn.RemoteAddr().String()] = connectionInfo{connection: conn}
 	case command.LogInUser:
 		payload := command.UserLoginPayload{}
 		response := command.Response{}
@@ -65,14 +72,16 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 			response.SetError(err.Error())
 			return string(response.Marshal())
 		}
-		record, err := s.SQL_DB.Select(payload.Email)
+		record, err := s.DB.Select(payload.Email)
 		if err == nil {
-			if payload.Password != record.Password || payload.Email != record.Email {
+			if payload.Password != record.Password {
 				response.SetError("Invalid password or email")
 				return string(response.Marshal())
 			}
 			response.SetPayload("Welcome " + record.NickName)
-			s.Connections[conn.RemoteAddr().String()] = connectionInfo{Name: record.NickName, connection: conn}
+			response.ID = s.makeClientID()
+			s.Connections[response.ID] = connectionInfo{Name: record.NickName, connection: conn}
+			fmt.Println("add connection", strconv.Itoa(len(s.Connections)), response.ID)
 			return string(response.Marshal())
 		}
 		response.SetError(err.Error())
@@ -96,11 +105,13 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 		}
 
 		s.DB.AddRecord(record)
-		s.Connections[conn.RemoteAddr().String()] = connectionInfo{Name: record.NickName, connection: conn}
 		response.SetPayload("Welcome " + payload.NickName)
+		response.ID = s.makeClientID()
+		s.Connections[response.ID] = connectionInfo{Name: record.NickName, connection: conn}
+		fmt.Println("add connection", strconv.Itoa(len(s.Connections)), response.ID)
 		return string(response.Marshal())
 	case command.Quit:
-		s.closeClientConnection(conn.RemoteAddr().String())
+		s.closeClientConnection(c.ClientID)
 	case command.ActiveUsers:
 		result := ""
 		response := command.Response{}
@@ -111,10 +122,10 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 		response.SetPayload(result)
 		return string(response.Marshal())
 	case command.SendMessage:
-		sender := s.Connections[conn.RemoteAddr().String()].Name
-		message := sender + ": " + string(c.Payload)
-		for _, client := range s.Connections {
-			if client.connection.RemoteAddr().String() != conn.RemoteAddr().String() {
+		sender := s.Connections[c.ClientID].Name
+		message := "> " + sender + ": " + string(c.Payload)
+		for id, client := range s.Connections {
+			if id != c.ClientID {
 				response := command.Response{}
 				response.SetPayload(message)
 				client.connection.Write(response.Marshal())
@@ -126,8 +137,12 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 }
 
 func (s *server) closeClientConnection(connAddr string) {
-	s.Connections[connAddr].connection.Close()
-	delete(s.Connections, connAddr)
+	if _, ok := s.Connections[connAddr]; ok {
+		s.Connections[connAddr].connection.Close()
+		delete(s.Connections, connAddr)
+		fmt.Println("removed")
+	}
+	fmt.Println("remove connection", strconv.Itoa(len(s.Connections)), connAddr, s.Connections)
 }
 
 func (s *server) handleRequest(conn net.Conn) {
@@ -148,8 +163,8 @@ func (s *server) handleRequest(conn net.Conn) {
 		}
 
 		response := s.handleCommand(cmd, conn)
-		fmt.Println("message:", response)
 		if response != "\n" {
+			fmt.Println("send message:", response)
 			conn.Write([]byte(response))
 		} else {
 			fmt.Println("message was not sent")
@@ -159,7 +174,7 @@ func (s *server) handleRequest(conn net.Conn) {
 
 func (s *server) Run() {
 	go s.isAlive()
-	defer s.SQL_DB.Close()
+	defer s.DB.Close()
 
 	for {
 		conn, err := s.listener.Accept()

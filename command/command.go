@@ -14,8 +14,9 @@ const (
 )
 
 type Command struct {
-	ID      CommandID `json:"id"`
-	Payload []byte    `json:"payload"`
+	ClientID string    `json:"clientID"`
+	ID       CommandID `json:"id"`
+	Payload  []byte    `json:"payload"`
 }
 
 type UserLoginPayload struct {
@@ -32,20 +33,21 @@ const (
 )
 
 type Response struct {
+	ID      string       `json:"id"`
 	Status  SereverStaus `json:"status"`
 	Payload string       `json:"payload,omitempty"`
 }
 
 func (p *UserLoginPayload) Marshal() []byte {
 	if payload, err := json.Marshal(p); err == nil {
-		return payload
+		return append(payload, '\n')
 	}
 	return []byte{}
 }
 
 func (r *Response) Marshal() []byte {
 	if payload, err := json.Marshal(r); err == nil {
-		return payload
+		return append(payload, '\n')
 	}
 	return []byte{}
 }

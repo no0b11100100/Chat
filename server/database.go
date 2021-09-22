@@ -3,13 +3,14 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type Record struct {
-	IP       string
 	Email    string
 	Password string
 	NickName string
@@ -49,7 +50,8 @@ func (db *InmemoryDB) IsEmailUnique(email string) bool {
 func (db *InmemoryDB) AddRecord(record Record) {
 	db.m.Lock()
 	defer db.m.Unlock()
-	db.data[record.IP] = record
+	db.data[record.Email] = record
+	fmt.Println("add record", db.data)
 }
 
 func (db *InmemoryDB) Close() {
@@ -58,6 +60,7 @@ func (db *InmemoryDB) Close() {
 func (db *InmemoryDB) Select(request string) (Record, error) {
 	db.m.Lock()
 	defer db.m.Unlock()
+	fmt.Println("select", db.data)
 	if value, ok := db.data[request]; ok {
 		return value, nil
 	}
@@ -88,34 +91,36 @@ func (db *DataBase) Close() {
 // https://metanit.com/go/tutorial/10.4.php
 func (db *DataBase) AddRecord(record Record) {
 	_, err := db.db.Exec("insert into "+tableName+" (email, password, nickName) values ($1, $2, $3)",
-		record.Email, record.Password, record.NickName)
+		strings.Replace(record.Email, "@", "a", -1), record.Password, record.NickName)
 	if err != nil {
-		panic(err)
+		fmt.Println("AddRecord error", err)
 	}
 }
 
-var CannotFind = errors.New("can not find")
-
-func (db *DataBase) Select(request string) (Record, error) {
-	rows, err := db.db.Query("select * from Products where email=" + request)
-	if err != nil {
-		panic(err)
-	}
-	defer rows.Close()
-
+func (db *DataBase) Select(email string) (Record, error) {
 	record := Record{}
-	err = CannotFind
-	if rows.Next() {
-		err = rows.Scan(&record.Email, &record.Password, &record.NickName)
-		if err == nil {
-			return record, nil
-		}
+	err := db.db.QueryRow("select * from users where email=$1", strings.Replace(email, "@", "a", -1)).Scan(&record.Email, &record.Password, &record.NickName)
+	switch err {
+	case sql.ErrNoRows:
+		return Record{}, err
+	case nil:
+		return record, nil
+	default:
+		fmt.Println("Select", err)
+		return Record{}, err
 	}
-
-	return Record{}, err
 }
 
 func (db *DataBase) IsEmailUnique(email string) bool {
-	_, err := db.Select(email)
-	return err == CannotFind
+	row := db.db.QueryRow("select * from users where email=$1", strings.Replace(email, "@", "a", -1))
+	record := Record{}
+	switch err := row.Scan(&record.Email); err {
+	case sql.ErrNoRows:
+		return true
+	case nil:
+		return false
+	default:
+		fmt.Println("IsEmailUnique", err)
+		return false
+	}
 }

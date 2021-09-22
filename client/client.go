@@ -17,7 +17,8 @@ type client struct {
 	Connection   net.Conn
 	UserReader   *bufio.Reader
 	ServerReader *bufio.Reader
-	ch           chan string
+	ID           string
+	isStarted    bool
 }
 
 func NewClient(conn net.Conn) *client {
@@ -25,7 +26,7 @@ func NewClient(conn net.Conn) *client {
 		Connection:   conn,
 		UserReader:   bufio.NewReader(os.Stdin),
 		ServerReader: bufio.NewReader(conn),
-		ch:           make(chan string),
+		isStarted:    false,
 	}
 }
 
@@ -45,8 +46,9 @@ func (c *client) handleInput(input string) {
 			Password: data[1],
 		}
 		command := command.Command{
-			ID:      command.LogInUser,
-			Payload: commandPayload.Marshal(),
+			ClientID: c.ID,
+			ID:       command.LogInUser,
+			Payload:  commandPayload.Marshal(),
 		}
 		if payload, err := json.Marshal(command); err == nil {
 			c.send(payload)
@@ -59,28 +61,37 @@ func (c *client) handleInput(input string) {
 			NickName: data[2],
 		}
 		command := command.Command{
-			ID:      command.RegisterUser,
-			Payload: commandPayload.Marshal(),
+			ClientID: c.ID,
+			ID:       command.RegisterUser,
+			Payload:  commandPayload.Marshal(),
 		}
 		if payload, err := json.Marshal(command); err == nil {
 			c.send(payload)
 		}
 	} else if strings.TrimSuffix(input, "\n") == Quit {
-		command := command.Command{ID: command.Quit}
+		command := command.Command{ID: command.Quit, ClientID: c.ID}
 		if payload, err := json.Marshal(command); err == nil {
 			c.send(payload)
 		}
 		c.Connection.Close()
 		os.Exit(1)
 	} else if strings.TrimSuffix(input, "\n") == Activeusers {
-		command := command.Command{ID: command.ActiveUsers}
+		if !c.isStarted {
+			fmt.Println("please log in or create account")
+			return
+		}
+		command := command.Command{ID: command.ActiveUsers, ClientID: c.ID}
 		if payload, err := json.Marshal(command); err == nil {
 			c.send(payload)
 		}
 	} else {
+		if !c.isStarted {
+			fmt.Println("please log in or create account")
+			return
+		}
 		// send message
 		fmt.Println("user message", input)
-		command := command.Command{ID: command.SendMessage, Payload: []byte(input)}
+		command := command.Command{ClientID: c.ID, ID: command.SendMessage, Payload: []byte(input)}
 		payload, err := json.Marshal(command)
 		if err == nil {
 			c.send(payload)
@@ -99,10 +110,8 @@ func (c *client) readFromUser() {
 }
 
 func (c *client) readResponse() {
-	// for {
 	text, _ := c.ServerReader.ReadString('\n')
 	c.handleResponse(text)
-	// }
 }
 
 func (c *client) handleResponse(payload string) {
@@ -112,8 +121,21 @@ func (c *client) handleResponse(payload string) {
 
 	response := command.Response{}
 	if err := json.Unmarshal([]byte(payload), &response); err == nil {
+		if !c.isStarted {
+			if response.Status == command.OK {
+				c.ID = response.ID
+				c.isStarted = true
+				fmt.Println("\r\033[KID", c.ID)
+			} else {
+				fmt.Println("\r\033[K" + string(response.Payload))
+				c.readFromUser()
+				return
+			}
+		}
 		fmt.Println(string(response.Payload))
 	}
+
+	c.readFromUser()
 }
 
 func (c *client) send(data []byte) {
