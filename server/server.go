@@ -24,7 +24,6 @@ type server struct {
 	CommandReader *bufio.Reader
 	DB            DBInterface
 	clientIDs     uint64
-	// SQL_DB        DBInterface
 }
 
 func NewServer() *server {
@@ -56,13 +55,8 @@ func (s *server) isAlive() {
 	}
 }
 
-func (s *server) makeClientID() string {
-	s.clientIDs = s.clientIDs + 1
-	return strconv.FormatUint(s.clientIDs, 10)
-}
-
 func (s *server) handleCommand(c command.Command, conn net.Conn) string {
-	fmt.Println("command ", c.ID)
+	fmt.Println("command ", c.ID, conn.RemoteAddr().String())
 	switch c.ID {
 	case command.StartConnection:
 	case command.LogInUser:
@@ -79,9 +73,7 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 				return string(response.Marshal())
 			}
 			response.SetPayload("Welcome " + record.NickName)
-			response.ID = s.makeClientID()
-			s.Connections[response.ID] = connectionInfo{Name: record.NickName, connection: conn}
-			fmt.Println("add connection", strconv.Itoa(len(s.Connections)), response.ID)
+			s.Connections[conn.RemoteAddr().Network()] = connectionInfo{Name: record.NickName, connection: conn}
 			return string(response.Marshal())
 		}
 		response.SetError(err.Error())
@@ -106,12 +98,10 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 
 		s.DB.AddRecord(record)
 		response.SetPayload("Welcome " + payload.NickName)
-		response.ID = s.makeClientID()
-		s.Connections[response.ID] = connectionInfo{Name: record.NickName, connection: conn}
-		fmt.Println("add connection", strconv.Itoa(len(s.Connections)), response.ID)
+		s.Connections[conn.RemoteAddr().Network()] = connectionInfo{Name: record.NickName, connection: conn}
 		return string(response.Marshal())
 	case command.Quit:
-		s.closeClientConnection(c.ClientID)
+		s.closeClientConnection(conn.RemoteAddr().Network())
 	case command.ActiveUsers:
 		result := ""
 		response := command.Response{}
@@ -122,10 +112,10 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 		response.SetPayload(result)
 		return string(response.Marshal())
 	case command.SendMessage:
-		sender := s.Connections[c.ClientID].Name
+		sender := s.Connections[conn.RemoteAddr().Network()].Name
 		message := "> " + sender + ": " + string(c.Payload)
 		for id, client := range s.Connections {
-			if id != c.ClientID {
+			if id != conn.RemoteAddr().Network() {
 				response := command.Response{}
 				response.SetPayload(message)
 				client.connection.Write(response.Marshal())
@@ -172,9 +162,25 @@ func (s *server) handleRequest(conn net.Conn) {
 	}
 }
 
+// func (s *server) checkConnection() {
+// 	broadcast := func() {
+// 		fmt.Println("start check")
+// 		for _, c := range s.Connections {
+// 			c.connection.Write([]byte("Check\n"))
+// 		}
+// 		fmt.Println("end check")
+// 	}
+// 	for {
+// 		ticker := time.NewTicker(1 * time.Second)
+// 		<-ticker.C
+// 		broadcast()
+// 	}
+// }
+
 func (s *server) Run() {
 	go s.isAlive()
 	defer s.DB.Close()
+	// go s.checkConnection()
 
 	for {
 		conn, err := s.listener.Accept()

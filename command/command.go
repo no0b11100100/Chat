@@ -14,9 +14,8 @@ const (
 )
 
 type Command struct {
-	ClientID string    `json:"clientID"`
-	ID       CommandID `json:"id"`
-	Payload  []byte    `json:"payload"`
+	ID      CommandID `json:"id"`
+	Payload []byte    `json:"payload"`
 }
 
 type UserLoginPayload struct {
@@ -33,7 +32,6 @@ const (
 )
 
 type Response struct {
-	ID      string       `json:"id"`
 	Status  SereverStaus `json:"status"`
 	Payload string       `json:"payload,omitempty"`
 }
