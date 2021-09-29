@@ -18,6 +18,8 @@ type client struct {
 	UserReader   *bufio.Reader
 	ServerReader *bufio.Reader
 	isStarted    bool
+	userChan     chan string
+	serverChan   chan string
 }
 
 func NewClient(conn net.Conn) *client {
@@ -26,6 +28,8 @@ func NewClient(conn net.Conn) *client {
 		UserReader:   bufio.NewReader(os.Stdin),
 		ServerReader: bufio.NewReader(conn),
 		isStarted:    false,
+		userChan:     make(chan string),
+		serverChan:   make(chan string),
 	}
 }
 
@@ -37,6 +41,7 @@ const (
 )
 
 func (c *client) handleInput(input string) {
+	fmt.Println("user input:", input)
 	input = strings.TrimSuffix(input, "\n")
 	if strings.HasPrefix(input, LogIn) {
 		data := strings.Split(input[len(LogIn)+1:], " ")
@@ -86,8 +91,11 @@ func (c *client) handleInput(input string) {
 			return
 		}
 		command := command.Command{ID: command.ActiveUsers}
-		if payload, err := json.Marshal(command); err == nil {
+		payload, err := json.Marshal(command)
+		if err == nil {
 			c.send(payload)
+		} else {
+			fmt.Println(err)
 		}
 	} else {
 		if !c.isStarted {
@@ -110,13 +118,15 @@ func (c *client) readFromUser() {
 	for {
 		fmt.Print("Enter command:")
 		text, _ := c.UserReader.ReadString('\n')
-		c.handleInput(text)
+		c.userChan <- text
 	}
 }
 
 func (c *client) readResponse() {
-	text, _ := c.ServerReader.ReadString('\n')
-	c.handleResponse(text)
+	for {
+		text, _ := c.ServerReader.ReadString('\n')
+		c.serverChan <- text
+	}
 }
 
 func (c *client) handleResponse(payload string) {
@@ -131,11 +141,10 @@ func (c *client) handleResponse(payload string) {
 		}
 		fmt.Println(string(response.Payload)) // "\r\033[K" +
 	}
-
-	c.readFromUser()
 }
 
 func (c *client) send(data []byte) {
+	fmt.Println("send to server", string(data))
 	fmt.Fprintf(c.Connection, string(data)+"\n")
 }
 
@@ -168,9 +177,25 @@ func (c *client) sendStartUp() {
 func (c *client) Run() {
 	c.sendStartUp()
 	go c.readFromUser()
+	go c.readResponse()
 	go c.handleInterrupt()
 
 	for {
-		c.readResponse()
+		select {
+		case response, ok := <-c.serverChan:
+			if !ok {
+				fmt.Println("response closed")
+				continue
+			}
+			c.handleResponse(response)
+		case command, ok := <-c.userChan:
+			if !ok {
+				fmt.Println("command closed")
+				continue
+			}
+			c.handleInput(command)
+		default:
+			continue
+		}
 	}
 }

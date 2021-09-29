@@ -20,7 +20,7 @@ type connectionInfo struct {
 
 type server struct {
 	listener      net.Listener
-	Connections   map[string]connectionInfo
+	Connections   []connectionInfo //map[string]connectionInfo
 	CommandReader *bufio.Reader
 	DB            DBInterface
 	clientIDs     uint64
@@ -35,7 +35,7 @@ func NewServer() *server {
 
 	return &server{
 		listener:      ln,
-		Connections:   make(map[string]connectionInfo),
+		Connections:   make([]connectionInfo, 0),
 		CommandReader: bufio.NewReader(nil),
 		DB:            NewDataBase(), //NewDB(),
 		clientIDs:     0,
@@ -73,7 +73,8 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 				return string(response.Marshal())
 			}
 			response.SetPayload("Welcome " + record.NickName)
-			s.Connections[conn.RemoteAddr().Network()] = connectionInfo{Name: record.NickName, connection: conn}
+			s.Connections = append(s.Connections, connectionInfo{Name: record.NickName, connection: conn})
+			fmt.Println("add connection", s.Connections)
 			return string(response.Marshal())
 		}
 		response.SetError(err.Error())
@@ -98,7 +99,7 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 
 		s.DB.AddRecord(record)
 		response.SetPayload("Welcome " + payload.NickName)
-		s.Connections[conn.RemoteAddr().Network()] = connectionInfo{Name: record.NickName, connection: conn}
+		s.Connections = append(s.Connections, connectionInfo{Name: record.NickName, connection: conn})
 		return string(response.Marshal())
 	case command.Quit:
 		s.closeClientConnection(conn.RemoteAddr().Network())
@@ -112,10 +113,17 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 		response.SetPayload(result)
 		return string(response.Marshal())
 	case command.SendMessage:
-		sender := s.Connections[conn.RemoteAddr().Network()].Name
+		sender := func() string {
+			for _, c := range s.Connections {
+				if c.connection.RemoteAddr().String() == conn.RemoteAddr().String() {
+					return c.Name
+				}
+			}
+			return ""
+		}()
 		message := "> " + sender + ": " + string(c.Payload)
-		for id, client := range s.Connections {
-			if id != conn.RemoteAddr().Network() {
+		for _, client := range s.Connections {
+			if client.connection.RemoteAddr().String() != conn.RemoteAddr().String() {
 				response := command.Response{}
 				response.SetPayload(message)
 				client.connection.Write(response.Marshal())
@@ -127,10 +135,15 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 }
 
 func (s *server) closeClientConnection(connAddr string) {
-	if _, ok := s.Connections[connAddr]; ok {
-		s.Connections[connAddr].connection.Close()
-		delete(s.Connections, connAddr)
-		fmt.Println("removed")
+	remove := func(slice []connectionInfo, s int) []connectionInfo {
+		return append(slice[:s], slice[s+1:]...)
+	}
+	for index, c := range s.Connections {
+		if c.connection.RemoteAddr().String() == connAddr {
+			s.Connections[index].connection.Close()
+			s.Connections = remove(s.Connections, index)
+			fmt.Println("removed")
+		}
 	}
 	fmt.Println("remove connection", strconv.Itoa(len(s.Connections)), connAddr, s.Connections)
 }

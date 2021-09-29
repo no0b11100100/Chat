@@ -40,14 +40,14 @@ func (p *UserLoginPayload) Marshal() []byte {
 	if payload, err := json.Marshal(p); err == nil {
 		return append(payload, '\n')
 	}
-	return []byte{}
+	return []byte{'\n'}
 }
 
 func (r *Response) Marshal() []byte {
 	if payload, err := json.Marshal(r); err == nil {
 		return append(payload, '\n')
 	}
-	return []byte{}
+	return []byte{'\n'}
 }
 
 func (r *Response) SetError(errorString string) {
