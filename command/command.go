@@ -4,6 +4,8 @@ import "encoding/json"
 
 type CommandID int
 
+const EndMessageByte = '\n'
+
 const (
 	StartConnection CommandID = iota
 	LogInUser
@@ -38,16 +40,16 @@ type Response struct {
 
 func (p *UserLoginPayload) Marshal() []byte {
 	if payload, err := json.Marshal(p); err == nil {
-		return append(payload, '\n')
+		return payload
 	}
-	return []byte{'\n'}
+	return []byte{}
 }
 
 func (r *Response) Marshal() []byte {
 	if payload, err := json.Marshal(r); err == nil {
-		return append(payload, '\n')
+		return payload
 	}
-	return []byte{'\n'}
+	return []byte{}
 }
 
 func (r *Response) SetError(errorString string) {

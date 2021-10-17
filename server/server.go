@@ -3,14 +3,11 @@ package main
 import (
 	"bufio"
 	"command"
-
-	// . "crypto/sha512"
 	"encoding/json"
 	"fmt"
 	"net"
-	"strconv"
 	"strings"
-	"time"
+	"sync"
 )
 
 type connectionInfo struct {
@@ -19,44 +16,72 @@ type connectionInfo struct {
 }
 
 type server struct {
-	listener      net.Listener
-	Connections   []connectionInfo //map[string]connectionInfo
-	CommandReader *bufio.Reader
-	DB            DBInterface
-	clientIDs     uint64
+	listener    net.Listener
+	Connections *sync.Map
+	DB          DBInterface
 }
 
 func NewServer() *server {
-	fmt.Println("Launching server...")
-	ln, err := net.Listen("tcp", ":8081")
-	if err != nil {
-		fmt.Println("cannot create server")
-	}
-
+	fmt.Println("Start server...")
+	ln, _ := net.Listen("tcp", ":8081")
 	return &server{
-		listener:      ln,
-		Connections:   make([]connectionInfo, 0),
-		CommandReader: bufio.NewReader(nil),
-		DB:            NewDataBase(), //NewDB(),
-		clientIDs:     0,
+		listener:    ln,
+		Connections: new(sync.Map),
+		DB:          NewDataBase(),
 	}
 }
 
-func (s *server) Close() {
-	for _, c := range s.Connections {
-		c.connection.Close()
-	}
-	s.listener.Close()
+func (s *server) addConnection(key string, value connectionInfo) {
+	s.Connections.Store(key, value)
 }
 
-func (s *server) isAlive() {
-	for range time.Tick(10 * time.Second) {
-		fmt.Println("alive", strconv.Itoa(len(s.Connections)))
+func (s *server) send(conn net.Conn, payload []byte) {
+	conn.Write(append(payload, '\n'))
+}
+
+func (s *server) broadcast(payload []byte, except string) {
+	s.Connections.Range(func(k, v interface{}) bool {
+		if info, ok := v.(connectionInfo); ok {
+			conn := info.connection
+			if conn.RemoteAddr().String() != except {
+				s.send(conn, payload)
+			}
+		} else {
+			fmt.Println("Cannot cast to connectionInfo")
+		}
+		return true
+	})
+}
+
+func (s *server) process(addr string) {
+	c, err := s.Connections.Load(addr)
+	if !err {
+		fmt.Println("cannot get item from map")
+		return
+	}
+	conn := c.(connectionInfo).connection
+	fmt.Println("Accept cnn:", conn.RemoteAddr().String())
+	defer conn.Close()
+
+	for {
+		msg, err := bufio.NewReader(conn).ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+
+		c := command.Command{}
+		err = json.Unmarshal([]byte(msg), &c)
+		if err == nil {
+			s.handleCommand(c, conn)
+		} else {
+			fmt.Println("unmarshal error", err)
+		}
 	}
 }
 
-func (s *server) handleCommand(c command.Command, conn net.Conn) string {
-	fmt.Println("command ", c.ID, conn.RemoteAddr().String())
+func (s *server) handleCommand(c command.Command, conn net.Conn) {
+	fmt.Println("command", c)
 	switch c.ID {
 	case command.StartConnection:
 	case command.LogInUser:
@@ -64,27 +89,29 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 		response := command.Response{}
 		if err := json.Unmarshal((c.Payload), &payload); err != nil {
 			response.SetError(err.Error())
-			return string(response.Marshal())
+			s.send(conn, response.Marshal())
 		}
 		record, err := s.DB.Select(payload.Email)
 		if err == nil {
 			if payload.Password != record.Password {
 				response.SetError("Invalid password or email")
-				return string(response.Marshal())
+				s.send(conn, response.Marshal())
 			}
 			response.SetPayload("Welcome " + record.NickName)
-			s.Connections = append(s.Connections, connectionInfo{Name: record.NickName, connection: conn})
+			s.addConnection(conn.RemoteAddr().String(), connectionInfo{Name: record.NickName, connection: conn})
 			fmt.Println("add connection", s.Connections)
-			return string(response.Marshal())
+			s.send(conn, response.Marshal())
+			return
 		}
 		response.SetError(err.Error())
-		return string(response.Marshal())
+		s.send(conn, response.Marshal())
 	case command.RegisterUser:
 		payload := command.UserLoginPayload{}
 		response := command.Response{}
 		if err := json.Unmarshal(c.Payload, &payload); err != nil {
 			response.SetError(err.Error())
-			return string(response.Marshal())
+			s.send(conn, response.Marshal())
+			return
 		}
 		record := Record{
 			Email:    payload.Email,
@@ -94,113 +121,61 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) string {
 
 		if !s.DB.IsEmailUnique(record.Email) {
 			response.SetError("this email is already used")
-			return string(response.Marshal())
+			s.send(conn, response.Marshal())
+			return
 		}
 
 		s.DB.AddRecord(record)
 		response.SetPayload("Welcome " + payload.NickName)
-		s.Connections = append(s.Connections, connectionInfo{Name: record.NickName, connection: conn})
-		return string(response.Marshal())
+		s.addConnection(conn.RemoteAddr().String(), connectionInfo{Name: record.NickName, connection: conn})
+		s.send(conn, response.Marshal())
 	case command.Quit:
-		s.closeClientConnection(conn.RemoteAddr().Network())
+		s.Connections.Delete(conn.RemoteAddr().String())
 	case command.ActiveUsers:
 		result := ""
 		response := command.Response{}
-		for _, c := range s.Connections {
-			result += c.Name + ","
-		}
+		s.Connections.Range(func(k, v interface{}) bool {
+			if info, ok := v.(connectionInfo); ok {
+				result += info.Name + ","
+			} else {
+				fmt.Println("Cannot cast to connectionInfo")
+			}
+			return true
+		})
+
 		result = strings.TrimSuffix(result, ",")
 		response.SetPayload(result)
-		return string(response.Marshal())
+		s.send(conn, response.Marshal())
 	case command.SendMessage:
 		sender := func() string {
-			for _, c := range s.Connections {
-				if c.connection.RemoteAddr().String() == conn.RemoteAddr().String() {
-					return c.Name
-				}
+			value, status := s.Connections.Load(conn.RemoteAddr().String())
+			if !status {
+				fmt.Println("cannot find user info for conn.RemoteAddr().String()")
+				return "unknown"
 			}
+
+			if info, ok := value.(connectionInfo); ok {
+				return info.Name
+			}
+			fmt.Println("cannot cast to connectionInfo")
 			return ""
 		}()
 		message := "> " + sender + ": " + string(c.Payload)
-		for _, client := range s.Connections {
-			if client.connection.RemoteAddr().String() != conn.RemoteAddr().String() {
-				response := command.Response{}
-				response.SetPayload(message)
-				client.connection.Write(response.Marshal())
-			}
-		}
-	}
-
-	return "\n"
-}
-
-func (s *server) closeClientConnection(connAddr string) {
-	remove := func(slice []connectionInfo, s int) []connectionInfo {
-		return append(slice[:s], slice[s+1:]...)
-	}
-	for index, c := range s.Connections {
-		if c.connection.RemoteAddr().String() == connAddr {
-			s.Connections[index].connection.Close()
-			s.Connections = remove(s.Connections, index)
-			fmt.Println("removed")
-		}
-	}
-	fmt.Println("remove connection", strconv.Itoa(len(s.Connections)), connAddr, s.Connections)
-}
-
-func (s *server) handleRequest(conn net.Conn) {
-	s.CommandReader.Reset(conn)
-	for {
-		message, _ := s.CommandReader.ReadString('\n')
-		if message == "\n" || message == "" {
-			continue
-		}
-		fmt.Print("Recieved message: ", string(message))
-
-		cmd := command.Command{}
-		err := json.Unmarshal([]byte(message), &cmd)
-		if err != nil {
-			fmt.Print("error parse command ", err)
-			conn.Write([]byte("Error\n"))
-			continue
-		}
-
-		response := s.handleCommand(cmd, conn)
-		if response != "\n" {
-			fmt.Println("send message:", response)
-			conn.Write([]byte(response))
-		} else {
-			fmt.Println("message was not sent")
-		}
+		response := command.Response{}
+		response.SetPayload(message)
+		s.broadcast(response.Marshal(), conn.RemoteAddr().String())
 	}
 }
 
-// func (s *server) checkConnection() {
-// 	broadcast := func() {
-// 		fmt.Println("start check")
-// 		for _, c := range s.Connections {
-// 			c.connection.Write([]byte("Check\n"))
-// 		}
-// 		fmt.Println("end check")
-// 	}
-// 	for {
-// 		ticker := time.NewTicker(1 * time.Second)
-// 		<-ticker.C
-// 		broadcast()
-// 	}
-// }
+func (s *server) Destroy() {
+	s.listener.Close()
+	s.DB.Close()
+}
 
 func (s *server) Run() {
-	go s.isAlive()
-	defer s.DB.Close()
-	// go s.checkConnection()
-
 	for {
-		conn, err := s.listener.Accept()
-		if err != nil {
-			fmt.Println("cannot accept")
-		}
-
-		go s.handleRequest(conn)
+		conn, _ := s.listener.Accept()
+		s.addConnection(conn.RemoteAddr().String(), connectionInfo{connection: conn})
+		go s.process(conn.RemoteAddr().String())
 	}
 }

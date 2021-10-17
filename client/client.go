@@ -5,12 +5,13 @@ import (
 	"command"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"os/signal"
-
 	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"time"
 )
 
 type client struct {
@@ -18,18 +19,52 @@ type client struct {
 	UserReader   *bufio.Reader
 	ServerReader *bufio.Reader
 	isStarted    bool
-	userChan     chan string
-	serverChan   chan string
+	state        State
+	Chan         chan string
 }
 
-func NewClient(conn net.Conn) *client {
+type State int
+
+const (
+	Init State = iota
+	Ready
+	Killed
+)
+
+func NewClient() *client {
+	conn, _ := net.Dial("tcp", "127.0.0.1:8081")
 	return &client{
 		Connection:   conn,
 		UserReader:   bufio.NewReader(os.Stdin),
 		ServerReader: bufio.NewReader(conn),
 		isStarted:    false,
-		userChan:     make(chan string),
-		serverChan:   make(chan string),
+		state:        Init,
+		Chan:         make(chan string),
+	}
+}
+
+func (c *client) Destroy() {
+	close(c.Chan)
+	c.Connection.Close()
+}
+
+func (c *client) readSock() {
+	if c.Connection == nil {
+		panic("Connection is nil")
+	}
+	for {
+		payload, err := c.ServerReader.ReadString('\n')
+		if err != nil || payload == "" || payload == "\n" {
+			continue
+		}
+
+		response := command.Response{}
+		if err := json.Unmarshal([]byte(payload), &response); err == nil {
+			if !c.isStarted && response.Status == command.OK {
+				c.isStarted = true
+			}
+			fmt.Println(string(response.Payload))
+		}
 	}
 }
 
@@ -40,14 +75,13 @@ const (
 	Activeusers = "/activeUsers"
 )
 
-func (c *client) handleInput(input string) {
-	fmt.Println("user input:", input)
+func (c *client) handleCommand(input string) (string, error) {
 	input = strings.TrimSuffix(input, "\n")
 	if strings.HasPrefix(input, LogIn) {
 		data := strings.Split(input[len(LogIn)+1:], " ")
 		if len(data) != 2 {
 			fmt.Println("Invalid data. Please try again")
-			return
+			return "", errors.New("Invalid data")
 		}
 		commandPayload := command.UserLoginPayload{
 			Email:    data[0],
@@ -58,13 +92,13 @@ func (c *client) handleInput(input string) {
 			Payload: commandPayload.Marshal(),
 		}
 		if payload, err := json.Marshal(command); err == nil {
-			c.send(payload)
+			return string(payload), nil
 		}
 	} else if strings.HasPrefix(input, Register) {
 		data := strings.Split(input[len(Register)+1:], " ")
 		if len(data) != 3 {
 			fmt.Println("Invalid data. Please try again")
-			return
+			return "", errors.New("Invalid data")
 		}
 		commandPayload := command.UserLoginPayload{
 			Email:    data[0],
@@ -76,76 +110,55 @@ func (c *client) handleInput(input string) {
 			Payload: commandPayload.Marshal(),
 		}
 		if payload, err := json.Marshal(command); err == nil {
-			c.send(payload)
+			return string(payload), nil
 		}
-	} else if strings.TrimSuffix(input, "\n") == Quit {
-		command := command.Command{ID: command.Quit}
-		if payload, err := json.Marshal(command); err == nil {
-			c.send(payload)
-		}
-		c.Connection.Close()
-		os.Exit(1)
 	} else if strings.TrimSuffix(input, "\n") == Activeusers {
 		if !c.isStarted {
 			fmt.Println("please log in or create account")
-			return
+			return "", errors.New("Invalid data")
 		}
 		command := command.Command{ID: command.ActiveUsers}
 		payload, err := json.Marshal(command)
 		if err == nil {
-			c.send(payload)
-		} else {
-			fmt.Println(err)
+			return string(payload), nil
 		}
+	} else if strings.TrimSuffix(input, "\n") == Quit {
+		command := command.Command{ID: command.Quit}
+		if payload, err := json.Marshal(command); err == nil {
+			c.state = Killed
+			return string(payload), nil
+		}
+
 	} else {
 		if !c.isStarted {
 			fmt.Println("please log in or create account")
-			return
+			return "", errors.New("Invalid data")
 		}
 		// send message
 		fmt.Println("user message", input)
 		command := command.Command{ID: command.SendMessage, Payload: []byte(input)}
 		payload, err := json.Marshal(command)
 		if err == nil {
-			c.send(payload)
-		} else {
+			return string(payload), nil
+		}
+	}
+
+	return "", errors.New("Error")
+}
+
+func (c *client) readConsole() {
+	for {
+		fmt.Print("Enter command: ")
+		msg, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+		fmt.Print(">")
+		out := msg[:len(msg)-1]
+		msg, err := c.handleCommand(out)
+		if err != nil {
 			fmt.Println(err)
+			continue
 		}
+		c.Chan <- msg + "\n"
 	}
-}
-
-func (c *client) readFromUser() {
-	for {
-		fmt.Print("Enter command:")
-		text, _ := c.UserReader.ReadString('\n')
-		c.userChan <- text
-	}
-}
-
-func (c *client) readResponse() {
-	for {
-		text, _ := c.ServerReader.ReadString('\n')
-		c.serverChan <- text
-	}
-}
-
-func (c *client) handleResponse(payload string) {
-	if payload == "" || payload == "\n" {
-		return
-	}
-
-	response := command.Response{}
-	if err := json.Unmarshal([]byte(payload), &response); err == nil {
-		if !c.isStarted && response.Status == command.OK {
-			c.isStarted = true
-		}
-		fmt.Println(string(response.Payload)) // "\r\033[K" +
-	}
-}
-
-func (c *client) send(data []byte) {
-	fmt.Println("send to server", string(data))
-	fmt.Fprintf(c.Connection, string(data)+"\n")
 }
 
 func (c *client) handleInterrupt() {
@@ -156,8 +169,9 @@ func (c *client) handleInterrupt() {
 	defer func() {
 		signal.Stop(ct)
 		fmt.Println("handled")
-		c.handleInput(Quit)
+		msg, _ := c.handleCommand(Quit)
 		cancel()
+		c.Chan <- msg + "\n"
 	}()
 
 	select {
@@ -167,35 +181,29 @@ func (c *client) handleInterrupt() {
 	}
 }
 
-func (c *client) sendStartUp() {
-	command := command.Command{ID: command.StartConnection}
-	if payload, err := json.Marshal(command); err == nil {
-		c.send(payload)
-	}
-}
-
 func (c *client) Run() {
-	c.sendStartUp()
-	go c.readFromUser()
-	go c.readResponse()
+	go c.readConsole()
+	go c.readSock()
 	go c.handleInterrupt()
 
 	for {
-		select {
-		case response, ok := <-c.serverChan:
-			if !ok {
-				fmt.Println("response closed")
+		val, ok := <-c.Chan
+		if ok {
+			out := []byte(val)
+			fmt.Println("sent to server", val)
+			_, err := c.Connection.Write(out)
+			if err != nil {
+				fmt.Println("Write error:", err.Error())
 				continue
 			}
-			c.handleResponse(response)
-		case command, ok := <-c.userChan:
-			if !ok {
-				fmt.Println("command closed")
-				continue
+
+			if c.state == Killed {
+				os.Exit(1)
 			}
-			c.handleInput(command)
-		default:
-			continue
+
+		} else {
+			time.Sleep(time.Second * 2)
 		}
+
 	}
 }
