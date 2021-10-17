@@ -69,7 +69,7 @@ func (db *InmemoryDB) Select(request string) (Record, error) {
 
 type DataBase struct {
 	db *sql.DB
-	// m  sync.RWMutex
+	m  sync.RWMutex
 }
 
 const tableName = "users"
@@ -90,6 +90,8 @@ func (db *DataBase) Close() {
 
 // https://metanit.com/go/tutorial/10.4.php
 func (db *DataBase) AddRecord(record Record) {
+	db.m.Lock()
+	defer db.m.Unlock()
 	_, err := db.db.Exec("insert into "+tableName+" (email, password, nickName) values ($1, $2, $3)",
 		strings.Replace(record.Email, "@", "a", -1), record.Password, record.NickName)
 	if err != nil {
@@ -98,6 +100,8 @@ func (db *DataBase) AddRecord(record Record) {
 }
 
 func (db *DataBase) Select(email string) (Record, error) {
+	db.m.RLock()
+	defer db.m.RUnlock()
 	record := Record{}
 	err := db.db.QueryRow("select * from users where email=$1", strings.Replace(email, "@", "a", -1)).Scan(&record.Email, &record.Password, &record.NickName)
 	switch err {
@@ -112,6 +116,8 @@ func (db *DataBase) Select(email string) (Record, error) {
 }
 
 func (db *DataBase) IsEmailUnique(email string) bool {
+	db.m.RLock()
+	defer db.m.RUnlock()
 	row := db.db.QueryRow("select * from users where email=$1", strings.Replace(email, "@", "a", -1))
 	record := Record{}
 	switch err := row.Scan(&record.Email); err {
