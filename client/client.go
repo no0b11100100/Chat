@@ -18,7 +18,6 @@ type client struct {
 	Connection   net.Conn
 	UserReader   *bufio.Reader
 	ServerReader *bufio.Reader
-	isStarted    bool
 	state        State
 	Chan         chan string
 }
@@ -37,7 +36,6 @@ func NewClient() *client {
 		Connection:   conn,
 		UserReader:   bufio.NewReader(os.Stdin),
 		ServerReader: bufio.NewReader(conn),
-		isStarted:    false,
 		state:        Init,
 		Chan:         make(chan string),
 	}
@@ -60,8 +58,8 @@ func (c *client) readSock() {
 
 		response := command.Response{}
 		if err := json.Unmarshal([]byte(payload), &response); err == nil {
-			if !c.isStarted && response.Status == command.OK {
-				c.isStarted = true
+			if c.state == Init && response.Status == command.OK {
+				c.state = Ready
 			}
 			fmt.Println(string(response.Payload))
 		}
@@ -113,7 +111,7 @@ func (c *client) handleCommand(input string) (string, error) {
 			return string(payload), nil
 		}
 	} else if strings.TrimSuffix(input, "\n") == Activeusers {
-		if !c.isStarted {
+		if c.state == Init {
 			fmt.Println("please log in or create account")
 			return "", errors.New("Invalid data")
 		}
@@ -130,7 +128,7 @@ func (c *client) handleCommand(input string) (string, error) {
 		}
 
 	} else {
-		if !c.isStarted {
+		if c.state == Init {
 			fmt.Println("please log in or create account")
 			return "", errors.New("Invalid data")
 		}
