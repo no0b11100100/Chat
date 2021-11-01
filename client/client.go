@@ -75,8 +75,12 @@ const (
 
 func (c *client) handleCommand(input string) (string, error) {
 	input = strings.TrimSuffix(input, "\n")
+	removeCommandNameFromInput := func(inputString string, commandName string) string {
+		return strings.TrimPrefix(inputString[len(commandName):], " ")
+	}
 	if strings.HasPrefix(input, LogIn) {
-		data := strings.Split(input[len(LogIn)+1:], " ")
+		formatedInput := removeCommandNameFromInput(input, LogIn)
+		data := strings.Split(formatedInput, " ")
 		if len(data) != 2 {
 			fmt.Println("Invalid data. Please try again")
 			return "", errors.New("Invalid data")
@@ -93,9 +97,10 @@ func (c *client) handleCommand(input string) (string, error) {
 			return string(payload), nil
 		}
 	} else if strings.HasPrefix(input, Register) {
-		data := strings.Split(input[len(Register)+1:], " ")
+		formatedInput := removeCommandNameFromInput(input, Register)
+		data := strings.Split(formatedInput, " ")
 		if len(data) != 3 {
-			fmt.Println("Invalid data. Please try again")
+			fmt.Println("Invalid data. Please try again", data, input)
 			return "", errors.New("Invalid data")
 		}
 		commandPayload := command.UserLoginPayload{
