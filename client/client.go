@@ -115,7 +115,7 @@ func (c *client) handleCommand(input string) (string, error) {
 		if payload, err := json.Marshal(command); err == nil {
 			return string(payload), nil
 		}
-	} else if strings.TrimSuffix(input, "\n") == Activeusers {
+	} else if input == Activeusers {
 		if c.state == Init {
 			fmt.Println("please log in or create account")
 			return "", errors.New("Invalid data")
@@ -125,7 +125,7 @@ func (c *client) handleCommand(input string) (string, error) {
 		if err == nil {
 			return string(payload), nil
 		}
-	} else if strings.TrimSuffix(input, "\n") == Quit {
+	} else if input == Quit {
 		command := command.Command{ID: command.Quit}
 		if payload, err := json.Marshal(command); err == nil {
 			c.state = Killed
