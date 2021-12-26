@@ -2,19 +2,6 @@ package command
 
 import "encoding/json"
 
-type CommandID int
-
-const EndMessageByte = '\n'
-
-const (
-	StartConnection CommandID = iota
-	LogInUser
-	RegisterUser
-	ActiveUsers
-	SendMessage
-	Quit
-)
-
 type Command struct {
 	ID      CommandID `json:"id"`
 	Payload []byte    `json:"payload"`
@@ -25,13 +12,6 @@ type UserLoginPayload struct {
 	Password string `json:"password"`
 	NickName string `json:"nickname"`
 }
-
-type SereverStaus uint32
-
-const (
-	OK SereverStaus = iota
-	Fail
-)
 
 type Response struct {
 	Status  SereverStaus `json:"status"`

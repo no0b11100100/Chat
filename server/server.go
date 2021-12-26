@@ -1,6 +1,7 @@
 package main
 
 import (
+	db "Chat/server/database"
 	"bufio"
 	"command"
 	"encoding/json"
@@ -18,7 +19,7 @@ type connectionInfo struct {
 type server struct {
 	listener    net.Listener
 	Connections *sync.Map
-	DB          DBInterface
+	DB          db.DBInterface
 }
 
 func NewServer() *server {
@@ -27,7 +28,7 @@ func NewServer() *server {
 	return &server{
 		listener:    ln,
 		Connections: new(sync.Map),
-		DB:          NewDataBase(),
+		DB:          db.NewDataBase(),
 	}
 }
 
@@ -113,7 +114,7 @@ func (s *server) handleCommand(c command.Command, conn net.Conn) {
 			s.send(conn, response.Marshal())
 			return
 		}
-		record := Record{
+		record := db.Record{
 			Email:    payload.Email,
 			Password: payload.Password,
 			NickName: payload.NickName,
