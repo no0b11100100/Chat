@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -35,7 +34,7 @@ func (db *DataBase) AddRecord(record Record) {
 	db.m.Lock()
 	defer db.m.Unlock()
 	_, err := db.db.Exec("insert into "+tableName+" (email, password, nickName) values ($1, $2, $3)",
-		strings.Replace(record.Email, "@", "a", -1), record.Password, record.NickName)
+		record.Email, record.Password, record.NickName)
 	if err != nil {
 		fmt.Println("AddRecord error", err)
 	}
@@ -45,7 +44,7 @@ func (db *DataBase) Select(email string) (Record, error) {
 	db.m.RLock()
 	defer db.m.RUnlock()
 	record := Record{}
-	err := db.db.QueryRow("select * from users where email=$1", strings.Replace(email, "@", "a", -1)).Scan(&record.Email, &record.Password, &record.NickName)
+	err := db.db.QueryRow("select * from users where email=$1", email).Scan(&record.Email, &record.Password, &record.NickName)
 	switch err {
 	case sql.ErrNoRows:
 		return Record{}, err
@@ -60,7 +59,7 @@ func (db *DataBase) Select(email string) (Record, error) {
 func (db *DataBase) IsEmailUnique(email string) bool {
 	db.m.RLock()
 	defer db.m.RUnlock()
-	row := db.db.QueryRow("select * from users where email=$1", strings.Replace(email, "@", "a", -1))
+	row := db.db.QueryRow("select * from users where email=$1", email)
 	record := Record{}
 	switch err := row.Scan(&record.Email); err {
 	case sql.ErrNoRows:
