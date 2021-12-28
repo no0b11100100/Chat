@@ -11,6 +11,9 @@ const (
 	ActiveUsers
 	SendMessage
 	Quit
+	JoinToRoom
+	CreateRoom
+	LeaveRoom
 )
 
 type SereverStaus uint32

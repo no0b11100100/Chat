@@ -18,6 +18,10 @@ type Response struct {
 	Payload string       `json:"payload,omitempty"`
 }
 
+type RoomInfo struct {
+	Name string `json:"name"`
+}
+
 func (p *UserLoginPayload) Marshal() []byte {
 	if payload, err := json.Marshal(p); err == nil {
 		return payload
@@ -40,4 +44,11 @@ func (r *Response) SetError(errorString string) {
 func (r *Response) SetPayload(payload string) {
 	r.Status = OK
 	r.Payload = payload
+}
+
+func (p *RoomInfo) Marshal() []byte {
+	if payload, err := json.Marshal(p); err == nil {
+		return payload
+	}
+	return []byte{}
 }

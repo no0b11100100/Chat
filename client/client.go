@@ -71,6 +71,9 @@ const (
 	Register    = "/register"
 	Quit        = "/quit"
 	Activeusers = "/activeUsers"
+	JoinToRoom  = "/join"
+	LeaveRoom   = "/leave"
+	CreateRoom  = "/create"
 )
 
 func (c *client) handleCommand(input string) (string, error) {
@@ -132,6 +135,39 @@ func (c *client) handleCommand(input string) (string, error) {
 			return string(payload), nil
 		}
 
+	} else if strings.HasPrefix(input, JoinToRoom) {
+		formatedInput := removeCommandNameFromInput(input, JoinToRoom)
+		commandPayload := command.RoomInfo{Name: formatedInput}
+		command := command.Command{
+			ID:      command.JoinToRoom,
+			Payload: commandPayload.Marshal(),
+		}
+
+		payload, err := json.Marshal(command)
+		if err == nil {
+			return string(payload), nil
+		}
+	} else if input == LeaveRoom {
+		command := command.Command{
+			ID: command.LeaveRoom,
+		}
+
+		payload, err := json.Marshal(command)
+		if err == nil {
+			return string(payload), nil
+		}
+	} else if strings.HasPrefix(input, CreateRoom) {
+		formatedInput := removeCommandNameFromInput(input, CreateRoom)
+		commandPayload := command.RoomInfo{Name: formatedInput}
+		command := command.Command{
+			ID:      command.CreateRoom,
+			Payload: commandPayload.Marshal(),
+		}
+
+		payload, err := json.Marshal(command)
+		if err == nil {
+			return string(payload), nil
+		}
 	} else {
 		if c.state == Init {
 			fmt.Println("please log in or create account")
