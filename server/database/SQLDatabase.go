@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -47,7 +48,7 @@ func (db *DataBase) Select(email string) (Record, error) {
 	err := db.db.QueryRow("select * from users where email=$1", email).Scan(&record.Email, &record.Password, &record.NickName)
 	switch err {
 	case sql.ErrNoRows:
-		return Record{}, err
+		return Record{}, errors.New("invalid user")
 	case nil:
 		return record, nil
 	default:
