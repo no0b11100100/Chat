@@ -136,6 +136,11 @@ func (c *client) handleCommand(input string) (string, error) {
 		}
 
 	} else if strings.HasPrefix(input, JoinToRoom) {
+		if c.state == Init {
+			fmt.Println("please log in or create account")
+			return "", errors.New("Invalid data")
+		}
+
 		formatedInput := removeCommandNameFromInput(input, JoinToRoom)
 		commandPayload := command.RoomInfo{Name: formatedInput}
 		command := command.Command{
@@ -148,6 +153,11 @@ func (c *client) handleCommand(input string) (string, error) {
 			return string(payload), nil
 		}
 	} else if input == LeaveRoom {
+		if c.state == Init {
+			fmt.Println("please log in or create account")
+			return "", errors.New("Invalid data")
+		}
+
 		command := command.Command{
 			ID: command.LeaveRoom,
 		}
@@ -157,6 +167,11 @@ func (c *client) handleCommand(input string) (string, error) {
 			return string(payload), nil
 		}
 	} else if strings.HasPrefix(input, CreateRoom) {
+		if c.state == Init {
+			fmt.Println("please log in or create account")
+			return "", errors.New("Invalid data")
+		}
+
 		formatedInput := removeCommandNameFromInput(input, CreateRoom)
 		commandPayload := command.RoomInfo{Name: formatedInput}
 		command := command.Command{
