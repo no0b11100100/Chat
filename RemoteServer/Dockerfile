@@ -1,6 +1,6 @@
 FROM golang:latest
 
-WORKDIR /Chat/Client/Server
+WORKDIR /Chat/RemoteServer
 
 ADD . .
 RUN go mod download
@@ -8,7 +8,7 @@ RUN chmod +x install_dependencies.sh
 RUN ./install_dependencies.sh
 RUN go mod tidy
 
-RUN go build -o /client-server
+RUN go build -o /server-server
 EXPOSE 8080
 
-CMD ["/client-server"]
+CMD ["/server-server"]
