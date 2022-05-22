@@ -1,8 +1,11 @@
 package main
 
 import (
+	"Chat/common"
 	"bufio"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -27,7 +30,7 @@ const (
 )
 
 func NewClient() *client {
-	conn, err := net.Dial("tcp", "172.17.0.2:8081")
+	conn, err := net.Dial("tcp", "localhost:8081") // "172.17.0.2:8081"
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -71,8 +74,13 @@ const (
 )
 
 func (c *client) handleCommand(input string) (string, error) {
+	info := common.UserInfo{Email: "email@test.com", Password: "cGFzc3dvcmQ="}
+	bytes, _ := json.Marshal(info)
+	cmd := common.Command{Type: common.LogIn, Payload: []byte(bytes)}
+	result, _ := json.Marshal(cmd)
+	payload := base64.StdEncoding.EncodeToString(result)
 
-	return string([]byte(`{"value":10}`)), nil
+	return payload, nil
 }
 
 func (c *client) readConsole() {
@@ -82,6 +90,7 @@ func (c *client) readConsole() {
 		fmt.Print(">")
 		out := string([]byte(`{"value":10}`))
 		msg, err := c.handleCommand(out)
+		time.Sleep(10 * time.Second)
 		if err != nil {
 			fmt.Println(err)
 			continue

@@ -2,4 +2,6 @@ module Chat/Client/Server
 
 go 1.17
 
-require github.com/gorilla/websocket v1.5.0 // indirect
+require common v1.0.0
+
+replace common => ../common

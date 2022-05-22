@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -31,13 +32,13 @@ type Database interface {
 	Connect()
 	Close()
 	IsEmailUnique(string) bool
-	ValidateUser(interface{}) bool
-	RegisterUser(interface{})
-	GetUserChats(string) []interface{}
-	GetUsers() []interface{}
-	GetChatMessages(string) []interface{}
-	GetChatParticipants(string) []interface{}
-	AddMessage(string, interface{})
+	ValidateUser(User) (bool, string)
+	RegisterUser(User) string
+	GetUserChats(string) []Chat
+	GetUsers() []User
+	GetChatMessages(string) []Message
+	GetChatParticipants(string) []Participant
+	AddMessage(string, Message)
 }
 
 func (db *DB) Connect() {
@@ -84,23 +85,30 @@ func (db *DB) Close() {
 	fmt.Println("Connection to MongoDB closed.")
 }
 
-func (db *DB) IsEmailUnique(string) bool {
-	return false
+func (db *DB) IsEmailUnique(email string) bool {
+	err := db.tables["Users"].FindOne(context.TODO(), bson.M{"email": email})
+	if err != nil {
+		return false
+	}
+	return true
 }
-func (db *DB) ValidateUser(interface{}) bool {
-	return false
+func (db *DB) ValidateUser(User) (bool, string) {
+	return false, ""
 }
-func (db *DB) RegisterUser(interface{}) {}
-func (db *DB) GetUserChats(string) []interface{} {
+func (db *DB) RegisterUser(User) string {
+	uid := uuid.New()
+	return uid.String()
+}
+func (db *DB) GetUserChats(string) []Chat {
 	return nil
 }
-func (db *DB) GetUsers() []interface{} {
+func (db *DB) GetUsers() []User {
 	return nil
 }
-func (db *DB) GetChatMessages(string) []interface{} {
+func (db *DB) GetChatMessages(string) []Message {
 	return nil
 }
-func (db *DB) GetChatParticipants(string) []interface{} {
+func (db *DB) GetChatParticipants(string) []Participant {
 	return nil
 }
-func (db *DB) AddMessage(string, interface{}) {}
+func (db *DB) AddMessage(string, Message) {}
