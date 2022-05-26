@@ -2,3 +2,5 @@ build-UI-Desktop_Qt_6_2_0_GCC_64bit-Debug/
 *.txt.user
 todo.txt
 .vscode
+RemoteServer
+Server

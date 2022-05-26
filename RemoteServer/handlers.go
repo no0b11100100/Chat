@@ -1,7 +1,6 @@
 package main
 
 import (
-	"Chat/RemoteServer/database"
 	"common"
 	"encoding/json"
 	"fmt"
@@ -9,14 +8,13 @@ import (
 )
 
 func (s *Server) LogIn(payload []byte) common.CommandResponce {
-	info := common.UserInfo{}
-	err := json.Unmarshal(payload, &info)
+	user := common.User{}
+	err := json.Unmarshal(payload, &user)
 	if err != nil {
 		log.Println(err)
 		return common.CommandResponce{Error: "Invalid input"}
 	}
 
-	user := database.User{Email: info.Email, Password: info.Password}
 	status, userID := s.database.ValidateUser(user)
 	if !status {
 		return common.CommandResponce{Error: "LogIn failed: Invalid data"}
@@ -26,17 +24,33 @@ func (s *Server) LogIn(payload []byte) common.CommandResponce {
 }
 
 func (s *Server) RegisterUser(payload []byte) common.CommandResponce {
-	info := common.UserInfo{}
-	err := json.Unmarshal(payload, &info)
+	user := common.User{}
+	err := json.Unmarshal(payload, &user)
 	if err != nil {
 		log.Println(err)
 		return common.CommandResponce{Error: "Invalid input"}
 	}
 
-	user := database.User{Email: info.Email, Password: info.Password}
-	userID := s.database.RegisterUser(user)
+	if s.database.IsEmailUnique(user.Email) {
+		ok, userID := s.database.RegisterUser(user)
+		if !ok {
+			return common.CommandResponce{Error: "Server error"}
+		}
+		return common.CommandResponce{Command: common.Command{Type: common.Register, Payload: []byte(string(fmt.Sprintf("{\"id\":%v}", userID)))}}
+	}
 
-	return common.CommandResponce{Command: common.Command{Type: common.Register, Payload: []byte(string(fmt.Sprintf("{\"id\":%v}", userID)))}}
+	return common.CommandResponce{Error: "Email is already used"}
 }
 
-func (s *Server) SendMessage([]byte) common.CommandResponce { return common.CommandResponce{} }
+func (s *Server) SendMessage(payload []byte) common.CommandResponce {
+	message := common.Message{}
+	err := json.Unmarshal(payload, &message)
+	if err != nil {
+		log.Println(err)
+		return common.CommandResponce{Error: "Invalid input"}
+	}
+
+	s.database.AddMessage(message)
+
+	return common.CommandResponce{}
+}

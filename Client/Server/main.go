@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Chat/common"
+	"Chat/Client/Server/common"
 	"bufio"
 	"context"
 	"encoding/base64"
@@ -74,7 +74,7 @@ const (
 )
 
 func (c *client) handleCommand(input string) (string, error) {
-	info := common.UserInfo{Email: "email@test.com", Password: "cGFzc3dvcmQ="}
+	info := common.User{Email: "email@test.com", Password: "cGFzc3dvcmQ="}
 	bytes, _ := json.Marshal(info)
 	cmd := common.Command{Type: common.LogIn, Payload: []byte(bytes)}
 	result, _ := json.Marshal(cmd)

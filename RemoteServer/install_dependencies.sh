@@ -1,5 +1,5 @@
 # /bin/bash
 
-go get github.com/mailru/easyjson
-go get go.mongodb.org/mongo-driver
-go get github.com/google/uuid
+go get github.com/mailru/easyjson@latest
+go get go.mongodb.org/mongo-driver@latest
+go get github.com/google/uuid@latest

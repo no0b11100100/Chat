@@ -1,6 +1,7 @@
 package database
 
 import (
+	"common"
 	"context"
 	"fmt"
 	"log"
@@ -32,13 +33,16 @@ type Database interface {
 	Connect()
 	Close()
 	IsEmailUnique(string) bool
-	ValidateUser(User) (bool, string)
-	RegisterUser(User) string
-	GetUserChats(string) []Chat
-	GetUsers() []User
-	GetChatMessages(string) []Message
-	GetChatParticipants(string) []Participant
-	AddMessage(string, Message)
+	ValidateUser(common.User) (bool, string)
+	RegisterUser(common.User) (bool, string)
+	GetUserChats(string) []common.Chat
+	GetUsers() []common.User
+	GetChatMessages(string) []common.Message
+	GetChatParticipants(string) []common.Participant
+	AddMessage(common.Message)
+	AddChat(common.Chat) error
+	AddUserToChat(string) error
+	LeaveChat(string, string) error
 }
 
 func (db *DB) Connect() {
@@ -77,7 +81,8 @@ func (db *DB) Connect() {
 }
 
 func (db *DB) Close() {
-	err := db.client.Disconnect(context.TODO())
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err := db.client.Disconnect(ctx)
 
 	if err != nil {
 		log.Fatal("DB Close error:", err)
@@ -86,29 +91,49 @@ func (db *DB) Close() {
 }
 
 func (db *DB) IsEmailUnique(email string) bool {
-	err := db.tables["Users"].FindOne(context.TODO(), bson.M{"email": email})
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err := db.tables["Users"].FindOne(ctx, bson.M{"email": email})
 	if err != nil {
 		return false
 	}
 	return true
 }
-func (db *DB) ValidateUser(User) (bool, string) {
-	return false, ""
+
+func (db *DB) ValidateUser(user common.User) (bool, string) {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	var record bson.M
+	if err := db.tables["Users"].FindOne(ctx, bson.M{"email": user.Email, "password": user.Password}).Decode(&record); err != nil {
+		fmt.Println(err)
+		return false, ""
+	}
+	fmt.Println(record)
+
+	userID, ok := record["user_id"].(string)
+	if !ok {
+		fmt.Println("ValidateUser error")
+		return false, ""
+	}
+
+	return true, userID
 }
-func (db *DB) RegisterUser(User) string {
-	uid := uuid.New()
-	return uid.String()
+
+func (db *DB) RegisterUser(user common.User) (bool, string) {
+	user.ID = uuid.New().String()
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	_, err := db.tables["Users"].InsertOne(ctx, user)
+	if err != nil {
+		fmt.Println(err)
+		return false, ""
+	}
+
+	return true, user.ID
 }
-func (db *DB) GetUserChats(string) []Chat {
-	return nil
-}
-func (db *DB) GetUsers() []User {
-	return nil
-}
-func (db *DB) GetChatMessages(string) []Message {
-	return nil
-}
-func (db *DB) GetChatParticipants(string) []Participant {
-	return nil
-}
-func (db *DB) AddMessage(string, Message) {}
+
+func (db *DB) GetUserChats(string) []common.Chat               { return nil }
+func (db *DB) GetUsers() []common.User                         { return nil }
+func (db *DB) GetChatMessages(string) []common.Message         { return nil }
+func (db *DB) GetChatParticipants(string) []common.Participant { return nil }
+func (db *DB) AddMessage(common.Message)                       {}
+func (db *DB) AddChat(common.Chat) error                       { return nil }
+func (db *DB) AddUserToChat(string) error                      { return nil }
+func (db *DB) LeaveChat(string, string) error                  { return nil }
