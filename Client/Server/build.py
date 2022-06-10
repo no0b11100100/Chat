@@ -34,7 +34,7 @@ def listDir(path, isDockerBuild=False):
         if os.path.isfile(f):
             if f.endswith('.go'):
                 if isDockerBuild:
-                    replace(f, old_string='Chat/common', new_string='Chat/Client/Server/common')
+                    replace(f, old_string='\"common\"', new_string='\"Chat/Client/Server/common\"')
         elif os.path.isdir(f) and not f.endswith('common'):
             listDir(f)
 
@@ -84,4 +84,5 @@ def change_goMod(file_path, is_docker=False):
 
 
 if __name__ == '__main__':
+    # os.system("docker rm -f $(docker ps -a -q) && docker image prune")
     build()

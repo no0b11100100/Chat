@@ -33,11 +33,11 @@ func NewServer() *Server {
 		cache:    new(sync.Map),
 		listener: ln,
 		handlers: make(map[common.CommandType]Handler),
-		database: database.NewDatabase(),
+		// database: database.NewDatabase(),
 	}
 
 	s.addHandlers()
-	s.database.Connect()
+	// s.database.Connect()
 
 	return s
 }
