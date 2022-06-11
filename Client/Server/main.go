@@ -1,21 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"net"
+	"Chat/Client/Server/app"
 )
 
 func main() {
-	// go func() {
-	conn, err := net.Dial("tcp", "172.17.0.2:8081")
 
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	server := app.NewApp()
+	server.Run()
 
-	conn.Write([]byte("hello"))
-	// }()
+	// // go func() {
+	// conn, err := net.Dial("tcp", "172.17.0.2:8081")
+
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+
+	// conn.Write([]byte("hello"))
+	// // }()
 
 	// app := app.NewLocalServer()
 	// app.Serve()
@@ -73,11 +76,11 @@ func main() {
 // 	if c.Connection == nil {
 // 		panic("Connection is nil")
 // 	}
-// 	for {
-// 		payload, err := c.ServerReader.ReadString('\n')
-// 		if err != nil || payload == "" || payload == "\n" {
-// 			continue
-// 		}
+// for {
+// 	payload, err := c.ServerReader.ReadString('\n')
+// 	if err != nil || payload == "" || payload == "\n" {
+// 		continue
+// 	}
 
 // 		fmt.Println(string(payload))
 

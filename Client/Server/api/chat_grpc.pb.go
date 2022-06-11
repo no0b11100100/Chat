@@ -34,7 +34,7 @@ func NewBaseClient(cc grpc.ClientConnInterface) BaseClient {
 
 func (c *baseClient) LogIn(ctx context.Context, in *UserLogIn, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
-	err := c.cc.Invoke(ctx, "/chat.Base/logIn", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/chat.Base/LogIn", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (c *baseClient) LogIn(ctx context.Context, in *UserLogIn, opts ...grpc.Call
 
 func (c *baseClient) Register(ctx context.Context, in *UserLogIn, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
-	err := c.cc.Invoke(ctx, "/chat.Base/register", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/chat.Base/Register", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func _Base_LogIn_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/chat.Base/logIn",
+		FullMethod: "/chat.Base/LogIn",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BaseServer).LogIn(ctx, req.(*UserLogIn))
@@ -123,7 +123,7 @@ func _Base_Register_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/chat.Base/register",
+		FullMethod: "/chat.Base/Register",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BaseServer).Register(ctx, req.(*UserLogIn))
@@ -157,11 +157,11 @@ var Base_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*BaseServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "logIn",
+			MethodName: "LogIn",
 			Handler:    _Base_LogIn_Handler,
 		},
 		{
-			MethodName: "register",
+			MethodName: "Register",
 			Handler:    _Base_Register_Handler,
 		},
 		{

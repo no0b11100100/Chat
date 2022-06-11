@@ -8,19 +8,21 @@ import (
 )
 
 func (s *Server) LogIn(payload []byte) common.CommandResponce {
-	user := common.User{}
-	err := json.Unmarshal(payload, &user)
-	if err != nil {
-		log.Println(err)
-		return common.CommandResponce{Error: "Invalid input"}
-	}
+	// user := common.User{}
+	// err := json.Unmarshal(payload, &user)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return common.CommandResponce{Error: "Invalid input"}
+	// }
 
-	status, userID := s.database.ValidateUser(user)
-	if !status {
-		return common.CommandResponce{Error: "LogIn failed: Invalid data"}
-	}
+	// status, userID := s.database.ValidateUser(user)
+	// if !status {
+	// 	return common.CommandResponce{Error: "LogIn failed: Invalid data"}
+	// }
 
-	return common.CommandResponce{Command: common.Command{Type: common.LogIn, Payload: []byte(string(fmt.Sprintf("{\"id\":%v}", userID)))}}
+	// return common.CommandResponce{Command: common.Command{Type: common.LogIn, Payload: []byte(string(fmt.Sprintf("{\"id\":%v}", userID)))}}
+
+	return common.CommandResponce{Command: common.Command{Type: common.LogIn, Payload: []byte(string(fmt.Sprintf("{\"id\":\"%v\"}", "ID from remote server")))}}
 }
 
 func (s *Server) RegisterUser(payload []byte) common.CommandResponce {

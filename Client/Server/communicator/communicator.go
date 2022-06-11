@@ -2,31 +2,44 @@ package communicator
 
 import (
 	"Chat/Client/Server/api"
-	"context"
-	"fmt"
+	"Chat/Client/Server/app"
+	"Chat/Client/Server/channels"
+	"log"
+	"net"
 
-	empty "github.com/golang/protobuf/ptypes/empty"
+	"google.golang.org/grpc"
 )
 
 type Communicator struct {
-	api.UnimplementedBaseServer
+	baseService  *BaseService
+	remoteServer *app.RemoteServer
+	channels     *channels.Channels
 }
 
 func NewCommunicator() *Communicator {
-	return &Communicator{}
+	// ch := make(chan string)
+	remoteServer := app.NewRemoteServer()
+	channels := channels.NewChannels()
+	c := &Communicator{NewBaseService(remoteServer, channels.UserChan), remoteServer, channels}
+
+	return c
 }
 
-func (s *Communicator) LogIn(_ context.Context, logIn *api.UserLogIn) (*api.ID, error) {
-	fmt.Printf("LogIn %+v\n", *logIn)
-	return &api.ID{Id: "id"}, nil
+func (c *Communicator) runGRPCClient() {
+	gprcServer := grpc.NewServer()
+	api.RegisterBaseServer(gprcServer, c.baseService)
+	l, err := net.Listen("tcp", ":8080")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := gprcServer.Serve(l); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func (s *Communicator) Register(_ context.Context, logIn *api.UserLogIn) (*api.ID, error) {
-	fmt.Printf("Register %+v\n", *logIn)
-	return nil, nil
-}
-
-func (s *Communicator) Logout(_ context.Context, id *api.ID) (*empty.Empty, error) {
-	fmt.Printf("LogOut %+v\n", *id)
-	return nil, nil
+func (c *Communicator) Serve() {
+	go c.remoteServer.Serve(c.channels)
+	c.runGRPCClient()
 }

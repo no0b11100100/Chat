@@ -45,8 +45,8 @@ message NewParticipant {
 }
 
 service Base {
-    rpc logIn(UserLogIn) returns(ID);
-    rpc register(UserLogIn) returns(ID);
+    rpc LogIn(UserLogIn) returns(ID);
+    rpc Register(UserLogIn) returns(ID);
     rpc logout(ID) returns(google.protobuf.Empty);
 }
 

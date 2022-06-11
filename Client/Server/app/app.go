@@ -1,36 +1,27 @@
 package app
 
-import (
-	"Chat/Client/Server/api"
-	"Chat/Client/Server/communicator"
-	"log"
-	"net"
+// import (
+// 	// "Chat/Client/Server/communicator"
+// )
 
-	"google.golang.org/grpc"
-)
-
-type LocalServer struct {
-	UIClient           api.BaseServer
-	RemoteServerClient interface{}
+type App struct {
+	// localServer  *LocalServer
+	// remoteServer *RemoteServer
+	// communicator communicator.Communicator
 }
 
-func NewLocalServer() *LocalServer {
-	return &LocalServer{
-		UIClient: communicator.NewCommunicator(),
+func NewApp() *App {
+	return &App{
+		// communicator: communicator.NewCommunicator()
+		// localServer:  NewLocalServer(),
+		// remoteServer: NewRemoteServer(),
 	}
 }
 
-func (s *LocalServer) Serve() {
-	gprcServer := grpc.NewServer()
-	api.RegisterBaseServer(gprcServer, s.UIClient)
+func (a *App) Run() {
+	// a.communicator.Serve()
+	// remoteServerCh := make(chan string)
 
-	l, err := net.Listen("tcp", ":8080")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := gprcServer.Serve(l); err != nil {
-		log.Fatal(err)
-	}
+	// go a.remoteServer.Serve(remoteServerCh)
+	// a.localServer.Serve()
 }

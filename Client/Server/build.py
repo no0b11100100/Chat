@@ -36,7 +36,7 @@ def listDir(path, isDockerBuild=False):
                 if isDockerBuild:
                     replace(f, old_string='\"common\"', new_string='\"Chat/Client/Server/common\"')
         elif os.path.isdir(f) and not f.endswith('common'):
-            listDir(f)
+            listDir(f, isDockerBuild)
 
 
 def replace(file_path, old_string, new_string):
@@ -45,9 +45,10 @@ def replace(file_path, old_string, new_string):
     for line in file:
         origiLine = line
         line = line.strip()
+        # print(line)
         if old_string in line:
             changes = origiLine.replace(old_string, new_string)
-            print("find: change to", changes)
+            print("find common: change to", changes)
             replacement = replacement + changes
             continue
 
