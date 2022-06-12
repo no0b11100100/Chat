@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"Chat/Client/Server/channels"
 	"Chat/Client/Server/common"
@@ -17,9 +19,16 @@ type RemoteServer struct {
 }
 
 func NewRemoteServer() *RemoteServer {
-	conn, err := net.Dial("tcp", "172.17.0.2:8081")
-	if err != nil {
-		log.Fatalln(err)
+	var conn net.Conn
+	var err error
+	for i := 0; i < 5; i++ {
+		conn, err = net.Dial("tcp", "localhost:8081")
+		if err != nil {
+			fmt.Println(err)
+			time.Sleep(1 * time.Second)
+		} else {
+			break
+		}
 	}
 
 	log.Println("Connected to remote server")

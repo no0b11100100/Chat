@@ -44,7 +44,7 @@ func NewServer() *Server {
 	}
 
 	s.addHandlers()
-	// s.database.Connect()
+	s.database.Connect()
 
 	return s
 }

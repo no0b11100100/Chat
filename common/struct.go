@@ -18,6 +18,7 @@ type Participant struct {
 }
 
 type User struct {
+	ID       string   `bson:"user_id"`
 	Email    string   `bson:"email" json:"email"`
 	Password string   `bson:"password" json:"password"`
 	Chats    []string `bson:"chats"` // chat ids

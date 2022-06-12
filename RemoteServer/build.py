@@ -33,15 +33,16 @@ def build():
 def listDir(path, isDockerBuild=False):
     for filename in os.listdir(path):
         f = os.path.join(path, filename)
-        is_skiped = os.path.isdir(f) and (not f.endswith('common') or not f.endswith('data'))
+
         if os.path.isfile(f):
             if f.endswith('.go'):
                 if isDockerBuild:
                     replace(f, old_string='\"common\"', new_string='\"Chat/RemoteServer/common\"')
                 else:
                     replace(f, old_string='\"Chat/RemoteServer/common\"', new_string='\"common\"')
-        elif is_skiped:
-            listDir(f, isDockerBuild)
+        elif os.path.isdir(f):
+            if not f.endswith('common') or not filename == 'data':
+                listDir(f, isDockerBuild)
 
 
 def replace(file_path, old_string, new_string):
@@ -89,4 +90,5 @@ def change_goMod(file_path, is_docker=False):
 
 
 if __name__ == '__main__':
+    # os.system('python3 /home/drago/Desktop/Golang/Chat/Client/Server/build.py')
     build()

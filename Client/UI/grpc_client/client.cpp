@@ -73,11 +73,11 @@ class BaseService {
 class Test {
 public:
     void test(){
-        BaseService base(grpc::CreateChannel("172.17.0.3:8080", grpc::InsecureChannelCredentials()));
+        BaseService base(grpc::CreateChannel("localhost:8080", grpc::InsecureChannelCredentials()));
         Info logIn;
-        logIn.email = "email";
-        logIn.password = "password";
-        logIn.name = "name";
+        logIn.email = "test@account.com";
+        logIn.password = "12345";
+        // logIn.name = "name";
 
         std::string reply = base.LogIn(logIn);
         std::cout << "Greeter received: " << reply << std::endl;

@@ -2,10 +2,10 @@ module Chat/RemoteServer
 
 go 1.17
 
-// // // // // // // // // // // // // // // // // // // // // replace common => ../common
+// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // replace common => ../common
 
 require (
-// // // // // // // // // // // // // // // // // // // // // 	common v0.0.0-00010101000000-000000000000 // indirect
+// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // 	common v0.0.0-00010101000000-000000000000 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
