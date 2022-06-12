@@ -29,11 +29,18 @@ func NewServer() *Server {
 		fmt.Println("New Server err:", err)
 	}
 
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(addrs)
+
 	s := &Server{
 		cache:    new(sync.Map),
 		listener: ln,
 		handlers: make(map[common.CommandType]Handler),
-		// database: database.NewDatabase(),
+		database: database.NewDatabase(),
 	}
 
 	s.addHandlers()

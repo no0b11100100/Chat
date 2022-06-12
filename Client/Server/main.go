@@ -1,21 +1,27 @@
 package main
 
 import (
-	"Chat/Client/Server/app"
+	"Chat/Client/Server/communicator"
 )
 
 func main() {
 
-	server := app.NewApp()
-	server.Run()
+	// server := app.NewApp()
+	// server.Run()
+
+	c := communicator.NewCommunicator()
+	c.Serve()
 
 	// // go func() {
 	// conn, err := net.Dial("tcp", "172.17.0.2:8081")
 
 	// if err != nil {
 	// 	fmt.Println(err)
-	// 	return
+	// } else {
+	// 	fmt.Println("Connected")
 	// }
+
+	// conn.Write([]byte("hello\n"))
 
 	// conn.Write([]byte("hello"))
 	// // }()

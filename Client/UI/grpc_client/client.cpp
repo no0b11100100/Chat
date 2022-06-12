@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <memory>
 #include <string>
@@ -26,7 +25,7 @@ class BaseService {
     BaseService(std::shared_ptr<Channel> channel)
       : _stub(Base::NewStub(channel)) {}
 
-    std::string LogIn(Info i) {
+    std::string LogIn(const Info& i) {
         UserLogIn request;
         request.set_email(i.email);
         request.set_name(i.name);
@@ -69,6 +68,20 @@ class BaseService {
 
     private:
         std::unique_ptr<Base::Stub> _stub;
+};
+
+class Test {
+public:
+    void test(){
+        BaseService base(grpc::CreateChannel("172.17.0.3:8080", grpc::InsecureChannelCredentials()));
+        Info logIn;
+        logIn.email = "email";
+        logIn.password = "password";
+        logIn.name = "name";
+
+        std::string reply = base.LogIn(logIn);
+        std::cout << "Greeter received: " << reply << std::endl;
+    }
 };
 
 

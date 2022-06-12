@@ -22,8 +22,9 @@ def build():
     listDir(root, True)
     change_goMod(os.path.join(root, 'go.mod'))
 
-    os.system('docker build -t server .')
-
+    # os.system('docker build -t server .')
+    os.system('docker compose build')
+    os.system('docker compose up')
     shutil.rmtree(root_common_path, ignore_errors=True)
     listDir(root)
     change_goMod(os.path.join(root, 'go.mod'), True)
@@ -32,13 +33,14 @@ def build():
 def listDir(path, isDockerBuild=False):
     for filename in os.listdir(path):
         f = os.path.join(path, filename)
+        is_skiped = os.path.isdir(f) and (not f.endswith('common') or not f.endswith('data'))
         if os.path.isfile(f):
             if f.endswith('.go'):
                 if isDockerBuild:
                     replace(f, old_string='\"common\"', new_string='\"Chat/RemoteServer/common\"')
                 else:
                     replace(f, old_string='\"Chat/RemoteServer/common\"', new_string='\"common\"')
-        elif os.path.isdir(f) and not f.endswith('common'):
+        elif is_skiped:
             listDir(f, isDockerBuild)
 
 

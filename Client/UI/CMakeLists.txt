@@ -9,15 +9,19 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set (VCPKG_TARGET_TRIPLET=x64-linux)
 set (VCPKG_HOME "${CMAKE_SOURCE_DIR}/third-party/vcpkg")
 set (CMAKE_TOOLCHAIN_FILE "${VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake")
 
-list(APPEND CMAKE_PREFIX_PATH ${VCPKG_HOME}/packages)
+#set(protobuf_MODULE_COMPATIBLE TRUE)
+
+#list(APPEND CMAKE_PREFIX_PATH ${VCPKG_HOME}/packages)
 
 find_package(gRPC CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
+find_package(absl CONFIG REQUIRED)
+find_package(Threads REQUIRED)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
@@ -29,8 +33,12 @@ set(PROJECT_SOURCES
         grpc_client/proto/gen/chat.grpc.pb.h
         grpc_client/proto/gen/chat.pb.cc
         grpc_client/proto/gen/chat.pb.h
-        grpc_client/client.cc
+        grpc_client/client.cpp
 )
+
+#add_executable(UI ${PROJECT_SOURCES})
+#target_link_libraries(UI PRIVATE absl::status gRPC::grpc++ gRPC::grpc++_unsecure gRPC::grpc++_reflection protobuf::libprotobuf)
+
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(UI
@@ -58,7 +66,7 @@ endif()
 target_compile_definitions(UI
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(UI
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick gRPC::grpc++ gRPC::grpc++_reflection)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick absl::status gRPC::grpc++ gRPC::grpc++_unsecure gRPC::grpc++_reflection protobuf::libprotobuf)
 
 set_target_properties(UI PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

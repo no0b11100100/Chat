@@ -1,7 +1,7 @@
 package database
 
 import (
-	"common"
+	"Chat/RemoteServer/common"
 	"context"
 	"fmt"
 	"log"
@@ -47,7 +47,7 @@ type Database interface {
 
 func (db *DB) Connect() {
 	fmt.Println("Connect database")
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI("mongodb://mongo:27017/db") //("mongodb://172.17.0.2:27017")
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
