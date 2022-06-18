@@ -9,14 +9,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set (VCPKG_TARGET_TRIPLET=x64-linux)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set (VCPKG_HOME "${CMAKE_SOURCE_DIR}/third-party/vcpkg")
 set (CMAKE_TOOLCHAIN_FILE "${VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake")
-
-#set(protobuf_MODULE_COMPATIBLE TRUE)
-
-#list(APPEND CMAKE_PREFIX_PATH ${VCPKG_HOME}/packages)
 
 find_package(gRPC CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
@@ -33,12 +28,12 @@ set(PROJECT_SOURCES
         grpc_client/proto/gen/chat.grpc.pb.h
         grpc_client/proto/gen/chat.pb.cc
         grpc_client/proto/gen/chat.pb.h
-        grpc_client/client.cpp
+        grpc_client/BaseService.hpp
+        grpc_client/Client.hpp
+        src/Function/Function.hpp
+        src/Models/LogInModel.h
+        src/App.hpp
 )
-
-#add_executable(UI ${PROJECT_SOURCES})
-#target_link_libraries(UI PRIVATE absl::status gRPC::grpc++ gRPC::grpc++_unsecure gRPC::grpc++_reflection protobuf::libprotobuf)
-
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(UI

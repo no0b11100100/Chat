@@ -1,8 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-
-#include "grpc_client/client.cpp"
+#include "src/App.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -12,10 +11,10 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    Test t;
-    t.test();
-
     QQmlApplicationEngine engine;
+
+    qmlRegisterType<App, 1>("Models", 1, 0, "Backend");
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {

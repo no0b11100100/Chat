@@ -20,12 +20,13 @@ struct Info {
     std::string name;
 };
 
-class BaseService {
+class BaseService final {
     public:
     BaseService(std::shared_ptr<Channel> channel)
       : _stub(Base::NewStub(channel)) {}
 
     std::string LogIn(const Info& i) {
+        std::cout << "LogIn call\n";
         UserLogIn request;
         request.set_email(i.email);
         request.set_name(i.name);
