@@ -16,9 +16,9 @@ public:
           m_action{action}
     {}
 
-    Q_INVOKABLE void triggerLogIn(QString email, QString password) {
-        qDebug() << email << password;
-        m_action(email, password);
+    Q_INVOKABLE void triggerAction(QStringList args) {
+        qDebug() << args;
+//        m_action(email, password);
     }
 
 private:

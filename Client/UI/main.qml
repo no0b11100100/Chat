@@ -14,9 +14,9 @@ Window {
     title: qsTr("Hello World")
     color: "green"
 
-    LogInScreen {
-        action: _models.model.triggerLogIn
+    ScreenController {
         anchors.fill: parent
+        action: _models.model.triggerAction
     }
 
     Backend {
