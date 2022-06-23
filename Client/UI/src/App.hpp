@@ -6,7 +6,7 @@
 #include <QObject>
 
 #include "../grpc_client/Client.hpp"
-#include "Models/LogInModel.h"
+#include "Models/SignInUpModel.hpp"
 
 constexpr const char* LOG_IN_MODEL = "logInModel";
 
@@ -23,17 +23,14 @@ public:
     }
 
     void initModels(QObject* parent) {
-        auto signInAction = [&](QString email, QString password) -> void
+        auto signInAction = [&](SignIn data) -> void
         {
-            Info i;
-            i.email = email.toStdString();
-            i.password = password.toStdString();
-            m_grpcClient.baseService().LogIn(i);
+            m_grpcClient.baseService().signIn(data);
         };
 
-        auto signUpAction = [&](QString, QString, QString, QString) -> void
+        auto signUpAction = [&](SignUp data) -> void
         {
-            qDebug() << "signUp";
+            m_grpcClient.baseService().signUp(data);
         };
 
         m_models[LOG_IN_MODEL] = std::make_unique<Models::SignInUpModel>(signInAction, signUpAction, parent);
