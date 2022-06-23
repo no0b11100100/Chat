@@ -23,14 +23,20 @@ public:
     }
 
     void initModels(QObject* parent) {
-        auto action = [&](QString email, QString password) -> void
+        auto signInAction = [&](QString email, QString password) -> void
         {
             Info i;
             i.email = email.toStdString();
             i.password = password.toStdString();
             m_grpcClient.baseService().LogIn(i);
         };
-        m_models[LOG_IN_MODEL] = std::make_unique<Models::LogInModel>(action, parent);
+
+        auto signUpAction = [&](QString, QString, QString, QString) -> void
+        {
+            qDebug() << "signUp";
+        };
+
+        m_models[LOG_IN_MODEL] = std::make_unique<Models::SignInUpModel>(signInAction, signUpAction, parent);
     }
 
     QObject* currentModel()

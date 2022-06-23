@@ -34,7 +34,7 @@ Rectangle {
                     args.push(repeater.itemAt(i).text)
                 }
                 console.log("args ", args)
-                root.action(args)
+                root.action(...args)
             }
         }
 

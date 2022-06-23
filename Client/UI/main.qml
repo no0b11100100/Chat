@@ -16,7 +16,7 @@ Window {
 
     ScreenController {
         anchors.fill: parent
-        action: _models.model.triggerAction
+        model: _models.model
     }
 
     Backend {

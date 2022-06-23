@@ -28,9 +28,11 @@ Rectangle {
 
             onPressed: {
                 var args = []
-                args.push(repeater.itemAt(0).text)
-                args.push(repeater.itemAt(1).text)
-                root.action(args)
+                for(var i = 0; i < repeater.count; i++) {
+                    args.push(repeater.itemAt(i).text)
+                }
+                console.log("args ", args)
+                root.action(...args)
             }
         }
 

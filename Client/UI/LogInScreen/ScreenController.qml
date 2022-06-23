@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Rectangle {
     id: root
-    property var action
+    property var model
 
     Loader {
         id: screenLoader
@@ -14,7 +14,7 @@ Rectangle {
 
         SignIn {
             anchors.fill: parent
-            action: root.action
+            action: root.model.signIn
             router: function() { screenLoader.sourceComponent = signUp }
         }
     }
@@ -24,7 +24,7 @@ Rectangle {
 
         SignUp {
             anchors.fill: parent
-            action: root.action
+            action: root.model.signUp
             router: function() { screenLoader.sourceComponent = signIn }
         }
     }

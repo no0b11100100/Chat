@@ -30,8 +30,7 @@ set(PROJECT_SOURCES
         grpc_client/proto/gen/chat.pb.h
         grpc_client/BaseService.hpp
         grpc_client/Client.hpp
-        src/Function/Function.hpp
-        src/Models/LogInModel.h
+        src/Models/SignInUpModel.hpp
         src/App.hpp
 )
 
