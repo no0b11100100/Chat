@@ -105,16 +105,14 @@ func (s *Server) handleCommand(payload string, conn net.Conn) {
 		responce = handler(c.Payload)
 	} else {
 		fmt.Println("Unknown command", c.Type)
-		responce.Error = fmt.Sprintf("Unknown command %v", c.Type)
+		responce.Status = common.UnknownCommand
 	}
 
 	s.send(conn, responce)
 }
 
 func (s *Server) addHandlers() {
-	s.handlers[common.LogIn] = s.LogIn
-	s.handlers[common.Register] = s.RegisterUser
-	s.handlers[common.SendMessage] = s.SendMessage
+	s.handlers[common.SignIn] = s.SignIn
 }
 
 func (s *Server) send(conn net.Conn, responce common.CommandResponce) {

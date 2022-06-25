@@ -35,14 +35,14 @@ type Database interface {
 	IsEmailUnique(string) bool
 	ValidateUser(common.User) (bool, string)
 	RegisterUser(common.User) (bool, string)
-	GetUserChats(string) []common.Chat
-	GetUsers() []common.User
-	GetChatMessages(string) []common.Message
-	GetChatParticipants(string) []common.Participant
-	AddMessage(common.Message)
-	AddChat(common.Chat) error
-	AddUserToChat(string) error
-	LeaveChat(string, string) error
+	// GetUserChats(string) []common.Chat
+	// GetUsers() []common.User
+	// GetChatMessages(string) []common.Message
+	// GetChatParticipants(string) []common.Participant
+	// AddMessage(common.Message)
+	// AddChat(common.Chat) error
+	// AddUserToChat(string) error
+	// LeaveChat(string, string) error
 }
 
 func (db *DB) Connect() {
@@ -135,12 +135,3 @@ func (db *DB) RegisterUser(user common.User) (bool, string) {
 
 	return true, user.ID
 }
-
-func (db *DB) GetUserChats(string) []common.Chat               { return nil }
-func (db *DB) GetUsers() []common.User                         { return nil }
-func (db *DB) GetChatMessages(string) []common.Message         { return nil }
-func (db *DB) GetChatParticipants(string) []common.Participant { return nil }
-func (db *DB) AddMessage(common.Message)                       {}
-func (db *DB) AddChat(common.Chat) error                       { return nil }
-func (db *DB) AddUserToChat(string) error                      { return nil }
-func (db *DB) LeaveChat(string, string) error                  { return nil }
