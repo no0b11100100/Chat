@@ -4,7 +4,6 @@ package api
 
 import (
 	context "context"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,9 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BaseClient interface {
-	LogIn(ctx context.Context, in *UserLogIn, opts ...grpc.CallOption) (*ID, error)
-	Register(ctx context.Context, in *UserLogIn, opts ...grpc.CallOption) (*ID, error)
-	Logout(ctx context.Context, in *ID, opts ...grpc.CallOption) (*empty.Empty, error)
+	SignIn(ctx context.Context, in *SignIn, opts ...grpc.CallOption) (*Result, error)
+	SignUp(ctx context.Context, in *SignUp, opts ...grpc.CallOption) (*Result, error)
 }
 
 type baseClient struct {
@@ -32,27 +30,18 @@ func NewBaseClient(cc grpc.ClientConnInterface) BaseClient {
 	return &baseClient{cc}
 }
 
-func (c *baseClient) LogIn(ctx context.Context, in *UserLogIn, opts ...grpc.CallOption) (*ID, error) {
-	out := new(ID)
-	err := c.cc.Invoke(ctx, "/chat.Base/LogIn", in, out, opts...)
+func (c *baseClient) SignIn(ctx context.Context, in *SignIn, opts ...grpc.CallOption) (*Result, error) {
+	out := new(Result)
+	err := c.cc.Invoke(ctx, "/chat.Base/signIn", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *baseClient) Register(ctx context.Context, in *UserLogIn, opts ...grpc.CallOption) (*ID, error) {
-	out := new(ID)
-	err := c.cc.Invoke(ctx, "/chat.Base/Register", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *baseClient) Logout(ctx context.Context, in *ID, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/chat.Base/logout", in, out, opts...)
+func (c *baseClient) SignUp(ctx context.Context, in *SignUp, opts ...grpc.CallOption) (*Result, error) {
+	out := new(Result)
+	err := c.cc.Invoke(ctx, "/chat.Base/signUp", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +52,8 @@ func (c *baseClient) Logout(ctx context.Context, in *ID, opts ...grpc.CallOption
 // All implementations must embed UnimplementedBaseServer
 // for forward compatibility
 type BaseServer interface {
-	LogIn(context.Context, *UserLogIn) (*ID, error)
-	Register(context.Context, *UserLogIn) (*ID, error)
-	Logout(context.Context, *ID) (*empty.Empty, error)
+	SignIn(context.Context, *SignIn) (*Result, error)
+	SignUp(context.Context, *SignUp) (*Result, error)
 	mustEmbedUnimplementedBaseServer()
 }
 
@@ -73,14 +61,11 @@ type BaseServer interface {
 type UnimplementedBaseServer struct {
 }
 
-func (UnimplementedBaseServer) LogIn(context.Context, *UserLogIn) (*ID, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LogIn not implemented")
+func (UnimplementedBaseServer) SignIn(context.Context, *SignIn) (*Result, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignIn not implemented")
 }
-func (UnimplementedBaseServer) Register(context.Context, *UserLogIn) (*ID, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
-}
-func (UnimplementedBaseServer) Logout(context.Context, *ID) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+func (UnimplementedBaseServer) SignUp(context.Context, *SignUp) (*Result, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignUp not implemented")
 }
 func (UnimplementedBaseServer) mustEmbedUnimplementedBaseServer() {}
 
@@ -95,56 +80,38 @@ func RegisterBaseServer(s grpc.ServiceRegistrar, srv BaseServer) {
 	s.RegisterService(&Base_ServiceDesc, srv)
 }
 
-func _Base_LogIn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserLogIn)
+func _Base_SignIn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignIn)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BaseServer).LogIn(ctx, in)
+		return srv.(BaseServer).SignIn(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/chat.Base/LogIn",
+		FullMethod: "/chat.Base/signIn",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BaseServer).LogIn(ctx, req.(*UserLogIn))
+		return srv.(BaseServer).SignIn(ctx, req.(*SignIn))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Base_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserLogIn)
+func _Base_SignUp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignUp)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BaseServer).Register(ctx, in)
+		return srv.(BaseServer).SignUp(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/chat.Base/Register",
+		FullMethod: "/chat.Base/signUp",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BaseServer).Register(ctx, req.(*UserLogIn))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Base_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ID)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BaseServer).Logout(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/chat.Base/logout",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BaseServer).Logout(ctx, req.(*ID))
+		return srv.(BaseServer).SignUp(ctx, req.(*SignUp))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -157,317 +124,14 @@ var Base_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*BaseServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "LogIn",
-			Handler:    _Base_LogIn_Handler,
+			MethodName: "signIn",
+			Handler:    _Base_SignIn_Handler,
 		},
 		{
-			MethodName: "Register",
-			Handler:    _Base_Register_Handler,
-		},
-		{
-			MethodName: "logout",
-			Handler:    _Base_Logout_Handler,
+			MethodName: "signUp",
+			Handler:    _Base_SignUp_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "chat.proto",
-}
-
-// ChatClient is the client API for Chat service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ChatClient interface {
-	GetUserInfo(ctx context.Context, in *ID, opts ...grpc.CallOption) (*UserInfo, error)
-	GetChatInfo(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ChatInfo, error)
-	CreateChat(ctx context.Context, in *ChatInfo, opts ...grpc.CallOption) (*empty.Empty, error)
-	LeaveChat(ctx context.Context, in *ID, opts ...grpc.CallOption) (*empty.Empty, error)
-	AddChat(ctx context.Context, in *ChatInfo, opts ...grpc.CallOption) (*empty.Empty, error)
-	Notify(ctx context.Context, opts ...grpc.CallOption) (Chat_NotifyClient, error)
-}
-
-type chatClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewChatClient(cc grpc.ClientConnInterface) ChatClient {
-	return &chatClient{cc}
-}
-
-func (c *chatClient) GetUserInfo(ctx context.Context, in *ID, opts ...grpc.CallOption) (*UserInfo, error) {
-	out := new(UserInfo)
-	err := c.cc.Invoke(ctx, "/chat.Chat/getUserInfo", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *chatClient) GetChatInfo(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ChatInfo, error) {
-	out := new(ChatInfo)
-	err := c.cc.Invoke(ctx, "/chat.Chat/getChatInfo", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *chatClient) CreateChat(ctx context.Context, in *ChatInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/chat.Chat/createChat", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *chatClient) LeaveChat(ctx context.Context, in *ID, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/chat.Chat/leaveChat", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *chatClient) AddChat(ctx context.Context, in *ChatInfo, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/chat.Chat/addChat", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *chatClient) Notify(ctx context.Context, opts ...grpc.CallOption) (Chat_NotifyClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Chat_ServiceDesc.Streams[0], "/chat.Chat/notify", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &chatNotifyClient{stream}
-	return x, nil
-}
-
-type Chat_NotifyClient interface {
-	Send(*Message) error
-	Recv() (*JSON, error)
-	grpc.ClientStream
-}
-
-type chatNotifyClient struct {
-	grpc.ClientStream
-}
-
-func (x *chatNotifyClient) Send(m *Message) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *chatNotifyClient) Recv() (*JSON, error) {
-	m := new(JSON)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-// ChatServer is the server API for Chat service.
-// All implementations must embed UnimplementedChatServer
-// for forward compatibility
-type ChatServer interface {
-	GetUserInfo(context.Context, *ID) (*UserInfo, error)
-	GetChatInfo(context.Context, *ID) (*ChatInfo, error)
-	CreateChat(context.Context, *ChatInfo) (*empty.Empty, error)
-	LeaveChat(context.Context, *ID) (*empty.Empty, error)
-	AddChat(context.Context, *ChatInfo) (*empty.Empty, error)
-	Notify(Chat_NotifyServer) error
-	mustEmbedUnimplementedChatServer()
-}
-
-// UnimplementedChatServer must be embedded to have forward compatible implementations.
-type UnimplementedChatServer struct {
-}
-
-func (UnimplementedChatServer) GetUserInfo(context.Context, *ID) (*UserInfo, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
-}
-func (UnimplementedChatServer) GetChatInfo(context.Context, *ID) (*ChatInfo, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetChatInfo not implemented")
-}
-func (UnimplementedChatServer) CreateChat(context.Context, *ChatInfo) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateChat not implemented")
-}
-func (UnimplementedChatServer) LeaveChat(context.Context, *ID) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LeaveChat not implemented")
-}
-func (UnimplementedChatServer) AddChat(context.Context, *ChatInfo) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddChat not implemented")
-}
-func (UnimplementedChatServer) Notify(Chat_NotifyServer) error {
-	return status.Errorf(codes.Unimplemented, "method Notify not implemented")
-}
-func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
-
-// UnsafeChatServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ChatServer will
-// result in compilation errors.
-type UnsafeChatServer interface {
-	mustEmbedUnimplementedChatServer()
-}
-
-func RegisterChatServer(s grpc.ServiceRegistrar, srv ChatServer) {
-	s.RegisterService(&Chat_ServiceDesc, srv)
-}
-
-func _Chat_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ID)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServer).GetUserInfo(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/chat.Chat/getUserInfo",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).GetUserInfo(ctx, req.(*ID))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Chat_GetChatInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ID)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServer).GetChatInfo(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/chat.Chat/getChatInfo",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).GetChatInfo(ctx, req.(*ID))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Chat_CreateChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChatInfo)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServer).CreateChat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/chat.Chat/createChat",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).CreateChat(ctx, req.(*ChatInfo))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Chat_LeaveChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ID)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServer).LeaveChat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/chat.Chat/leaveChat",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).LeaveChat(ctx, req.(*ID))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Chat_AddChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChatInfo)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServer).AddChat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/chat.Chat/addChat",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).AddChat(ctx, req.(*ChatInfo))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Chat_Notify_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ChatServer).Notify(&chatNotifyServer{stream})
-}
-
-type Chat_NotifyServer interface {
-	Send(*JSON) error
-	Recv() (*Message, error)
-	grpc.ServerStream
-}
-
-type chatNotifyServer struct {
-	grpc.ServerStream
-}
-
-func (x *chatNotifyServer) Send(m *JSON) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *chatNotifyServer) Recv() (*Message, error) {
-	m := new(Message)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-// Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Chat_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "chat.Chat",
-	HandlerType: (*ChatServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "getUserInfo",
-			Handler:    _Chat_GetUserInfo_Handler,
-		},
-		{
-			MethodName: "getChatInfo",
-			Handler:    _Chat_GetChatInfo_Handler,
-		},
-		{
-			MethodName: "createChat",
-			Handler:    _Chat_CreateChat_Handler,
-		},
-		{
-			MethodName: "leaveChat",
-			Handler:    _Chat_LeaveChat_Handler,
-		},
-		{
-			MethodName: "addChat",
-			Handler:    _Chat_AddChat_Handler,
-		},
-	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "notify",
-			Handler:       _Chat_Notify_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-	},
 	Metadata: "chat.proto",
 }

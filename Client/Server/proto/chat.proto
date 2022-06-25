@@ -5,57 +5,24 @@ package chat;
 option go_package = "/;api";
 import "google/protobuf/empty.proto";
 
-message ChatInfo {
-    string title=1;
-    string cover=2;
-    repeated string messages=3;
-    repeated string participants=4;
-    string lastMessage=5;
-}
-
-message UserInfo {
-    string name=1;
-    string nickname=2;
-    repeated string chats=3;
-    string cover=4;
-}
-
-message ID {
-    string id=1;
-}
-
-message UserLogIn {
+message SignIn {
     string email=1;
     string password=2;
-    string name=3;
 }
 
-message JSON{
-    string json=1;
-}
-
-message Message {
-    string text=1;
-    ID chatID=2;
-}
-
-message NewParticipant {
+message Result {
     string id=1;
-    string chat_id=2;
+    int32 responseStatus=2;
+}
+
+message SignUp {
+    string name=1;
+    string nickName=2;
+    string email=3;
+    string password=4;
 }
 
 service Base {
-    rpc LogIn(UserLogIn) returns(ID);
-    rpc Register(UserLogIn) returns(ID);
-    rpc logout(ID) returns(google.protobuf.Empty);
-}
-
-service Chat {
-    rpc getUserInfo(ID) returns(UserInfo);
-    rpc getChatInfo(ID) returns(ChatInfo);
-    rpc createChat(ChatInfo) returns(google.protobuf.Empty);
-    rpc leaveChat(ID) returns(google.protobuf.Empty);
-    rpc addChat(ChatInfo) returns(google.protobuf.Empty);
-
-    rpc notify(stream Message) returns(stream JSON);
+    rpc signIn(SignIn) returns(Result);
+    rpc signUp(SignUp) returns(Result);
 }
