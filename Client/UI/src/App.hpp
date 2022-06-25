@@ -23,9 +23,10 @@ public:
     }
 
     void initModels(QObject* parent) {
-        auto signInAction = [&](SignIn data) -> void
+        auto signInAction = [&](SignIn data) -> int32_t
         {
-            m_grpcClient.baseService().signIn(data);
+            auto result = m_grpcClient.baseService().signIn(data);
+            return result;
         };
 
         auto signUpAction = [&](SignUp data) -> void

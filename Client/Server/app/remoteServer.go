@@ -9,16 +9,18 @@ import (
 	"net"
 	"time"
 
-	"Chat/Client/Server/channels"
 	"Chat/Client/Server/common"
 )
 
 type RemoteServer struct {
 	conn   net.Conn
 	reader *bufio.Reader
+	notify common.ChannelType
+	//TODO: use sync.Map
+	channels map[common.CommandType][]common.ChannelType
 }
 
-func NewRemoteServer() *RemoteServer {
+func NewRemoteServer(ch common.ChannelType) *RemoteServer {
 	var conn net.Conn
 	var err error
 	for i := 0; i < 5; i++ {
@@ -35,10 +37,10 @@ func NewRemoteServer() *RemoteServer {
 
 	reader := bufio.NewReader(conn)
 
-	return &RemoteServer{conn, reader}
+	return &RemoteServer{conn, reader, ch, make(map[common.CommandType][]common.ChannelType)}
 }
 
-func (s *RemoteServer) Serve(notification *channels.Channels) {
+func (s *RemoteServer) Serve() {
 	for {
 		payload, err := s.reader.ReadString('\n')
 		if err != nil || payload == "" || payload == "\n" {
@@ -53,17 +55,27 @@ func (s *RemoteServer) Serve(notification *channels.Channels) {
 			log.Println(err)
 		}
 
-		var responce common.CommandResponce
+		var response common.CommandResponce
 
-		if err := json.Unmarshal(bytes, &responce); err != nil {
+		if err := json.Unmarshal(bytes, &response); err != nil {
 			log.Println(err)
 		}
 
-		notification.Notify(responce.Command)
+		if response.Type == common.Notification {
+			s.notify <- response.Command
+			return
+		}
+
+		//Response
+		if value, ok := s.channels[response.Command.Type]; ok {
+			value[0] <- response.Command
+			s.channels[response.Command.Type] = value[1:]
+		}
+
 	}
 }
 
-func (s *RemoteServer) Send(c common.Command) {
+func (s *RemoteServer) Send(c common.Command, ch common.ChannelType) {
 	bytes, err := json.Marshal(c)
 
 	if err != nil {
@@ -72,6 +84,10 @@ func (s *RemoteServer) Send(c common.Command) {
 
 	payload := base64.StdEncoding.EncodeToString(bytes)
 	payload += "\n"
+
+	if ch != nil {
+		s.channels[c.Type] = append(s.channels[c.Type], ch)
+	}
 
 	s.conn.Write([]byte(payload))
 }

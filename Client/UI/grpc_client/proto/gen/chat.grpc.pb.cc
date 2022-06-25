@@ -37,46 +37,46 @@ Base::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, cons
   , rpcmethod_signUp_(Base_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
-::grpc::Status Base::Stub::signIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::google::protobuf::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::chat::SignIn, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_signIn_, context, request, response);
+::grpc::Status Base::Stub::signIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::chat::Result* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::chat::SignIn, ::chat::Result, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_signIn_, context, request, response);
 }
 
-void Base::Stub::async::signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::chat::SignIn, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_signIn_, context, request, response, std::move(f));
+void Base::Stub::async::signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::chat::Result* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::chat::SignIn, ::chat::Result, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_signIn_, context, request, response, std::move(f));
 }
 
-void Base::Stub::async::signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+void Base::Stub::async::signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::chat::Result* response, ::grpc::ClientUnaryReactor* reactor) {
   ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_signIn_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* Base::Stub::PrepareAsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::google::protobuf::Empty, ::chat::SignIn, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_signIn_, context, request);
+::grpc::ClientAsyncResponseReader< ::chat::Result>* Base::Stub::PrepareAsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::chat::Result, ::chat::SignIn, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_signIn_, context, request);
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* Base::Stub::AsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::chat::Result>* Base::Stub::AsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncsignInRaw(context, request, cq);
   result->StartCall();
   return result;
 }
 
-::grpc::Status Base::Stub::signUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::google::protobuf::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::chat::SignUp, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_signUp_, context, request, response);
+::grpc::Status Base::Stub::signUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::chat::Result* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::chat::SignUp, ::chat::Result, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_signUp_, context, request, response);
 }
 
-void Base::Stub::async::signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::chat::SignUp, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_signUp_, context, request, response, std::move(f));
+void Base::Stub::async::signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::chat::Result* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::chat::SignUp, ::chat::Result, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_signUp_, context, request, response, std::move(f));
 }
 
-void Base::Stub::async::signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+void Base::Stub::async::signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::chat::Result* response, ::grpc::ClientUnaryReactor* reactor) {
   ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_signUp_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* Base::Stub::PrepareAsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::google::protobuf::Empty, ::chat::SignUp, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_signUp_, context, request);
+::grpc::ClientAsyncResponseReader< ::chat::Result>* Base::Stub::PrepareAsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::chat::Result, ::chat::SignUp, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_signUp_, context, request);
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* Base::Stub::AsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::chat::Result>* Base::Stub::AsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncsignUpRaw(context, request, cq);
   result->StartCall();
@@ -87,21 +87,21 @@ Base::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Base_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< Base::Service, ::chat::SignIn, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< Base::Service, ::chat::SignIn, ::chat::Result, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](Base::Service* service,
              ::grpc::ServerContext* ctx,
              const ::chat::SignIn* req,
-             ::google::protobuf::Empty* resp) {
+             ::chat::Result* resp) {
                return service->signIn(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Base_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< Base::Service, ::chat::SignUp, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< Base::Service, ::chat::SignUp, ::chat::Result, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](Base::Service* service,
              ::grpc::ServerContext* ctx,
              const ::chat::SignUp* req,
-             ::google::protobuf::Empty* resp) {
+             ::chat::Result* resp) {
                return service->signUp(ctx, req, resp);
              }, this)));
 }
@@ -109,14 +109,14 @@ Base::Service::Service() {
 Base::Service::~Service() {
 }
 
-::grpc::Status Base::Service::signIn(::grpc::ServerContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response) {
+::grpc::Status Base::Service::signIn(::grpc::ServerContext* context, const ::chat::SignIn* request, ::chat::Result* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status Base::Service::signUp(::grpc::ServerContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response) {
+::grpc::Status Base::Service::signUp(::grpc::ServerContext* context, const ::chat::SignUp* request, ::chat::Result* response) {
   (void) context;
   (void) request;
   (void) response;

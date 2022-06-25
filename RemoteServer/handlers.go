@@ -10,7 +10,7 @@ import (
 func (s *Server) SignIn(payload []byte) common.CommandResponce {
 	user := common.User{}
 	err := json.Unmarshal(payload, &user)
-	response := common.CommandResponce{Type: common.Response, common.Command{Status: common.OK, Type: common.SignIn}}
+	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.SignIn}}
 
 	if err != nil {
 		log.Println(err)
@@ -24,6 +24,6 @@ func (s *Server) SignIn(payload []byte) common.CommandResponce {
 		return response
 	}
 
-	response.Payload = []byte(string(fmt.Sprintf("{\"id\":\"%v\"}", userID)))
+	response.Command.Payload = []byte(string(fmt.Sprintf("{\"id\":\"%v\"}", userID)))
 	return response
 }

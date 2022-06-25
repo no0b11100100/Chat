@@ -22,6 +22,7 @@ def build():
     change_goMod(os.path.join(root, 'go.mod'))
 
     os.system('docker build -t client-server .')
+    os.system('docker run --network host client-server')
 
     shutil.rmtree(root_common_path, ignore_errors=True)
     listDir(root)

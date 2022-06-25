@@ -13,6 +13,7 @@ using grpc::Status;
 using chat::Base;
 using chat::SignIn;
 using chat::SignUp;
+using chat::Result;
 
 
 class BaseService final {
@@ -20,9 +21,9 @@ public:
     BaseService(std::shared_ptr<Channel> channel)
         : _stub(Base::NewStub(channel)) {}
 
-    void signIn(const SignIn& request) {
+    int32_t signIn(const SignIn& request) {
         std::cout << "signIn call\n";
-        ::google::protobuf::Empty reply;
+        Result reply;
         ClientContext context;
 
         Status status = _stub->signIn(&context, request, &reply);
@@ -30,10 +31,12 @@ public:
         if (!status.ok()) {
             std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
         }
+
+        return reply.responsestatus();
     }
 
     void signUp(const SignUp& request) {
-        ::google::protobuf::Empty reply;
+        Result reply;
         ClientContext context;
 
         Status status = _stub->signUp(&context, request, &reply);

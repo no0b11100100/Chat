@@ -105,7 +105,7 @@ func (s *Server) handleCommand(payload string, conn net.Conn) {
 		responce = handler(c.Payload)
 	} else {
 		fmt.Println("Unknown command", c.Type)
-		responce.Status = common.UnknownCommand
+		responce.Command.Status = common.UnknownCommand
 	}
 
 	s.send(conn, responce)

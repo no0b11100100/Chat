@@ -14,7 +14,7 @@ class SignInUpModel : public QObject
 {
     Q_OBJECT
 
-    using SignInAction = std::function<void(chat::SignIn)>;
+    using SignInAction = std::function<int32_t(chat::SignIn)>;
     using SignUpAction = std::function<void(chat::SignUp)>;
 public:
     SignInUpModel(SignInAction signInAction, SignUpAction signUpAction, QObject* parent = nullptr)
@@ -28,7 +28,8 @@ public:
         chat::SignIn data;
         data.set_email(email.toStdString());
         data.set_password(password.toStdString());
-        m_signInAction(data);
+        auto status = m_signInAction(data);
+        qDebug() << status;
     }
 
     Q_INVOKABLE void signUp(QString name, QString email, QString password, QString confirmedPassword) {

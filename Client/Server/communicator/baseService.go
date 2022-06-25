@@ -7,49 +7,44 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-
-	empty "github.com/golang/protobuf/ptypes/empty"
 )
 
 type BaseService struct {
 	api.UnimplementedBaseServer
-	sender   RemoteServerInterface
-	baseChan <-chan string
+	sender RemoteServerInterface
 }
 
-func NewBaseService(sender RemoteServerInterface, ch <-chan string) *BaseService {
-	return &BaseService{sender: sender, baseChan: ch}
+func NewBaseService(sender RemoteServerInterface) *BaseService {
+	return &BaseService{sender: sender}
 }
 
-func (s *BaseService) LogIn(_ context.Context, logIn *api.UserLogIn) (*api.ID, error) {
-	fmt.Printf("LogIn %+v\n", *logIn)
-	c := common.Command{Type: common.LogIn}
+func (s *BaseService) SignIn(_ context.Context, userData *api.SignIn) (*api.Result, error) {
+	fmt.Printf("SignIn %+v\n", *userData)
+	c := common.Command{Type: common.SignIn}
 	var err error
-	c.Payload, err = json.Marshal(*logIn)
+	c.Payload, err = json.Marshal(*userData)
 
 	if err != nil {
 		log.Println(err)
 	}
 
-	s.sender.Send(c)
+	ch := make(common.ChannelType)
+	s.sender.Send(c, ch)
 
-	responce := <-s.baseChan
-	log.Println(responce)
+	response := <-ch
+	close(ch)
+	log.Println(response)
 
-	var id api.ID
-	if err := json.Unmarshal([]byte(responce), &id); err != nil {
-		return nil, err
-	}
+	var result api.Result
 
-	return &api.ID{Id: id.Id}, nil
+	//TODO: save userID
+
+	result.ResponseStatus = int32(response.Status)
+
+	return &result, nil
 }
 
-func (s *BaseService) Register(_ context.Context, logIn *api.UserLogIn) (*api.ID, error) {
-	fmt.Printf("Register %+v\n", *logIn)
-	return nil, nil
-}
-
-func (s *BaseService) Logout(_ context.Context, id *api.ID) (*empty.Empty, error) {
-	fmt.Printf("LogOut %+v\n", *id)
+func (s *BaseService) SignUp(_ context.Context, logIn *api.SignUp) (*api.Result, error) {
+	fmt.Printf("SignUp %+v\n", *logIn)
 	return nil, nil
 }

@@ -3,36 +3,24 @@ package common
 type CommandType int
 
 const (
-	LogIn CommandType = iota
-	Register
-	SendMessage
-	LeaveChat
-	CreateChat
-	GetMessages
-	GetParticipants
-	AddUserToChat
-	Notify
+	SignIn CommandType = iota
+	SignOut
 	Max
 )
 
-type MessageType int
+type CommandStatus int
 
 const (
-	Normal MessageType = iota
-	Info
-	Forwarded
-	Replied
+	OK CommandStatus = iota
+	SignInError
+	SignOutInvalidEmail
+	ServerError
+	UnknownCommand
 )
 
-type ChatType int
+type ResponseType int
 
 const (
-	Private ChatType = iota
-	Channel
-)
-
-// Notification fields
-const (
-	Chats        = "chats"
-	Participants = "participants"
+	Response = iota
+	Notification
 )

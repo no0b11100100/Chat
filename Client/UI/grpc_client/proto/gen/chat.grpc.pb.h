@@ -35,61 +35,61 @@ class Base final {
   class StubInterface {
    public:
     virtual ~StubInterface() {}
-    virtual ::grpc::Status signIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::google::protobuf::Empty* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>> AsyncsignIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>>(AsyncsignInRaw(context, request, cq));
+    virtual ::grpc::Status signIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::chat::Result* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>> AsyncsignIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>>(AsyncsignInRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>> PrepareAsyncsignIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>>(PrepareAsyncsignInRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>> PrepareAsyncsignIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>>(PrepareAsyncsignInRaw(context, request, cq));
     }
-    virtual ::grpc::Status signUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::google::protobuf::Empty* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>> AsyncsignUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>>(AsyncsignUpRaw(context, request, cq));
+    virtual ::grpc::Status signUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::chat::Result* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>> AsyncsignUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>>(AsyncsignUpRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>> PrepareAsyncsignUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>>(PrepareAsyncsignUpRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>> PrepareAsyncsignUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>>(PrepareAsyncsignUpRaw(context, request, cq));
     }
     class async_interface {
      public:
       virtual ~async_interface() {}
-      virtual void signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      virtual void signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::chat::Result* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::chat::Result* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::chat::Result* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::chat::Result* response, ::grpc::ClientUnaryReactor* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
     virtual class async_interface* async() { return nullptr; }
     class async_interface* experimental_async() { return async(); }
    private:
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>* AsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>* PrepareAsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>* AsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::google::protobuf::Empty>* PrepareAsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>* AsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>* PrepareAsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>* AsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::chat::Result>* PrepareAsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
     Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
-    ::grpc::Status signIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::google::protobuf::Empty* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>> AsyncsignIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>>(AsyncsignInRaw(context, request, cq));
+    ::grpc::Status signIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::chat::Result* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chat::Result>> AsyncsignIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chat::Result>>(AsyncsignInRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>> PrepareAsyncsignIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>>(PrepareAsyncsignInRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chat::Result>> PrepareAsyncsignIn(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chat::Result>>(PrepareAsyncsignInRaw(context, request, cq));
     }
-    ::grpc::Status signUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::google::protobuf::Empty* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>> AsyncsignUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>>(AsyncsignUpRaw(context, request, cq));
+    ::grpc::Status signUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::chat::Result* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chat::Result>> AsyncsignUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chat::Result>>(AsyncsignUpRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>> PrepareAsyncsignUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>>(PrepareAsyncsignUpRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chat::Result>> PrepareAsyncsignUp(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::chat::Result>>(PrepareAsyncsignUpRaw(context, request, cq));
     }
     class async final :
       public StubInterface::async_interface {
      public:
-      void signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      void signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      void signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)>) override;
-      void signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::chat::Result* response, std::function<void(::grpc::Status)>) override;
+      void signIn(::grpc::ClientContext* context, const ::chat::SignIn* request, ::chat::Result* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::chat::Result* response, std::function<void(::grpc::Status)>) override;
+      void signUp(::grpc::ClientContext* context, const ::chat::SignUp* request, ::chat::Result* response, ::grpc::ClientUnaryReactor* reactor) override;
      private:
       friend class Stub;
       explicit async(Stub* stub): stub_(stub) { }
@@ -101,10 +101,10 @@ class Base final {
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
     class async async_stub_{this};
-    ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* AsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* PrepareAsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* AsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* PrepareAsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::chat::Result>* AsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::chat::Result>* PrepareAsyncsignInRaw(::grpc::ClientContext* context, const ::chat::SignIn& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::chat::Result>* AsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::chat::Result>* PrepareAsyncsignUpRaw(::grpc::ClientContext* context, const ::chat::SignUp& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_signIn_;
     const ::grpc::internal::RpcMethod rpcmethod_signUp_;
   };
@@ -114,8 +114,8 @@ class Base final {
    public:
     Service();
     virtual ~Service();
-    virtual ::grpc::Status signIn(::grpc::ServerContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response);
-    virtual ::grpc::Status signUp(::grpc::ServerContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response);
+    virtual ::grpc::Status signIn(::grpc::ServerContext* context, const ::chat::SignIn* request, ::chat::Result* response);
+    virtual ::grpc::Status signUp(::grpc::ServerContext* context, const ::chat::SignUp* request, ::chat::Result* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_signIn : public BaseClass {
@@ -129,11 +129,11 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestsignIn(::grpc::ServerContext* context, ::chat::SignIn* request, ::grpc::ServerAsyncResponseWriter< ::google::protobuf::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+    void RequestsignIn(::grpc::ServerContext* context, ::chat::SignIn* request, ::grpc::ServerAsyncResponseWriter< ::chat::Result>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
@@ -149,11 +149,11 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestsignUp(::grpc::ServerContext* context, ::chat::SignUp* request, ::grpc::ServerAsyncResponseWriter< ::google::protobuf::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+    void RequestsignUp(::grpc::ServerContext* context, ::chat::SignUp* request, ::grpc::ServerAsyncResponseWriter< ::chat::Result>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
@@ -165,25 +165,25 @@ class Base final {
    public:
     WithCallbackMethod_signIn() {
       ::grpc::Service::MarkMethodCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::chat::SignIn, ::google::protobuf::Empty>(
+          new ::grpc::internal::CallbackUnaryHandler< ::chat::SignIn, ::chat::Result>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::chat::SignIn* request, ::google::protobuf::Empty* response) { return this->signIn(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::chat::SignIn* request, ::chat::Result* response) { return this->signIn(context, request, response); }));}
     void SetMessageAllocatorFor_signIn(
-        ::grpc::MessageAllocator< ::chat::SignIn, ::google::protobuf::Empty>* allocator) {
+        ::grpc::MessageAllocator< ::chat::SignIn, ::chat::Result>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::chat::SignIn, ::google::protobuf::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::chat::SignIn, ::chat::Result>*>(handler)
               ->SetMessageAllocator(allocator);
     }
     ~WithCallbackMethod_signIn() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     virtual ::grpc::ServerUnaryReactor* signIn(
-      ::grpc::CallbackServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::google::protobuf::Empty* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::chat::Result* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
   class WithCallbackMethod_signUp : public BaseClass {
@@ -192,25 +192,25 @@ class Base final {
    public:
     WithCallbackMethod_signUp() {
       ::grpc::Service::MarkMethodCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::chat::SignUp, ::google::protobuf::Empty>(
+          new ::grpc::internal::CallbackUnaryHandler< ::chat::SignUp, ::chat::Result>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::chat::SignUp* request, ::google::protobuf::Empty* response) { return this->signUp(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::chat::SignUp* request, ::chat::Result* response) { return this->signUp(context, request, response); }));}
     void SetMessageAllocatorFor_signUp(
-        ::grpc::MessageAllocator< ::chat::SignUp, ::google::protobuf::Empty>* allocator) {
+        ::grpc::MessageAllocator< ::chat::SignUp, ::chat::Result>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::chat::SignUp, ::google::protobuf::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::chat::SignUp, ::chat::Result>*>(handler)
               ->SetMessageAllocator(allocator);
     }
     ~WithCallbackMethod_signUp() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     virtual ::grpc::ServerUnaryReactor* signUp(
-      ::grpc::CallbackServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::google::protobuf::Empty* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::chat::Result* /*response*/)  { return nullptr; }
   };
   typedef WithCallbackMethod_signIn<WithCallbackMethod_signUp<Service > > CallbackService;
   typedef CallbackService ExperimentalCallbackService;
@@ -226,7 +226,7 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -243,7 +243,7 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -260,7 +260,7 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -280,7 +280,7 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -303,7 +303,7 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -325,7 +325,7 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -340,10 +340,10 @@ class Base final {
     WithStreamedUnaryMethod_signIn() {
       ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::StreamedUnaryHandler<
-          ::chat::SignIn, ::google::protobuf::Empty>(
+          ::chat::SignIn, ::chat::Result>(
             [this](::grpc::ServerContext* context,
                    ::grpc::ServerUnaryStreamer<
-                     ::chat::SignIn, ::google::protobuf::Empty>* streamer) {
+                     ::chat::SignIn, ::chat::Result>* streamer) {
                        return this->StreamedsignIn(context,
                          streamer);
                   }));
@@ -352,12 +352,12 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signIn(::grpc::ServerContext* /*context*/, const ::chat::SignIn* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedsignIn(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::chat::SignIn,::google::protobuf::Empty>* server_unary_streamer) = 0;
+    virtual ::grpc::Status StreamedsignIn(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::chat::SignIn,::chat::Result>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_signUp : public BaseClass {
@@ -367,10 +367,10 @@ class Base final {
     WithStreamedUnaryMethod_signUp() {
       ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::StreamedUnaryHandler<
-          ::chat::SignUp, ::google::protobuf::Empty>(
+          ::chat::SignUp, ::chat::Result>(
             [this](::grpc::ServerContext* context,
                    ::grpc::ServerUnaryStreamer<
-                     ::chat::SignUp, ::google::protobuf::Empty>* streamer) {
+                     ::chat::SignUp, ::chat::Result>* streamer) {
                        return this->StreamedsignUp(context,
                          streamer);
                   }));
@@ -379,12 +379,12 @@ class Base final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status signUp(::grpc::ServerContext* /*context*/, const ::chat::SignUp* /*request*/, ::chat::Result* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedsignUp(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::chat::SignUp,::google::protobuf::Empty>* server_unary_streamer) = 0;
+    virtual ::grpc::Status StreamedsignUp(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::chat::SignUp,::chat::Result>* server_unary_streamer) = 0;
   };
   typedef WithStreamedUnaryMethod_signIn<WithStreamedUnaryMethod_signUp<Service > > StreamedUnaryService;
   typedef Service SplitStreamedService;
