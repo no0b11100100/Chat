@@ -1,7 +1,7 @@
 package main
 
 import (
-	"common"
+	"Chat/RemoteServer/common"
 	"encoding/json"
 	"fmt"
 	"log"

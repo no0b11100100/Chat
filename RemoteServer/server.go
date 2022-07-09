@@ -1,9 +1,9 @@
 package main
 
 import (
+	"Chat/RemoteServer/common"
 	"Chat/RemoteServer/database"
 	"bufio"
-	"common"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"

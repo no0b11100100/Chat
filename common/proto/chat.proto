@@ -3,7 +3,6 @@ syntax = "proto3";
 package chat;
 
 option go_package = "/;api";
-import "google/protobuf/empty.proto";
 
 message SignIn {
     string email=1;
@@ -11,6 +10,7 @@ message SignIn {
 }
 
 message Result {
+    string user_id=1;
     int32 responseStatus=2;
 }
 

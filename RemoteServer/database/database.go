@@ -1,7 +1,7 @@
 package database
 
 import (
-	"common"
+	"Chat/RemoteServer/common"
 	"context"
 	"fmt"
 	"log"
