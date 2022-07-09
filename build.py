@@ -46,7 +46,7 @@ def generate_proto():
     protoc_path = os.path.join(ui_path, 'third-party','vcpkg','packages','protobuf_x64-linux','tools','protobuf','protoc')
     plagin_path = os.path.join(ui_path, 'third-party','vcpkg','packages','grpc_x64-linux','tools','grpc','grpc_cpp_plugin')
     os.chdir(proto_path)
-    os.system(f'{protoc_path} -I {proto_path} --cpp_out=gen --grpc_out=gen --plugin=protoc-gen-grpc={plagin_path} chat.proto')
+    os.system(f'{protoc_path} -I {proto_path} --cpp_out=gen --grpc_out=gen --plugin=protoc-gen-grpc={plagin_path} *.proto')
 
 
 def copy_gen_api():
