@@ -4,6 +4,7 @@ import QtQuick.Controls
 Rectangle {
     id: root
 
+    property string resultStatus: ""
     property var action
     property var router
     property string buttonText
@@ -16,6 +17,10 @@ Rectangle {
     Column {
         anchors.centerIn: parent
         spacing: 5
+
+        Text{
+            text: root.resultStatus
+        }
 
         Repeater {
             id: repeater

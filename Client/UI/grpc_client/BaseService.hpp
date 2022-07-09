@@ -4,7 +4,7 @@
 
 #include <grpcpp/grpcpp.h>
 
-#include "proto/gen/chat.grpc.pb.h"
+#include "proto_gen/chat.grpc.pb.h"
 
 using grpc::Channel;
 using grpc::ClientContext;

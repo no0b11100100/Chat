@@ -13,6 +13,7 @@ Rectangle {
         id: signIn
 
         SignScreen {
+            id: signInScreen
             anchors.fill: parent
             action: root.model.signIn
             buttonText: "Sign In"
@@ -20,6 +21,10 @@ Rectangle {
             labelText: "Don't have an account?"
             linkText: "Sign Up"
             fields: ["Username or email", "Password"]
+
+            Component.onCompleted: {
+                root.model.statusMessage.connect(function(message) { signInScreen.resultStatus = message })
+            }
         }
     }
 
@@ -40,4 +45,5 @@ Rectangle {
     Component.onCompleted: {
         screenLoader.sourceComponent = signIn
     }
+
 }
