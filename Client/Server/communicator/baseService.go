@@ -12,10 +12,16 @@ import (
 type BaseService struct {
 	api.UnimplementedBaseServer
 	sender RemoteServerInterface
+	errors map[common.CommandStatus]string
 }
 
 func NewBaseService(sender RemoteServerInterface) *BaseService {
-	return &BaseService{sender: sender}
+	errors := map[common.CommandStatus]string{
+		common.SignInOK:    "Successfully log in",
+		common.SignInError: "Invalid email or password",
+	}
+
+	return &BaseService{sender: sender, errors: errors}
 }
 
 func (s *BaseService) SignIn(_ context.Context, userData *api.SignIn) (*api.Result, error) {
@@ -37,9 +43,12 @@ func (s *BaseService) SignIn(_ context.Context, userData *api.SignIn) (*api.Resu
 
 	var result api.Result
 
-	//TODO: save userID
+	err = json.Unmarshal(response.Payload, &result)
+	if err != nil {
+		log.Println(err)
+	}
 
-	result.ResponseStatus = int32(response.Status)
+	result.ErrorMessage = s.errors[response.Status]
 
 	return &result, nil
 }

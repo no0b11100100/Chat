@@ -11,7 +11,8 @@ const (
 type CommandStatus int
 
 const (
-	OK CommandStatus = iota
+	SignInOK CommandStatus = iota
+	SignUpOK
 	SignInError
 	SignOutInvalidEmail
 	ServerError

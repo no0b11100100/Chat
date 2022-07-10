@@ -21,7 +21,7 @@ public:
     BaseService(std::shared_ptr<Channel> channel)
         : _stub(Base::NewStub(channel)) {}
 
-    int32_t signIn(const SignIn& request) {
+    Result signIn(const SignIn& request) {
         std::cout << "signIn call\n";
         Result reply;
         ClientContext context;
@@ -32,7 +32,7 @@ public:
             std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
         }
 
-        return reply.responsestatus();
+        return reply;
     }
 
     void signUp(const SignUp& request) {

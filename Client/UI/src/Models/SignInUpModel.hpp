@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QDebug>
 
+#include <string>
 
 namespace Models {
 
@@ -14,7 +15,7 @@ class SignInUpModel : public QObject
 {
     Q_OBJECT
 
-    using SignInAction = std::function<int32_t(chat::SignIn)>;
+    using SignInAction = std::function<std::string(chat::SignIn)>;
     using SignUpAction = std::function<void(chat::SignUp)>;
 
 public:
@@ -30,9 +31,8 @@ public:
         chat::SignIn data;
         data.set_email(email.toStdString());
         data.set_password(password.toStdString());
-        auto status = m_signInAction(data);
-        emit statusMessage("Status: " + QString::number(status));
-        qDebug() << status;
+        std::string message = m_signInAction(data);
+        emit statusMessage(message.c_str());
     }
 
     Q_INVOKABLE void signUp(QString name, QString email, QString password, QString confirmedPassword) {

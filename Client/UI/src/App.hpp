@@ -17,19 +17,21 @@ class App : public QObject {
     Q_PROPERTY(QObject* model READ currentModel NOTIFY modelChanged)
 public:
     App(QObject* parent = nullptr)
-        : QObject{parent}
+        : QObject{parent},
+        m_userID{""}
     {
         initModels(parent);
     }
 
     void initModels(QObject* parent) {
-        auto signInAction = [&](SignIn data) -> int32_t
+        auto signInAction = [&](SignIn data) -> std::string
         {
             auto result = m_grpcClient.baseService().signIn(data);
-            return result;
+            m_userID = result.user_id();
+            return result.errormessage();
         };
 
-        auto signUpAction = [&](SignUp data) -> void
+        auto signUpAction = [&](SignUp data)
         {
             m_grpcClient.baseService().signUp(data);
         };
@@ -47,6 +49,6 @@ signals:
 
 private:
     GRPCClient m_grpcClient;
-
     std::unordered_map<std::string, std::unique_ptr<QObject>> m_models;
+    std::string m_userID;
 };

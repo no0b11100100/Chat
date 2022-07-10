@@ -18,8 +18,15 @@ Rectangle {
         anchors.centerIn: parent
         spacing: 5
 
-        Text{
-            text: root.resultStatus
+        Rectangle {
+            width: 300
+            height: 30
+            color: "transparent"
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: root.resultStatus
+                font.pointSize: 12
+            }
         }
 
         Repeater {
