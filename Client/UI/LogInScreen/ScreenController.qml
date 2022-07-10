@@ -9,6 +9,8 @@ Rectangle {
         anchors.fill: parent
     }
 
+
+
     Component {
         id: signIn
 
@@ -20,7 +22,10 @@ Rectangle {
             router: function() { screenLoader.sourceComponent = signUp }
             labelText: "Don't have an account?"
             linkText: "Sign Up"
-            fields: ["Username or email", "Password"]
+            fields: [
+                {text:"Username or email", hide: false},
+                {text:"Password", hide: true}
+            ]
 
             Component.onCompleted: {
                 root.model.statusMessage.connect(function(message) { signInScreen.resultStatus = message })
@@ -38,7 +43,12 @@ Rectangle {
             router: function() { screenLoader.sourceComponent = signIn }
             labelText: "Have an account?"
             linkText: "Sign In"
-            fields: ["Full name", "Enter email", "Enter password", "Confirm password"]
+            fields: [
+                {text:"Full name", hide: false},
+                {text:"Enter email", hide: false},
+                {text:"Enter password", hide: true},
+                {text:"Confirm password", hide: true},
+            ]
         }
     }
 

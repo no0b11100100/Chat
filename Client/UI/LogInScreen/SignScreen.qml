@@ -35,7 +35,8 @@ Rectangle {
             TextAreaInput {
                 width: 300
                 height: 30
-                placeholderText: modelData
+                placeholderText: modelData.text
+                hideInput: modelData.hide
             }
         }
 
