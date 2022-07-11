@@ -35,7 +35,7 @@ public:
         return reply;
     }
 
-    void signUp(const SignUp& request) {
+    Result signUp(const SignUp& request) {
         Result reply;
         ClientContext context;
 
@@ -44,6 +44,8 @@ public:
         if (!status.ok()) {
             std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
         }
+
+        return reply;
     }
 
 private:

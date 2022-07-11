@@ -4,6 +4,7 @@ type CommandType int
 
 const (
 	SignIn CommandType = iota
+	SignUp
 	SignOut
 	Max
 )
@@ -14,7 +15,7 @@ const (
 	SignInOK CommandStatus = iota
 	SignUpOK
 	SignInError
-	SignOutInvalidEmail
+	SignUpInvalidEmail
 	ServerError
 	UnknownCommand
 )

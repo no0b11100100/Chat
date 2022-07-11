@@ -113,6 +113,7 @@ func (s *Server) handleCommand(payload string, conn net.Conn) {
 
 func (s *Server) addHandlers() {
 	s.handlers[common.SignIn] = s.SignIn
+	s.handlers[common.SignUp] = s.SignUp
 }
 
 func (s *Server) send(conn net.Conn, responce common.CommandResponce) {

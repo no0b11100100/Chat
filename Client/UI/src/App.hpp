@@ -33,7 +33,9 @@ public:
 
         auto signUpAction = [&](SignUp data)
         {
-            m_grpcClient.baseService().signUp(data);
+            auto result = m_grpcClient.baseService().signUp(data);
+            m_userID = result.user_id();
+            return result.errormessage();
         };
 
         m_models[LOG_IN_MODEL] = std::make_unique<Models::SignInUpModel>(signInAction, signUpAction, parent);

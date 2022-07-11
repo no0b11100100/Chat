@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQml
 
 Rectangle {
     id: root
@@ -8,7 +9,6 @@ Rectangle {
         id: screenLoader
         anchors.fill: parent
     }
-
 
 
     Component {
@@ -27,8 +27,10 @@ Rectangle {
                 {text:"Password", hide: true}
             ]
 
-            Component.onCompleted: {
-                root.model.statusMessage.connect(function(message) { signInScreen.resultStatus = message })
+
+            Connections {
+                target: root.model
+                function onStatusMessage(message) { signInScreen.resultStatus = message }
             }
         }
     }
@@ -37,6 +39,7 @@ Rectangle {
         id: signUp
 
         SignScreen {
+            id: signUpScreen
             anchors.fill: parent
             action: root.model.signUp
             buttonText: "Sign Up"
@@ -45,10 +48,16 @@ Rectangle {
             linkText: "Sign In"
             fields: [
                 {text:"Full name", hide: false},
+                {text:"Nickname", hide: false},
                 {text:"Enter email", hide: false},
                 {text:"Enter password", hide: true},
                 {text:"Confirm password", hide: true},
             ]
+
+            Connections {
+                target: root.model
+                function onStatusMessage(message) { signUpScreen.resultStatus = message }
+            }
         }
     }
 

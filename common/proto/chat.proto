@@ -19,6 +19,7 @@ message SignUp {
     string nickName=2;
     string email=3;
     string password=4;
+    string confirmedPassword=5;
 }
 
 service Base {
