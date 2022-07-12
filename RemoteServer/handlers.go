@@ -1,58 +1,51 @@
 package main
 
 import (
-	"common"
+	"Chat/RemoteServer/common"
 	"encoding/json"
 	"fmt"
 	"log"
 )
 
-func (s *Server) LogIn(payload []byte) common.CommandResponce {
+func (s *Server) SignIn(payload []byte) common.CommandResponce {
 	user := common.User{}
 	err := json.Unmarshal(payload, &user)
+	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.SignInOK, Type: common.SignIn}}
+
 	if err != nil {
 		log.Println(err)
-		return common.CommandResponce{Error: "Invalid input"}
+		response.Command.Status = common.ServerError
+		return response
 	}
 
 	status, userID := s.database.ValidateUser(user)
 	if !status {
-		return common.CommandResponce{Error: "LogIn failed: Invalid data"}
+		response.Command.Status = common.SignInError
+		return response
 	}
 
-	return common.CommandResponce{Command: common.Command{Type: common.LogIn, Payload: []byte(string(fmt.Sprintf("{\"id\":\"%v\"}", userID)))}}
-
-	// return common.CommandResponce{Command: common.Command{Type: common.LogIn, Payload: []byte(string(fmt.Sprintf("{\"id\":\"%v\"}", "ID from remote server")))}}
+	response.Command.Payload = []byte(string(fmt.Sprintf("{\"user_id\":\"%v\"}", userID)))
+	return response
 }
 
-func (s *Server) RegisterUser(payload []byte) common.CommandResponce {
+func (s *Server) SignUp(payload []byte) common.CommandResponce {
 	user := common.User{}
 	err := json.Unmarshal(payload, &user)
+	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.SignUpOK, Type: common.SignUp}}
+
 	if err != nil {
 		log.Println(err)
-		return common.CommandResponce{Error: "Invalid input"}
+		response.Command.Status = common.ServerError
+		return response
 	}
 
-	if s.database.IsEmailUnique(user.Email) {
-		ok, userID := s.database.RegisterUser(user)
-		if !ok {
-			return common.CommandResponce{Error: "Server error"}
-		}
-		return common.CommandResponce{Command: common.Command{Type: common.Register, Payload: []byte(string(fmt.Sprintf("{\"id\":%v}", userID)))}}
+	if !s.database.IsEmailUnique(user.Email) {
+		response.Command.Status = common.SignUpInvalidEmail
+		return response
 	}
 
-	return common.CommandResponce{Error: "Email is already used"}
-}
+	_, userID := s.database.RegisterUser(user)
 
-func (s *Server) SendMessage(payload []byte) common.CommandResponce {
-	message := common.Message{}
-	err := json.Unmarshal(payload, &message)
-	if err != nil {
-		log.Println(err)
-		return common.CommandResponce{Error: "Invalid input"}
-	}
-
-	s.database.AddMessage(message)
-
-	return common.CommandResponce{}
+	response.Command.Payload = []byte(string(fmt.Sprintf("{\"user_id\":\"%v\"}", userID)))
+	return response
 }

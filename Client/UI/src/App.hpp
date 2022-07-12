@@ -6,7 +6,7 @@
 #include <QObject>
 
 #include "../grpc_client/Client.hpp"
-#include "Models/LogInModel.h"
+#include "Models/SignInUpModel.hpp"
 
 constexpr const char* LOG_IN_MODEL = "logInModel";
 
@@ -17,20 +17,30 @@ class App : public QObject {
     Q_PROPERTY(QObject* model READ currentModel NOTIFY modelChanged)
 public:
     App(QObject* parent = nullptr)
-        : QObject{parent}
+        : QObject{parent},
+        m_userID{""}
     {
         initModels(parent);
     }
 
     void initModels(QObject* parent) {
-        auto action = [&](QString email, QString password) -> void
+        auto signInAction = [&](SignIn data) -> std::string
         {
-            Info i;
-            i.email = email.toStdString();
-            i.password = password.toStdString();
-            m_grpcClient.baseService().LogIn(i);
+            auto result = m_grpcClient.baseService().signIn(data);
+            m_userID = result.user_id();
+            std::cout << "SignIn " << m_userID << std::endl;
+            return result.errormessage();
         };
-        m_models[LOG_IN_MODEL] = std::make_unique<Models::LogInModel>(action, parent);
+
+        auto signUpAction = [&](SignUp data)
+        {
+            auto result = m_grpcClient.baseService().signUp(data);
+            m_userID = result.user_id();
+            std::cout << "SignUp " << m_userID << std::endl;
+            return result.errormessage();
+        };
+
+        m_models[LOG_IN_MODEL] = std::make_unique<Models::SignInUpModel>(signInAction, signUpAction, parent);
     }
 
     QObject* currentModel()
@@ -43,6 +53,6 @@ signals:
 
 private:
     GRPCClient m_grpcClient;
-
     std::unordered_map<std::string, std::unique_ptr<QObject>> m_models;
+    std::string m_userID;
 };

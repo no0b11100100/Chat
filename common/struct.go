@@ -1,53 +1,22 @@
 package common
 
 type Command struct {
-	Type    CommandType `json:"type"`
-	Payload []byte      `json:"payload"`
+	Type    CommandType   `json:"type"`
+	Status  CommandStatus `json:"status"`
+	Payload []byte        `json:"payload,omitempty"`
 }
 
 type CommandResponce struct {
-	Error   string  `json:"error"`
-	Command Command `json:"command"`
-}
-
-type Participant struct {
-	ID       string `bson:"user_id"`
-	Name     string `bson:"name" json:"name,omitempty"`
-	Nickname string `bson:"nickname" json:"nickname,omitempty"`
-	Photo    string `bson:"photo" json:"photo,omitempty"`
+	Type    ResponseType `json:"type"`
+	Command Command      `json:"command"`
 }
 
 type User struct {
-	ID       string   `bson:"user_id"`
-	Email    string   `bson:"email" json:"email"`
-	Password string   `bson:"password" json:"password"`
-	Chats    []string `bson:"chats"` // chat ids
-	Participant
+	ID       string `bson:"user_id"`
+	Email    string `bson:"email" json:"email"`
+	Password string `bson:"password" json:"password"`
+	Name     string `bson:"name" json:"name,omitempty"`
+	NickName string `bson:"nickname" json:"nickname,omitempty"`
 }
 
-type Message struct {
-	ChatID string      `bson:"-" json:"chat_id"`
-	Text   MessageType `bson:"text" json:"text"`
-	Sender string      `bson:"sender" json:"user_id"`
-	Type   int         `bson:"type" json:"type"`
-}
-
-type Chat struct {
-	ID           string    `bson:"id" json:"id"`
-	Type         ChatType  `bson:"type" json:"type"`
-	Title        string    `bson:"title" json:"title"`
-	Cover        string    `bson:"cover" json:"cover"`
-	Participants []string  `bson:"participants" json:"participants"` // user ids
-	Messages     []Message `bson:"messages" json:"messages"`
-}
-
-type NewChatUser struct {
-	ChatID          string `json:"chat_id"`
-	UserID          string `json:"user_id"`
-	IsExportHistiry bool   `json:"isExportHistory"`
-}
-
-type Notification struct {
-	Field   string `json:"field"`
-	Paylaod []byte `json:"payload"`
-}
+type ChannelType chan Command

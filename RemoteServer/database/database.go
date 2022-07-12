@@ -1,7 +1,7 @@
 package database
 
 import (
-	"common"
+	"Chat/RemoteServer/common"
 	"context"
 	"fmt"
 	"log"
@@ -35,14 +35,14 @@ type Database interface {
 	IsEmailUnique(string) bool
 	ValidateUser(common.User) (bool, string)
 	RegisterUser(common.User) (bool, string)
-	GetUserChats(string) []common.Chat
-	GetUsers() []common.User
-	GetChatMessages(string) []common.Message
-	GetChatParticipants(string) []common.Participant
-	AddMessage(common.Message)
-	AddChat(common.Chat) error
-	AddUserToChat(string) error
-	LeaveChat(string, string) error
+	// GetUserChats(string) []common.Chat
+	// GetUsers() []common.User
+	// GetChatMessages(string) []common.Message
+	// GetChatParticipants(string) []common.Participant
+	// AddMessage(common.Message)
+	// AddChat(common.Chat) error
+	// AddUserToChat(string) error
+	// LeaveChat(string, string) error
 }
 
 func (db *DB) Connect() {
@@ -73,12 +73,6 @@ func (db *DB) Connect() {
 	db.tables["Users"] = users
 	db.tables["Chats"] = chats
 
-	user := common.User{Email: "test@account.com", Password: "12345", ID: "43278"}
-	_, err = client.Database("application").Collection("Users").InsertOne(context.TODO(), user)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
@@ -98,11 +92,14 @@ func (db *DB) Close() {
 
 func (db *DB) IsEmailUnique(email string) bool {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	err := db.tables["Users"].FindOne(ctx, bson.M{"email": email})
+	var result bson.M
+	err := db.tables["Users"].FindOne(ctx, bson.M{"email": email}).Decode(&result)
 	if err != nil {
-		return false
+		if err == mongo.ErrNoDocuments {
+			return true
+		}
 	}
-	return true
+	return false
 }
 
 func (db *DB) ValidateUser(user common.User) (bool, string) {
@@ -135,12 +132,3 @@ func (db *DB) RegisterUser(user common.User) (bool, string) {
 
 	return true, user.ID
 }
-
-func (db *DB) GetUserChats(string) []common.Chat               { return nil }
-func (db *DB) GetUsers() []common.User                         { return nil }
-func (db *DB) GetChatMessages(string) []common.Message         { return nil }
-func (db *DB) GetChatParticipants(string) []common.Participant { return nil }
-func (db *DB) AddMessage(common.Message)                       {}
-func (db *DB) AddChat(common.Chat) error                       { return nil }
-func (db *DB) AddUserToChat(string) error                      { return nil }
-func (db *DB) LeaveChat(string, string) error                  { return nil }

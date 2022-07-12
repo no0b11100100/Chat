@@ -7,5 +7,5 @@ import "Chat/Client/Server/common"
 // }
 
 type RemoteServerInterface interface {
-	Send(common.Command)
+	Send(common.Command, common.ChannelType)
 }

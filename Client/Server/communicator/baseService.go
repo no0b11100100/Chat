@@ -7,49 +7,86 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-
-	empty "github.com/golang/protobuf/ptypes/empty"
 )
 
 type BaseService struct {
 	api.UnimplementedBaseServer
-	sender   RemoteServerInterface
-	baseChan <-chan string
+	sender RemoteServerInterface
+	errors map[common.CommandStatus]string
 }
 
-func NewBaseService(sender RemoteServerInterface, ch <-chan string) *BaseService {
-	return &BaseService{sender: sender, baseChan: ch}
+func NewBaseService(sender RemoteServerInterface) *BaseService {
+	errors := map[common.CommandStatus]string{
+		common.SignInOK:           "Successfully log in",
+		common.SignInError:        "Invalid email or password",
+		common.SignUpOK:           "You successfully created a new account",
+		common.SignUpInvalidEmail: "This email already in use",
+	}
+
+	return &BaseService{sender: sender, errors: errors}
 }
 
-func (s *BaseService) LogIn(_ context.Context, logIn *api.UserLogIn) (*api.ID, error) {
-	fmt.Printf("LogIn %+v\n", *logIn)
-	c := common.Command{Type: common.LogIn}
+func (s *BaseService) SignIn(_ context.Context, userData *api.SignIn) (*api.Result, error) {
+	fmt.Printf("SignIn %+v\n", *userData)
+	c := common.Command{Type: common.SignIn}
 	var err error
-	c.Payload, err = json.Marshal(*logIn)
+	c.Payload, err = json.Marshal(*userData)
 
 	if err != nil {
 		log.Println(err)
 	}
 
-	s.sender.Send(c)
+	ch := make(common.ChannelType)
+	s.sender.Send(c, ch)
 
-	responce := <-s.baseChan
-	log.Println(responce)
+	response := <-ch
+	close(ch)
+	log.Println(response)
 
-	var id api.ID
-	if err := json.Unmarshal([]byte(responce), &id); err != nil {
-		return nil, err
+	var result api.Result
+
+	err = json.Unmarshal(response.Payload, &result)
+	if err != nil {
+		log.Println(err)
 	}
 
-	return &api.ID{Id: id.Id}, nil
+	result.ErrorMessage = s.errors[response.Status]
+
+	return &result, nil
 }
 
-func (s *BaseService) Register(_ context.Context, logIn *api.UserLogIn) (*api.ID, error) {
-	fmt.Printf("Register %+v\n", *logIn)
-	return nil, nil
-}
+func (s *BaseService) SignUp(_ context.Context, userData *api.SignUp) (*api.Result, error) {
+	fmt.Printf("SignUp %+v\n", *userData)
 
-func (s *BaseService) Logout(_ context.Context, id *api.ID) (*empty.Empty, error) {
-	fmt.Printf("LogOut %+v\n", *id)
-	return nil, nil
+	if userData.Password != userData.ConfirmedPassword {
+		return &api.Result{ErrorMessage: "Passwords not match"}, nil
+	}
+
+	c := common.Command{Type: common.SignUp}
+	var err error
+	c.Payload, err = json.Marshal(*userData)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	ch := make(common.ChannelType)
+	s.sender.Send(c, ch)
+
+	response := <-ch
+	close(ch)
+	log.Println(response)
+
+	var result api.Result
+
+	if response.Status == common.SignUpOK {
+		err = json.Unmarshal(response.Payload, &result)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	result.ErrorMessage = s.errors[response.Status]
+
+	return &result, nil
 }
