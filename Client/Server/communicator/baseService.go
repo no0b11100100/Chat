@@ -79,9 +79,11 @@ func (s *BaseService) SignUp(_ context.Context, userData *api.SignUp) (*api.Resu
 
 	var result api.Result
 
-	err = json.Unmarshal(response.Payload, &result)
-	if err != nil {
-		log.Println(err)
+	if response.Status == common.SignUpOK {
+		err = json.Unmarshal(response.Payload, &result)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	result.ErrorMessage = s.errors[response.Status]

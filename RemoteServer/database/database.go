@@ -73,12 +73,6 @@ func (db *DB) Connect() {
 	db.tables["Users"] = users
 	db.tables["Chats"] = chats
 
-	user := common.User{Email: "test@account.com", Password: "12345", ID: "43278"}
-	_, err = client.Database("application").Collection("Users").InsertOne(context.TODO(), user)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
@@ -98,11 +92,14 @@ func (db *DB) Close() {
 
 func (db *DB) IsEmailUnique(email string) bool {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	err := db.tables["Users"].FindOne(ctx, bson.M{"email": email})
+	var result bson.M
+	err := db.tables["Users"].FindOne(ctx, bson.M{"email": email}).Decode(&result)
 	if err != nil {
-		return false
+		if err == mongo.ErrNoDocuments {
+			return true
+		}
 	}
-	return true
+	return false
 }
 
 func (db *DB) ValidateUser(user common.User) (bool, string) {

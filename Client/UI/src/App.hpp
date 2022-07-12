@@ -28,6 +28,7 @@ public:
         {
             auto result = m_grpcClient.baseService().signIn(data);
             m_userID = result.user_id();
+            std::cout << "SignIn " << m_userID << std::endl;
             return result.errormessage();
         };
 
@@ -35,6 +36,7 @@ public:
         {
             auto result = m_grpcClient.baseService().signUp(data);
             m_userID = result.user_id();
+            std::cout << "SignUp " << m_userID << std::endl;
             return result.errormessage();
         };
 
