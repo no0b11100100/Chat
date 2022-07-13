@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "/;api";
+
+message ChatID {
+    string chat_id=1;
+}
+
+message UserChats {
+    repeated ChatID chat_ids=1;
+}
+
+message UserID {
+    string user_id=1;
+}
+
+enum MessageType {
+    Normal=0;
+}
+
+message Message {
+    string message=1;
+    MessageType type=2;
+    string sender=3;
+    string message_id=4;
+}
+
+message ChatInfo {
+    repeated Message messages=1;
+    string title=2;
+    repeated UserID participants=3;
+}
+
+message ParticipantInfo {
+    string name=1;
+    string nickName=2;
+    UserID user_id=3;
+}
+
+service Chat {
+    rpc getUserChats(UserID) returns(UserChats);
+    rpc getChatInfo(ChatID) returns(ChatInfo);
+    rpc getParticipantInfo(UserID) returns(ParticipantInfo);
+
+    rpc MessageExchange(stream Message) returns(stream Message);
+}

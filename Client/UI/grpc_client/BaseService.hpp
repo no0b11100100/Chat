@@ -4,16 +4,16 @@
 
 #include <grpcpp/grpcpp.h>
 
-#include "proto_gen/chat.grpc.pb.h"
+#include "proto_gen/base_service.grpc.pb.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 
-using chat::Base;
-using chat::SignIn;
-using chat::SignUp;
-using chat::Result;
+using base::Base;
+using base::SignIn;
+using base::SignUp;
+using base::Result;
 
 
 class BaseService final {

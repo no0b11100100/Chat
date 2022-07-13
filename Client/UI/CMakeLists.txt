@@ -24,10 +24,17 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 set(PROJECT_SOURCES
         main.cpp
         qml.qrc
-        grpc_client/proto_gen/chat.grpc.pb.cc
-        grpc_client/proto_gen/chat.grpc.pb.h
-        grpc_client/proto_gen/chat.pb.cc
-        grpc_client/proto_gen/chat.pb.h
+
+        grpc_client/proto_gen/chat_service.grpc.pb.cc
+        grpc_client/proto_gen/chat_service.grpc.pb.h
+        grpc_client/proto_gen/chat_service.pb.cc
+        grpc_client/proto_gen/chat_service.pb.h
+
+        grpc_client/proto_gen/base_service.grpc.pb.cc
+        grpc_client/proto_gen/base_service.grpc.pb.h
+        grpc_client/proto_gen/base_service.pb.cc
+        grpc_client/proto_gen/base_service.pb.h
+
         grpc_client/BaseService.hpp
         grpc_client/Client.hpp
         src/Models/SignInUpModel.hpp
