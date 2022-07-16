@@ -39,10 +39,21 @@ message ParticipantInfo {
     UserID user_id=3;
 }
 
+enum Direction {
+    chanAfter=0;
+    chanBefore=1;
+}
+
+message MessageChan {
+    string message_id=0;
+    Direction direction=1;
+}
+
 service Chat {
     rpc getUserChats(UserID) returns(UserChats);
     rpc getChatInfo(ChatID) returns(ChatInfo);
     rpc getParticipantInfo(UserID) returns(ParticipantInfo);
+    rpc getMessages(MessageChan) returns(Message);
 
     rpc MessageExchange(stream Message) returns(stream Message);
 }
