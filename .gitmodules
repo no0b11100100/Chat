@@ -1,0 +1,3 @@
+[submodule "Client/UI/third-party/vcpkg"]
+	path = Client/UI/third-party/vcpkg
+	url = https://github.com/microsoft/vcpkg.git
