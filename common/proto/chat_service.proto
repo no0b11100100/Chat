@@ -47,8 +47,8 @@ enum Direction {
 }
 
 message MessageChan {
-    string message_id=0;
-    Direction direction=1;
+    string message_id=1;
+    Direction direction=2;
 }
 
 service Chat {
