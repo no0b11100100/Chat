@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set (VCPKG_HOME "${CMAKE_SOURCE_DIR}/third-party/vcpkg")
 set (CMAKE_TOOLCHAIN_FILE "${VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake")
@@ -22,6 +22,8 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/grpc_client/proto_gen/ SUB_SOURCES)
+
+add_subdirectory(json)
 
 set(PROJECT_SOURCES
         ${SUB_SOURCES}
