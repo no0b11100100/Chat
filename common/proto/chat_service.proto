@@ -20,11 +20,13 @@ enum MessageType {
     Normal=0;
 }
 
+message MessageInfo {
+    string message_json=1;
+}
+
 message Message {
-    string message=1;
+    MessageInfo message=1;
     MessageType type=2;
-    string sender=3;
-    string message_id=4;
 }
 
 message ChatInfo {
