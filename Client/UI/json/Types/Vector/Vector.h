@@ -76,7 +76,7 @@ public:
         }
         else if constexpr(is_specialization<std::decay_t<T>, std::forward_list>::value)
         {
-//            std::fill(result.begin(), result.end(), m_value.begin(), m_value.end());
+            result.assign(m_value.cbegin(), m_value.cend());
         }
         else
         {

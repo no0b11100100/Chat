@@ -22,8 +22,7 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/grpc_client/proto_gen/ SUB_SOURCES)
-
-add_subdirectory(json)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/json/ SUB_SOURCES)
 
 set(PROJECT_SOURCES
         ${SUB_SOURCES}
