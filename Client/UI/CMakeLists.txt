@@ -32,6 +32,7 @@ set(PROJECT_SOURCES
         grpc_client/Client.hpp
         src/Models/SignInUpModel.hpp
         src/App.hpp
+        Logger/Logger.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
