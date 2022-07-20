@@ -1,36 +1,25 @@
 package logger
 
 import (
-	"fmt"
 	"log"
 	"os"
 )
 
-type Writter struct{}
+type Writter struct {
+	prefix string
+}
 
 func (w *Writter) Write(p []byte) (int, error) {
-	p = append(p, []byte("\033[0m")...)
-	return os.Stdout.Write(p)
+	bytes := []byte(w.prefix)
+	bytes = append(bytes, p...)
+	bytes = append(bytes, []byte("\033[0m")...)
+	return os.Stdout.Write(bytes)
 }
 
 var flags = log.Lshortfile | log.Lmsgprefix | log.Ltime
 
-var writter *Writter = &Writter{}
-
 var (
-	Info    = log.New(writter, "", flags)
-	Warning = log.New(writter, "", flags)
-	Error   = log.New(writter, "", flags)
+	Info    = log.New(&Writter{"\033[0m"}, "[INFO]: ", flags)
+	Warning = log.New(&Writter{"\033[31m"}, "[WARNING]: ", flags)
+	Error   = log.New(&Writter{"\033[33m"}, "[ERROR]: ", flags)
 )
-
-const (
-	colorReset  = "\033[0m"
-	colorRed    = "\033[31m"
-	colorYellow = "\033[33m"
-)
-
-func InitLogger(prefix string) {
-	Info.SetPrefix(fmt.Sprintf("%v%v %v: ", colorReset, "[INFO]", prefix))
-	Warning.SetPrefix(fmt.Sprintf("%v%v %v: ", colorYellow, "[WARNING]", prefix))
-	Error.SetPrefix(fmt.Sprintf("%v%v %v: ", colorRed, "[ERROR]", prefix))
-}

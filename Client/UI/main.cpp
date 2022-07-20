@@ -14,8 +14,9 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     qmlRegisterType<App, 1>("Models", 1, 0, "Backend");
+
     // used for qml logs
-    qSetMessagePattern("%{file}(%{line}): %{message}");
+    qSetMessagePattern("%{time HH:mm:ss }%{file}:%{line}: %{message}");
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

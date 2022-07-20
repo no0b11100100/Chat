@@ -3,14 +3,15 @@
 #include <iostream>
 #include <string_view>
 #include <source_location>
+#include <ctime>
 
 namespace Logger
 {
     namespace {
         using LOG_LEVEL = std::string_view;
-        constexpr LOG_LEVEL INFO = "[INFO]";
-        constexpr LOG_LEVEL WARNING = "[WARNING]";
-        constexpr LOG_LEVEL ERROR = "[ERROR]";
+        constexpr LOG_LEVEL INFO = "[INFO]:";
+        constexpr LOG_LEVEL WARNING = "[WARNING]:";
+        constexpr LOG_LEVEL ERROR = "[ERROR]:";
 
         using COLOR = std::string_view;
         constexpr COLOR INFO_COLOR  = "\033[0m";
@@ -26,6 +27,15 @@ namespace Logger
             return result;
         }
 
+        std::string currentDateTime() {
+            std::time_t t = std::time(nullptr);
+            std::tm* now = std::localtime(&t);
+
+            char buffer[128];
+            strftime(buffer, sizeof(buffer), "%X", now);
+            return buffer;
+        }
+
         class Printer {
             private:
             std::string call_info;
@@ -33,7 +43,7 @@ namespace Logger
             template <typename... Args>
             void print(const COLOR color, const LOG_LEVEL log_level, Args&&... args)
             {
-                std::cout << color << log_level << " " << call_info << std::boolalpha;
+                std::cout << color << currentDateTime() << " " << call_info << ": " << log_level << std::boolalpha;
                 ((std::cout << ' ' << std::forward<Args>(args)), ...);
                 std::cout << INFO_COLOR << std::endl;
             }
@@ -66,7 +76,7 @@ namespace Logger
         };
     }
 
-    auto log = [](const std::source_location location = std::source_location::current())
+    auto log(const std::source_location location = std::source_location::current())
     {
         Printer printer(location);
         return printer;
