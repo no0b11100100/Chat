@@ -6,20 +6,21 @@ import (
 	"os"
 )
 
+type Writter struct{}
+
+func (w *Writter) Write(p []byte) (int, error) {
+	p = append(p, []byte("\033[0m")...)
+	return os.Stdout.Write(p)
+}
+
 var flags = log.Lshortfile | log.Lmsgprefix | log.Ltime
 
-const (
-	info     = "[INFO]"
-	warning  = "[WARNING]"
-	error    = "[ERROR]"
-	critical = "[CRITICAL]"
-)
+var writter *Writter = &Writter{}
 
 var (
-	Info     = log.New(os.Stdout, "", flags)
-	Warning  = log.New(os.Stdout, "", flags)
-	Error    = log.New(os.Stdout, "", flags)
-	Critical = log.New(os.Stdout, "", flags)
+	Info    = log.New(writter, "", flags)
+	Warning = log.New(writter, "", flags)
+	Error   = log.New(writter, "", flags)
 )
 
 const (
@@ -29,8 +30,7 @@ const (
 )
 
 func InitLogger(prefix string) {
-	Info.SetPrefix(fmt.Sprintf("%v%v %v: ", colorReset, info, prefix))
-	Warning.SetPrefix(fmt.Sprintf("%v%v %v: ", colorYellow, warning, prefix))
-	Error.SetPrefix(fmt.Sprintf("%v%v %v: ", colorRed, error, prefix))
-	Critical.SetPrefix(fmt.Sprintf("%v%v %v: ", colorRed, critical, prefix))
+	Info.SetPrefix(fmt.Sprintf("%v%v %v: ", colorReset, "[INFO]", prefix))
+	Warning.SetPrefix(fmt.Sprintf("%v%v %v: ", colorYellow, "[WARNING]", prefix))
+	Error.SetPrefix(fmt.Sprintf("%v%v %v: ", colorRed, "[ERROR]", prefix))
 }
