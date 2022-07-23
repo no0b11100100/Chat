@@ -4,7 +4,11 @@ Rectangle {
     id: root
     property var model
 
+    width: item.width
+    height: item.height
+
     Rectangle {
+        id: item
         width: root.width
         height: background.height
 

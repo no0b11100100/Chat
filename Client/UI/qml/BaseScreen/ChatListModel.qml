@@ -1,7 +1,5 @@
 import QtQuick 2.0
 
-import "Message"
-
 Rectangle {
     id: root
     property var model
@@ -10,9 +8,9 @@ Rectangle {
         anchors.fill: parent
         model: root.model
         spacing: 2
-        delegate: SimpleMessage{
+        delegate: Chat{
             width: root.width
-            // height: 40 //TODO
+            height: 40 //TODO
             model: display
         }
 
