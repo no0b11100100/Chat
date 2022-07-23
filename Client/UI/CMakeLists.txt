@@ -27,10 +27,15 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/json/ SUB_SOURCES)
 set(PROJECT_SOURCES
         ${SUB_SOURCES}
         main.cpp
-        qml.qrc
+        qml/qml.qrc
         grpc_client/BaseService.hpp
         grpc_client/Client.hpp
+
         src/Models/SignInUpModel.hpp
+        src/Models/BaseScreen/ChatModel.hpp
+        src/Models/BaseScreen/BaseScreen.hpp
+        src/Models/BaseScreen/Message/SimpleMessage.hpp
+
         src/App.hpp
         Logger/Logger.hpp
 )
