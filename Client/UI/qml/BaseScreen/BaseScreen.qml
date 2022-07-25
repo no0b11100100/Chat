@@ -1,5 +1,8 @@
 import QtQuick 2.0
 
+import "ChatListModel"
+import "ChatModel"
+
 Rectangle {
     id: root
     property var model

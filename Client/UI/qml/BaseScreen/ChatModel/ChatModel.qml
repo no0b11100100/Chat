@@ -8,26 +8,16 @@ Rectangle {
 
     Column {
         spacing: 2
-        Rectangle {
+
+        Header {
             id: header
             width: root.width
-            height: chatInfo.height
-
-            Column {
-                id: chatInfo
-                Text {
-                    text: root.model.header.title
-                }
-
-                Text {
-                    text: root.model.header.secondLine
-                }
-            }
+            model: root.model.header
         }
 
         ListView {
             width: root.width
-            height: root.height - header.height
+            height: root.height - header.height - userInput.height
             model: root.model
             spacing: 2
             delegate: SimpleMessage{
@@ -50,6 +40,11 @@ Rectangle {
                 text: "Please select chat"
                 anchors.centerIn: parent
             }
+        }
+
+        UserInput {
+            id: userInput
+            width: root.width
         }
     }
 }
