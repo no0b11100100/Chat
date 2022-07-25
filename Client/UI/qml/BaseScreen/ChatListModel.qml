@@ -12,6 +12,7 @@ Rectangle {
             width: root.width
             height: 40 //TODO
             model: display
+            selectChat: root.model.selectChat
         }
 
         Component.onCompleted: {

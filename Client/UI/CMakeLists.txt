@@ -36,6 +36,7 @@ set(PROJECT_SOURCES
         src/Models/BaseScreen/BaseScreen.hpp
         src/Models/BaseScreen/ChatListModel.hpp
         src/Models/BaseScreen/Chat.hpp
+        src/Models/BaseScreen/Header.hpp
         src/Models/BaseScreen/Message/SimpleMessage.hpp
 
         src/App.hpp

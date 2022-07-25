@@ -6,18 +6,50 @@ Rectangle {
     id: root
     property var model
 
-    ListView {
-        anchors.fill: parent
-        model: root.model
+    Column {
         spacing: 2
-        delegate: SimpleMessage{
+        Rectangle {
+            id: header
             width: root.width
-            // height: 40 //TODO
-            model: display
+            height: chatInfo.height
+
+            Column {
+                id: chatInfo
+                Text {
+                    text: root.model.header.title
+                }
+
+                Text {
+                    text: root.model.header.secondLine
+                }
+            }
         }
 
-        Component.onCompleted: {
-            console.log(root.model === undefined, root.model.name)
+        ListView {
+            width: root.width
+            height: root.height - header.height
+            model: root.model
+            spacing: 2
+            delegate: SimpleMessage{
+                width: root.width
+                model: display
+            }
+
+            visible: true // TODO
+
+            Component.onCompleted: {
+                console.log(root.model === undefined, root.model.name)
+            }
+        }
+
+        Rectangle {
+            visible: false //TODO
+            width: root.width
+
+            Text {
+                text: "Please select chat"
+                anchors.centerIn: parent
+            }
         }
     }
 }

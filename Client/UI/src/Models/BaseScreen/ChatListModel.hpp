@@ -6,12 +6,12 @@
 #include <memory>
 
 #include "Chat.hpp"
+#include "Header.hpp"
 
 #include <QDebug>
 
 class ChatListModel : public QAbstractListModel
 {
-    std::vector<std::unique_ptr<QObject>> m_chats;
     Q_OBJECT
     Q_PROPERTY(QString name READ name CONSTANT)
 public:
@@ -21,9 +21,9 @@ public:
     ChatListModel(QObject* parent = nullptr)
         : QAbstractListModel{parent}
     {
-        m_chats.emplace_back(new ChatInfo("First chat", parent));
-        m_chats.emplace_back(new ChatInfo("Second chat", parent));
-        m_chats.emplace_back(new ChatInfo("Third chat", parent));
+        m_chats.emplace_back(new ChatInfo("1", "First chat", parent));
+        m_chats.emplace_back(new ChatInfo("2", "Second chat", parent));
+        m_chats.emplace_back(new ChatInfo("3", "Third chat", parent));
     }
 
     int rowCount(const QModelIndex& parent) const override
@@ -37,5 +37,39 @@ public:
             return QVariant();
 
         return QVariant::fromValue( (m_chats.at(index.row()).get()) );
+    }
+
+    Q_INVOKABLE void selectChat(QString chatID)
+    {
+        qDebug() << "Select chat by id" << chatID;
+        auto chat = findChatByID(chatID);
+        Header header;
+        header.SetTitle(chat->title());
+        // TODO: Add second line
+        emit headerChanged(header);
+    }
+
+signals:
+    void headerChanged(const Header& header);
+
+public slots:
+    void setLastMessage(QString chatID, QString message)
+    {
+        auto chat = findChatByID(chatID);
+        chat->UpdateLastMessage(message);
+    }
+
+private:
+    std::vector<std::shared_ptr<ChatInfo>> m_chats;
+
+    std::shared_ptr<ChatInfo> findChatByID(QString id)
+    {
+        auto it = std::find_if(m_chats.begin(), m_chats.end(), [&](const std::shared_ptr<ChatInfo>& chat){
+            return chat->id() == id;
+        });
+
+        if(it == m_chats.end()) qDebug() << "Cannot find chat for id" << id;
+
+        return *it;
     }
 };
