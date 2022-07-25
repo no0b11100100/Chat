@@ -2,14 +2,17 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <thread>
+#include <chrono>
 
 #include <QObject>
 
 #include "../grpc_client/Client.hpp"
 #include "Models/SignInUpModel.hpp"
+#include "Models/BaseScreen/BaseScreen.hpp"
 
 constexpr const char* LOG_IN_MODEL = "logInModel";
-
+constexpr const char* BASE_SCREEN_MODEL = "baseScreenModel";
 
 class App : public QObject {
     Q_OBJECT
@@ -18,34 +21,47 @@ class App : public QObject {
 public:
     App(QObject* parent = nullptr)
         : QObject{parent},
+        m_currentModel{nullptr},
         m_userID{""}
     {
         initModels(parent);
+        m_currentModel = m_models[BASE_SCREEN_MODEL];
     }
 
     void initModels(QObject* parent) {
-        auto signInAction = [&](SignIn data) -> std::string
-        {
-            auto result = m_grpcClient.baseService().signIn(data);
-            m_userID = result.user_id();
-            std::cout << "SignIn " << m_userID << std::endl;
-            return result.errormessage();
-        };
-
-        auto signUpAction = [&](SignUp data)
-        {
-            auto result = m_grpcClient.baseService().signUp(data);
-            m_userID = result.user_id();
-            std::cout << "SignUp " << m_userID << std::endl;
-            return result.errormessage();
-        };
-
-        m_models[LOG_IN_MODEL] = std::make_unique<Models::SignInUpModel>(signInAction, signUpAction, parent);
+        m_models[LOG_IN_MODEL] = std::make_unique<Models::SignInUpModel>(
+            [this](SignIn data){ return signInAction(data); },
+            [this](SignUp data){ return signUpAction(data); },
+            parent);
+        m_models[BASE_SCREEN_MODEL] = std::make_unique<BaseScreen>(parent);
     }
 
     QObject* currentModel()
     {
-        return m_models[LOG_IN_MODEL].get();
+        return m_currentModel.get();
+    }
+
+private:
+    std::string signUpAction(SignUp data) {
+        auto result = m_grpcClient.baseService().signUp(data);
+        auto userID = result.user_id();
+        if (userID != "")
+        {
+            m_userID = userID;
+        }
+        std::cout << "SignUp " << m_userID << std::endl;
+        return result.errormessage();
+    }
+
+    std::string signInAction(SignIn data) {
+        auto result = m_grpcClient.baseService().signIn(data);
+        auto userID = result.user_id();
+        if (userID != "")
+        {
+            m_userID = userID;
+        }
+        std::cout << "SignIn " << m_userID << std::endl;
+        return result.errormessage();
     }
 
 signals:
@@ -53,6 +69,7 @@ signals:
 
 private:
     GRPCClient m_grpcClient;
-    std::unordered_map<std::string, std::unique_ptr<QObject>> m_models;
+    std::unordered_map<std::string, std::shared_ptr<QObject>> m_models;
+    std::shared_ptr<QObject> m_currentModel;
     std::string m_userID;
 };

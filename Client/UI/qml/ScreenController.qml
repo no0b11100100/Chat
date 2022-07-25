@@ -1,6 +1,9 @@
 import QtQuick 2.0
 import QtQml
 
+import "LogInScreen"
+import "BaseScreen"
+
 Rectangle {
     id: root
     property var model
@@ -9,7 +12,6 @@ Rectangle {
         id: screenLoader
         anchors.fill: parent
     }
-
 
     Component {
         id: signIn
@@ -61,8 +63,20 @@ Rectangle {
         }
     }
 
+    Component {
+        id: baseScreen
+
+        BaseScreen {
+            anchors.fill: parent
+            model: root.model
+            Component.onCompleted: {
+                console.log("Create BaseScreen", root.model === undefined, root.model.name)
+            }
+        }
+    }
+
     Component.onCompleted: {
-        screenLoader.sourceComponent = signIn
+        screenLoader.sourceComponent = baseScreen
     }
 
 }

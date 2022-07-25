@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="qml/">
+        <file>main.qml</file>
+        <file>ScreenController.qml</file>
+
+        <file>LogInScreen/TextAreaInput.qml</file>
+        <file>LogInScreen/RouteArea.qml</file>
+        <file>LogInScreen/SignScreen.qml</file>
+
+        <file>BaseScreen/BaseScreen.qml</file>
+
+        <file>BaseScreen/ChatModel/ChatModel.qml</file>
+        <file>BaseScreen/ChatModel/Header.qml</file>
+        <file>BaseScreen/ChatModel/UserInput.qml</file>
+
+        <file>BaseScreen/ChatModel/Message/SimpleMessage.qml</file>
+
+        <file>BaseScreen/ChatListModel/ChatListModel.qml</file>
+        <file>BaseScreen/ChatListModel/Chat.qml</file>
+    </qresource>
+</RCC>

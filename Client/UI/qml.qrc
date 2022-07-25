@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>main.qml</file>
-        <file>LogInScreen/ScreenController.qml</file>
-        <file>LogInScreen/TextAreaInput.qml</file>
-        <file>LogInScreen/RouteArea.qml</file>
-        <file>LogInScreen/SignScreen.qml</file>
-    </qresource>
-</RCC>
