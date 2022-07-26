@@ -15,8 +15,7 @@ public:
           m_chatModel{new ChatModel(parent)},
           m_chatList{new ChatListModel(parent)}
     {
-        QObject::connect(m_chatList.get(), &ChatListModel::headerChanged, m_chatModel.get(), &ChatModel::changeHeader);
-        QObject::connect(m_chatModel.get(), &ChatModel::lastMessageChanhed, m_chatList.get(), &ChatListModel::setLastMessage);
+        QObject::connect(m_chatList.get(), &ChatListModel::chatSelected, m_chatModel.get(), &ChatModel::updateChatModel);
     }
 
     QObject* chatModel() { return m_chatModel.get(); }

@@ -25,7 +25,7 @@ Rectangle {
                 model: display
             }
 
-            visible: true // TODO
+            visible: root.model.isChatSelected
 
             Component.onCompleted: {
                 console.log(root.model === undefined, root.model.name)
@@ -33,8 +33,9 @@ Rectangle {
         }
 
         Rectangle {
-            visible: false //TODO
+            visible: !root.model.isChatSelected
             width: root.width
+            height: root.height
 
             Text {
                 text: "Please select chat"
@@ -45,6 +46,7 @@ Rectangle {
         UserInput {
             id: userInput
             width: root.width
+            visible: root.model.isChatSelected
         }
     }
 }

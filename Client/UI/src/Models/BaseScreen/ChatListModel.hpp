@@ -46,11 +46,11 @@ public:
         Header header;
         header.SetTitle(chat->title());
         // TODO: Add second line
-        emit headerChanged(header);
+        emit chatSelected(header, chatID);
     }
 
 signals:
-    void headerChanged(const Header& header);
+    void chatSelected(const Header&, QString);
 
 public slots:
     void setLastMessage(QString chatID, QString message)
