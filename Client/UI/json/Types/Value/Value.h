@@ -158,4 +158,6 @@ public:
     }
 };
 
+using json = Value;
+
 }
