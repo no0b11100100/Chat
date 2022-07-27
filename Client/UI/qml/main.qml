@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 
-import "LogInScreen"
-
 import Models 1.0
 
 Window {
