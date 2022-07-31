@@ -12,6 +12,7 @@ import (
 
 type Communicator struct {
 	baseService  *BaseService
+	chatService  *ChatService
 	remoteServer *app.RemoteServer
 	notification common.ChannelType
 }
@@ -19,7 +20,7 @@ type Communicator struct {
 func NewCommunicator() *Communicator {
 	ch := make(common.ChannelType)
 	remoteServer := app.NewRemoteServer(ch)
-	c := &Communicator{NewBaseService(remoteServer), remoteServer, ch}
+	c := &Communicator{baseService: NewBaseService(remoteServer), chatService: NewChatService(remoteServer), remoteServer: remoteServer, notification: ch}
 
 	return c
 }
@@ -27,6 +28,7 @@ func NewCommunicator() *Communicator {
 func (c *Communicator) runGRPCClient() {
 	gprcServer := grpc.NewServer()
 	api.RegisterBaseServer(gprcServer, c.baseService)
+	api.RegisterChatServer(gprcServer, c.chatService)
 	l, err := net.Listen("tcp", ":8080")
 
 	if err != nil {
