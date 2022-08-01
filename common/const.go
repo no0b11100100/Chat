@@ -23,6 +23,7 @@ const (
 	SignInError
 	SignUpInvalidEmail
 	ServerError
+	OK
 	UnknownCommand
 )
 
