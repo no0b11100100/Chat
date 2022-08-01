@@ -6,6 +6,12 @@ const (
 	SignIn CommandType = iota
 	SignUp
 	SignOut
+
+	GetUserChatsCommand
+	GetChatInfoCommand
+	GetParticipantInfoCommand
+	GetMessagesCommand
+
 	Max
 )
 

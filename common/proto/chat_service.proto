@@ -29,7 +29,7 @@ message Message {
     MessageType type=2;
 }
 
-message ChatInfo {
+message ChatInformation {
     repeated Message messages=1;
     string title=2;
     repeated UserID participants=3;
@@ -51,11 +51,15 @@ message MessageChan {
     Direction direction=2;
 }
 
+message Messages {
+    repeated Message messages=1;
+}
+
 service Chat {
     rpc getUserChats(UserID) returns(UserChats);
-    rpc getChatInfo(ChatID) returns(ChatInfo);
+    rpc getChatInfo(ChatID) returns(ChatInformation);
     rpc getParticipantInfo(UserID) returns(ParticipantInfo);
-    rpc getMessages(MessageChan) returns(Message);
+    rpc getMessages(MessageChan) returns(Messages);
 
     rpc MessageExchange(stream Message) returns(stream Message);
 }
