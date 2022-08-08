@@ -49,3 +49,23 @@ func (s *Server) SignUp(payload []byte) common.CommandResponce {
 	response.Command.Payload = []byte(string(fmt.Sprintf("{\"user_id\":\"%v\"}", userID)))
 	return response
 }
+
+func (s *Server) GetUserChats(payload []byte) common.CommandResponce {
+	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetUserChatsCommand}}
+	return response
+}
+
+func (s *Server) GetChatInfo(payload []byte) common.CommandResponce {
+	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetChatInfoCommand}}
+	return response
+}
+
+func (s *Server) GetParticipantInfo(payload []byte) common.CommandResponce {
+	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetParticipantInfoCommand}}
+	return response
+}
+
+func (s *Server) GetMessages(payload []byte) common.CommandResponce {
+	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetMessagesCommand}}
+	return response
+}

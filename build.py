@@ -63,6 +63,17 @@ def copy_gen_api():
 
     shutil.copytree(api_path, client_server_api_path, dirs_exist_ok=True)
 
+    # copy proto messages to remote server
+    server_path = os.path.join(current_path, 'RemoteServer')
+    structs_path = os.path.join(server_path, 'structs')
+    if not os.path.exists(structs_path):
+        os.mkdir(structs_path)
+
+    files = [f for f in os.listdir(api_path) if f.endswith('_service.pb.go')]
+
+    for f in files:
+        shutil.copy(os.path.join(api_path, f), structs_path)
+
     #copy api for C++
     gen_path = os.path.join(common_path, 'proto','gen')
     ui_api_path = os.path.join(current_path, 'Client','UI','grpc_client','proto_gen')
@@ -114,11 +125,13 @@ def remove_copied_folders():
     client_server_common_path = os.path.join(client_server_path, 'common')
     ui_api_path = os.path.join(current_path, 'Client','UI','grpc_client','proto_gen')
     server_common_path =  os.path.join(current_path, 'RemoteServer','common')
+    server_structs_path = os.path.join(current_path, 'RemoteServer', 'structs')
 
     shutil.rmtree(client_server_api_path, ignore_errors=True)
     shutil.rmtree(client_server_common_path, ignore_errors=True)
     shutil.rmtree(ui_api_path, ignore_errors=True)
     shutil.rmtree(server_common_path, ignore_errors=True)
+    shutil.rmtree(server_structs_path, ignore_errors=True)
 
 
 if __name__ == '__main__':

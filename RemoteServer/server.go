@@ -114,6 +114,11 @@ func (s *Server) handleCommand(payload string, conn net.Conn) {
 func (s *Server) addHandlers() {
 	s.handlers[common.SignIn] = s.SignIn
 	s.handlers[common.SignUp] = s.SignUp
+
+	s.handlers[common.GetUserChatsCommand] = s.GetUserChats
+	s.handlers[common.GetChatInfoCommand] = s.GetChatInfo
+	s.handlers[common.GetParticipantInfoCommand] = s.GetParticipantInfo
+	s.handlers[common.GetMessagesCommand] = s.GetMessages
 }
 
 func (s *Server) send(conn net.Conn, responce common.CommandResponce) {

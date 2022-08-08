@@ -4,3 +4,4 @@ todo.txt
 .vscode
 RemoteServer/data
 Client/UI/build/
+common/proto/*.txt
