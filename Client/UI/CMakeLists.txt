@@ -28,7 +28,8 @@ set(PROJECT_SOURCES
         ${SUB_SOURCES}
         main.cpp
         qml/qml.qrc
-        grpc_client/BaseService.hpp
+        grpc_client/UserService.hpp
+        grpc_client/ChatService.hpp
         grpc_client/Client.hpp
 
         src/Models/SignInUpModel.hpp

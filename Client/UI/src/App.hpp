@@ -25,7 +25,7 @@ public:
         m_userID{""}
     {
         initModels(parent);
-        m_currentModel = m_models[BASE_SCREEN_MODEL];
+        m_currentModel = m_models[LOG_IN_MODEL];
     }
 
     void initModels(QObject* parent) {
@@ -45,23 +45,32 @@ private:
     std::string signUpAction(SignUp data) {
         auto result = m_grpcClient.baseService().signUp(data);
         auto userID = result.user_id();
-        if (userID != "")
-        {
+        if ((int)result.status() == 0) {
             m_userID = userID;
+            std::thread([this](){
+                changeToBaseScreen();
+            }).detach();
         }
-        std::cout << "SignUp " << m_userID << std::endl;
-        return result.errormessage();
+        return result.statusmessage();
     }
 
     std::string signInAction(SignIn data) {
         auto result = m_grpcClient.baseService().signIn(data);
         auto userID = result.user_id();
-        if (userID != "")
-        {
+        if ((int)result.status() == 0) {
             m_userID = userID;
+            std::thread([this](){
+                changeToBaseScreen();
+            }).detach();
         }
-        std::cout << "SignIn " << m_userID << std::endl;
-        return result.errormessage();
+        return result.statusmessage();
+    }
+
+    void changeToBaseScreen()
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        m_currentModel = m_models[BASE_SCREEN_MODEL];
+        emit modelChanged();
     }
 
 signals:

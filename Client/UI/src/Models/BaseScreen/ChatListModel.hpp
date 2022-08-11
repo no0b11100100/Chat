@@ -21,9 +21,9 @@ public:
     ChatListModel(QObject* parent = nullptr)
         : QAbstractListModel{parent}
     {
-        m_chats.emplace_back(new ChatInfo("1", "First chat", parent));
-        m_chats.emplace_back(new ChatInfo("2", "Second chat", parent));
-        m_chats.emplace_back(new ChatInfo("3", "Third chat", parent));
+        m_chats.emplace_back(new ChatInformation("1", "First chat", parent));
+        m_chats.emplace_back(new ChatInformation("2", "Second chat", parent));
+        m_chats.emplace_back(new ChatInformation("3", "Third chat", parent));
     }
 
     int rowCount(const QModelIndex& parent) const override
@@ -60,11 +60,11 @@ public slots:
     }
 
 private:
-    std::vector<std::shared_ptr<ChatInfo>> m_chats;
+    std::vector<std::shared_ptr<ChatInformation>> m_chats;
 
-    std::shared_ptr<ChatInfo> findChatByID(QString id)
+    std::shared_ptr<ChatInformation> findChatByID(QString id)
     {
-        auto it = std::find_if(m_chats.begin(), m_chats.end(), [&](const std::shared_ptr<ChatInfo>& chat){
+        auto it = std::find_if(m_chats.begin(), m_chats.end(), [&](const std::shared_ptr<ChatInformation>& chat){
             return chat->id() == id;
         });
 

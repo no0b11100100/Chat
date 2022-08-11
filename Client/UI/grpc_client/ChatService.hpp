@@ -9,18 +9,26 @@
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
+using grpc::ClientReader;
 
+using chat::ChatInfo;
+using chat::Chats;
 using chat::Chat;
-using chat::UserID;
-using chat::UserChats;
-using chat::ChatID;
-using chat::ChatInformation;
-using chat::ParticipantInfo;
-using chat::MessageChan;
-using chat::Messages;
 using chat::Direction;
+using chat::MessageChan;
+using chat::MessageType;
+using chat::Message;
+using chat::Messages;
+using chat::UserID;
+using chat::MessageID;
+using chat::ChatData;
+using chat::ExchangedMessage;
+using chat::ReadMessage;
+using chat::ChatData;
+
 
 // https://gist.github.com/ppLorins/d4484b61f12b2d87ac5c8d50d0808974
+// https://github.com/grpc/grpc/blob/master/examples/cpp/route_guide/route_guide_client.cc
 class ChatService final
 {
 public:
@@ -28,73 +36,128 @@ public:
         : _stub(Chat::NewStub(channel))
     {}
 
-    UserChats GetUserChats(const std::string& userID)
+    Chats GetChats(std::string userID)
     {
-        std::cout << "getUserChats " << userID;
-        ClientContext context;
         UserID request;
+        Chats reply;
+        ClientContext context;
+
         request.set_user_id(userID);
-        UserChats reply;
 
-        Status status = _stub->getUserChats(&context, request, &reply);
+        Status status = _stub->getChats(&context, request, &reply);
 
         if (!status.ok()) {
-            std::cout << "getUserChats error " << status.error_code() << ": " << status.error_message() << std::endl;
+            std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
         }
 
         return reply;
     }
 
-    ChatInformation GetChatInfo(const std::string& chatID)
+    Messages GetMessages(std::string from, Direction direction)
     {
-        std::cout << "getChatInfo " << chatID;
-        ClientContext context;
-        ChatID request;
-        request.set_chat_id(chatID);
-        ChatInformation reply;
-
-        Status status = _stub->getChatInfo(&context, request, &reply);
-
-        if (!status.ok()) {
-            std::cout << "getChatInfo error " << status.error_code() << ": " << status.error_message() << std::endl;
-        }
-
-        return reply;
-    }
-
-    ParticipantInfo GetParticipantInfo(const std::string& userID)
-    {
-        std::cout << "getParticipantInfo " << userID;
-        ClientContext context;
-        UserID request;
-        request.set_user_id(userID);
-        ParticipantInfo reply;
-
-        Status status = _stub->getParticipantInfo(&context, request, &reply);
-
-        if (!status.ok()) {
-            std::cout << "getParticipantInfo error " << status.error_code() << ": " << status.error_message() << std::endl;
-        }
-
-        return reply;
-    }
-
-    Messages GetMessages(const std::string& messageID, Direction direction)
-    {
-        std::cout << "getMessages " << messageID << " " << static_cast<int>(direction) << std::endl;
-        ClientContext context;
         MessageChan request;
-        request.set_message_id(messageID);
-        request.set_direction(direction);
         Messages reply;
+        ClientContext context;
+
+        request.set_message_id(from);
+        request.set_direction(direction);
 
         Status status = _stub->getMessages(&context, request, &reply);
 
         if (!status.ok()) {
-            std::cout << "getMessages error " << status.error_code() << ": " << status.error_message() << std::endl;
+            std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
         }
 
         return reply;
+    }
+
+    void ReadingMessage(std::string chatID, std::string messageID)
+    {
+        ReadMessage request;
+        google::protobuf::Empty reply;
+        ClientContext context;
+
+        request.set_chat_id(chatID);
+        request.set_message_id(messageID);
+
+        Status status = _stub->readMessage(&context, request, &reply);
+
+        if (!status.ok()) {
+            std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
+        }
+
+    }
+
+    void EditChat(ChatData request)
+    {
+        google::protobuf::Empty reply;
+        ClientContext context;
+
+        Status status = _stub->editChat(&context, request, &reply);
+
+        if (!status.ok()) {
+            std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
+        }
+
+    }
+
+    void SendMessage(ExchangedMessage message)
+    {
+        google::protobuf::Empty reply;
+        ClientContext context;
+
+        Status status = _stub->sendMessage(&context, message, &reply);
+
+        if (!status.ok()) {
+            std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
+        }
+    }
+
+    //Note: Run in separate thread
+    //TODO: change argument(s)
+    void MessagesUpdated(std::function<void(std::string)> handler)
+    {
+        // std::thread t([this, handler](){
+        google::protobuf::Empty request;
+        ClientContext context;
+        ExchangedMessage reply;
+
+        std::unique_ptr< ClientReader<ExchangedMessage> > reader(_stub->recieveMessage(&context, request));
+        while(reader->Read(&reply))
+        {
+            handler(reply.chat_id());
+        }
+
+        Status status = reader->Finish();
+
+        if (status.ok()) {
+            std::cout << "recieveMessage rpc succeeded." << std::endl;
+        } else {
+            std::cout << "recieveMessage rpc failed." << status.error_code() << ": " << status.error_message() << std::endl;
+        }
+        // });
+        // t.detach();
+    }
+
+    //Note: Run in separate thread
+    //TODO: change argument(s)
+    void ChatChanged()
+    {
+        google::protobuf::Empty request;
+        ClientContext context;
+        ChatData reply;
+
+        std::unique_ptr< ClientReader<ChatData> > reader(_stub->chatChanged(&context, request));
+        while(reader->Read(&reply))
+        {}
+
+        Status status = reader->Finish();
+
+        if (status.ok()) {
+            std::cout << "recieveMessage rpc succeeded." << std::endl;
+        } else {
+            std::cout << "recieveMessage rpc failed." << status.error_code() << ": " << status.error_message() << std::endl;
+        }
     }
 
 private:

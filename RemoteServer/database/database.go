@@ -38,6 +38,7 @@ type Database interface {
 	RegisterUser(common.User) (bool, string)
 	GetUserChats(string) []api.ChatInformation
 	GetChatParticipants(string) []api.ParticipantInfo
+	GetMessages(string, string) []api.Message
 	// GetUsers() []common.User
 	// GetChatMessages(string) []common.Message
 	// AddMessage(common.Message)
@@ -184,8 +185,34 @@ func (db *DB) GetChatParticipants(chatID string) []api.ParticipantInfo {
 		log.Warning.Println("DB error:", err)
 	}
 
-	for _, userID := range chat.Participants() {
-		result = append(result, db.getParticipantInfo(userID))
+	for _, userID := range chat.Participants {
+		result = append(result, db.getParticipantInfo(userID.UserId))
+	}
+
+	return result
+}
+
+// If message_from is empty - return all available messages for chat
+// otherwise - messages from provided message_id
+func (db *DB) GetMessages(chatID string, message_from string) []api.Message {
+	log.Info.Printf("GetMessages %v < %v >\n", chatID, message_from)
+	result := make([]api.Message, 0)
+
+	if message_from == "" {
+		var chat api.ChatInformation
+		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		err := db.tables["Chats"].FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&chat)
+		if err != nil {
+			log.Warning.Println("DB error:", err)
+		}
+
+		// return chat.Messages
+	} else {
+		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		err := db.tables["Chats"].FindOne(ctx, bson.M{"chat_id": chatID}) // $elementMatch : {message_id : { $gt : message_from } }
+		if err != nil {
+			log.Warning.Println("DB error:", err)
+		}
 	}
 
 	return result

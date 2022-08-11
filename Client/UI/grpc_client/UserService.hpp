@@ -4,26 +4,26 @@
 
 #include <grpcpp/grpcpp.h>
 
-#include "proto_gen/base_service.grpc.pb.h"
+#include "proto_gen/user_service.grpc.pb.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 
-using base::Base;
-using base::SignIn;
-using base::SignUp;
-using base::Result;
+using user::User;
+using user::SignIn;
+using user::SignUp;
+using user::Response;
 
 
-class BaseService final {
+class UserService final {
 public:
-    BaseService(std::shared_ptr<Channel> channel)
-        : _stub(Base::NewStub(channel)) {}
+    UserService(std::shared_ptr<Channel> channel)
+        : _stub(User::NewStub(channel)) {}
 
-    Result signIn(const SignIn& request) {
+    Response signIn(const SignIn& request) {
         std::cout << "signIn call\n";
-        Result reply;
+        Response reply;
         ClientContext context;
 
         Status status = _stub->signIn(&context, request, &reply);
@@ -35,8 +35,8 @@ public:
         return reply;
     }
 
-    Result signUp(const SignUp& request) {
-        Result reply;
+    Response signUp(const SignUp& request) {
+        Response reply;
         ClientContext context;
 
         Status status = _stub->signUp(&context, request, &reply);
@@ -49,5 +49,5 @@ public:
     }
 
 private:
-    std::unique_ptr<Base::Stub> _stub;
+    std::unique_ptr<User::Stub> _stub;
 };

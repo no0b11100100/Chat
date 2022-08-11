@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../grpc_client/proto_gen/base_service.pb.h"
+#include "../../grpc_client/proto_gen/user_service.pb.h"
 
 #include <functional>
 
@@ -11,12 +11,15 @@
 
 namespace Models {
 
+using user::SignIn;
+using user::SignUp;
+
 class SignInUpModel : public QObject
 {
     Q_OBJECT
 
-    using SignInAction = std::function<std::string(base::SignIn)>;
-    using SignUpAction = std::function<std::string(base::SignUp)>;
+    using SignInAction = std::function<std::string(SignIn)>;
+    using SignUpAction = std::function<std::string(SignUp)>;
 
 public:
     SignInUpModel(SignInAction signInAction, SignUpAction signUpAction, QObject* parent = nullptr)
@@ -28,7 +31,7 @@ public:
     Q_INVOKABLE void signIn(QString email, QString password) {
         emit statusMessage("");
         qDebug() << email << password;
-        base::SignIn data;
+        SignIn data;
         data.set_email(email.toStdString());
         data.set_password(password.toStdString());
         std::string message = m_signInAction(data);
@@ -38,7 +41,7 @@ public:
     Q_INVOKABLE void signUp(QString name, QString nickName, QString email, QString password, QString confirmedPassword) {
         qDebug() << name << email << password << confirmedPassword;
         emit statusMessage("");
-        base::SignUp data;
+        SignUp data;
         data.set_name(name.toStdString());
         data.set_nickname(nickName.toStdString());
         data.set_email(email.toStdString());

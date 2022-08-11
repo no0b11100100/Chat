@@ -135,9 +135,10 @@ def remove_copied_folders():
 
 
 if __name__ == '__main__':
+    # docker rm $(docker ps -a -q) && docker image prune
     generate_proto()
     copy_gen_api()
-    remove_gen_folders_from_common()
+    # remove_gen_folders_from_common()
     copy_common()
     build()
-    remove_copied_folders()
+    # remove_copied_folders()
