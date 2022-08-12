@@ -36,8 +36,8 @@ type Database interface {
 	IsEmailUnique(string) bool
 	ValidateUser(common.User) (bool, string)
 	RegisterUser(common.User) (bool, string)
-	GetUserChats(string) []api.ChatInformation
-	GetChatParticipants(string) []api.ParticipantInfo
+	GetUserChats(string) api.Chats
+	// GetChatParticipants(string) []api.ParticipantInfo
 	GetMessages(string, string) []api.Message
 	// GetUsers() []common.User
 	// GetChatMessages(string) []common.Message
@@ -135,9 +135,9 @@ func (db *DB) RegisterUser(user common.User) (bool, string) {
 	return true, user.ID
 }
 
-func (db *DB) GetUserChats(userID string) []api.ChatInformation {
+func (db *DB) GetUserChats(userID string) api.Chats {
 	log.Info.Println("GetUserChatsr", userID)
-	result := make([]api.ChatInformation, 0)
+	result := make([]api.ChatInfo, 0)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
 	cur, err := db.tables["Users"].Find(ctx, bson.M{"user_id": userID})
@@ -146,7 +146,7 @@ func (db *DB) GetUserChats(userID string) []api.ChatInformation {
 	}
 
 	for cur.Next(ctx) {
-		var chat api.ChatInformation
+		var chat api.ChatInfo
 		err = cur.Decode(&chat)
 		if err != nil {
 			log.Warning.Println("DB error:", err)
@@ -161,36 +161,36 @@ func (db *DB) GetUserChats(userID string) []api.ChatInformation {
 
 	cur.Close(ctx)
 
-	return result
+	return api.Chats{}
 }
 
-func (db *DB) getParticipantInfo(userID string) api.ParticipantInfo {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	var participant api.ParticipantInfo
-	if err := db.tables["Users"].FindOne(ctx, bson.M{"user_id": userID}).Decode(&participant); err != nil {
-		log.Warning.Println(err)
-	}
+// func (db *DB) getParticipantInfo(userID string) api.ParticipantInfo {
+// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+// 	var participant api.ParticipantInfo
+// 	if err := db.tables["Users"].FindOne(ctx, bson.M{"user_id": userID}).Decode(&participant); err != nil {
+// 		log.Warning.Println(err)
+// 	}
 
-	return participant
-}
+// 	return participant
+// }
 
-func (db *DB) GetChatParticipants(chatID string) []api.ParticipantInfo {
-	log.Info.Println("GetChatParticipants", chatID)
-	result := make([]api.ParticipantInfo, 0)
-	var chat api.ChatInformation
+// func (db *DB) GetChatParticipants(chatID string) []api.ParticipantInfo {
+// 	log.Info.Println("GetChatParticipants", chatID)
+// 	result := make([]api.ParticipantInfo, 0)
+// 	var chat api.ChatInformation
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	err := db.tables["Chats"].FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&chat)
-	if err != nil {
-		log.Warning.Println("DB error:", err)
-	}
+// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+// 	err := db.tables["Chats"].FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&chat)
+// 	if err != nil {
+// 		log.Warning.Println("DB error:", err)
+// 	}
 
-	for _, userID := range chat.Participants {
-		result = append(result, db.getParticipantInfo(userID.UserId))
-	}
+// 	for _, userID := range chat.Participants {
+// 		result = append(result, db.getParticipantInfo(userID.UserId))
+// 	}
 
-	return result
-}
+// 	return result
+// }
 
 // If message_from is empty - return all available messages for chat
 // otherwise - messages from provided message_id
@@ -199,7 +199,7 @@ func (db *DB) GetMessages(chatID string, message_from string) []api.Message {
 	result := make([]api.Message, 0)
 
 	if message_from == "" {
-		var chat api.ChatInformation
+		var chat api.ChatInfo
 		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 		err := db.tables["Chats"].FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&chat)
 		if err != nil {

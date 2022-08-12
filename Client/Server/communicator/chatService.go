@@ -6,6 +6,8 @@ import (
 	log "Chat/Client/Server/common/logger"
 	"context"
 	"encoding/json"
+
+	"github.com/golang/protobuf/ptypes/empty"
 )
 
 type ChatService struct {
@@ -18,7 +20,7 @@ func NewChatService(sender RemoteServerInterface) *ChatService {
 }
 
 type ResponseType interface {
-	api.UserChats | api.ChatInformation | api.ParticipantInfo | api.Messages
+	api.Messages | api.Chats
 }
 
 func makeRequest[T ResponseType](send func(common.Command, common.ChannelType), command common.CommandType, payload interface{}, response *T) {
@@ -42,25 +44,11 @@ func makeRequest[T ResponseType](send func(common.Command, common.ChannelType), 
 	}
 }
 
-func (chat *ChatService) GetUserChats(_ context.Context, userID *api.UserID) (*api.UserChats, error) {
-	log.Info.Printf("GetUserChats %+v\n", *userID)
-	var chats api.UserChats
+func (chat *ChatService) GetChats(_ context.Context, userID *api.UserID) (*api.Chats, error) {
+	log.Info.Printf("GetChats %+v\n", *userID)
+	var chats api.Chats
 	makeRequest(chat.sender.Send, common.GetUserChatsCommand, *userID, &chats)
 	return &chats, nil
-}
-
-func (chat *ChatService) GetChatInfo(_ context.Context, chatID *api.ChatID) (*api.ChatInformation, error) {
-	log.Info.Printf("GetChatInfo %+v\n", *chatID)
-	var chatInfo api.ChatInformation
-	makeRequest(chat.sender.Send, common.GetChatInfoCommand, *chatID, &chatInfo)
-	return &chatInfo, nil
-}
-
-func (chat *ChatService) GetParticipantInfo(_ context.Context, userID *api.UserID) (*api.ParticipantInfo, error) {
-	log.Info.Printf("GetParticipantInfo %+v\n", *userID)
-	var participantInfo api.ParticipantInfo
-	makeRequest(chat.sender.Send, common.GetParticipantInfoCommand, *userID, &participantInfo)
-	return &participantInfo, nil
 }
 
 func (chat *ChatService) GetMessages(_ context.Context, messageChan *api.MessageChan) (*api.Messages, error) {
@@ -70,6 +58,22 @@ func (chat *ChatService) GetMessages(_ context.Context, messageChan *api.Message
 	return &messages, nil
 }
 
-func (chat *ChatService) MessageExchange(api.Chat_MessageExchangeServer) error {
+func (chat *ChatService) ReadMessage(context.Context, *api.ReadMessage) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (chat *ChatService) EditChat(context.Context, *api.ChatData) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (chat *ChatService) ChatChanged(*empty.Empty, api.Chat_ChatChangedServer) error {
+	return nil
+}
+
+func (chat *ChatService) SendMessage(context.Context, *api.ExchangedMessage) (*empty.Empty, error) {
+	return nil, nil
+}
+
+func (chat *ChatService) RecieveMessage(*empty.Empty, api.Chat_RecieveMessageServer) error {
 	return nil
 }
