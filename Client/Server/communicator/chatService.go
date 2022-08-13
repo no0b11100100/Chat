@@ -13,10 +13,11 @@ import (
 type ChatService struct {
 	sender RemoteServerInterface
 	api.UnimplementedChatServer
+	messageChan chan *api.ExchangedMessage
 }
 
 func NewChatService(sender RemoteServerInterface) *ChatService {
-	return &ChatService{sender: sender}
+	return &ChatService{sender: sender, messageChan: make(chan *api.ExchangedMessage)}
 }
 
 type ResponseType interface {
@@ -79,10 +80,23 @@ func (chat *ChatService) ChatChanged(*empty.Empty, api.Chat_ChatChangedServer) e
 	return nil
 }
 
-func (chat *ChatService) SendMessage(context.Context, *api.ExchangedMessage) (*empty.Empty, error) {
-	return nil, nil
+func (chat *ChatService) SendMessage(_ context.Context, message *api.ExchangedMessage) (*empty.Empty, error) {
+	log.Info.Printf("SendMessage %+v\n", *message)
+	// go func() {
+	chat.messageChan <- message
+	// }()
+	return &empty.Empty{}, nil
 }
 
-func (chat *ChatService) RecieveMessage(*empty.Empty, api.Chat_RecieveMessageServer) error {
+func (chat *ChatService) RecieveMessage(_ *empty.Empty, stream api.Chat_RecieveMessageServer) error {
+	for {
+		for message := range chat.messageChan {
+			err := stream.Send(message)
+			if err != nil {
+				log.Warning.Println(err)
+			}
+		}
+	}
+
 	return nil
 }

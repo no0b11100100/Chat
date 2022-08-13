@@ -20,8 +20,11 @@ public:
           m_chatList{new ChatListModel(parent)},
           m_client{client}
     {
-        QObject::connect(m_chatList.get(), &ChatListModel::chatSelected, this, &BaseScreen::setChat); //m_chatModel.get(), &ChatModel::updateChatModel);
+        QObject::connect(m_chatList.get(), &ChatListModel::chatSelected, this, &BaseScreen::setChat);
         QObject::connect(m_chatModel.get(), &ChatModel::sendingMessage, this, &BaseScreen::sendMessage);
+        std::thread([this](){
+                m_client->chatService().MessagesUpdated([](std::string msg){std::cout << msg << std::endl;});
+            }).detach();
     }
 
     QObject* chatModel() { return m_chatModel.get(); }
@@ -50,8 +53,8 @@ public slots:
     {
         m_chatList->SetLastMessage(chatID, message);
         //TODO: add message properly
-        // chat::Message msg;
-        // m_client->chatService().SendMessage(chatID.toStdString(), msg);
+        chat::Message msg;
+        m_client->chatService().SendMessage(chatID.toStdString(), msg);
     }
 
 private:

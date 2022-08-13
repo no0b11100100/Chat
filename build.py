@@ -105,7 +105,8 @@ def build():
     os.chdir(ui_build_folder_path)
 
     buildsystem_path = os.path.join(ui_path, 'third-party','vcpkg','scripts','buildsystems','vcpkg.cmake')
-    os.system(f'cmake .. -DCMAKE_TOOLCHAIN_FILE={buildsystem_path} && make -j7')
+    if os.system(f'cmake .. -DCMAKE_TOOLCHAIN_FILE={buildsystem_path} && make -j7') != 0:
+        os._exit(1)
 
     #build local server
     local_server_path = os.path.join(current_path, 'Client','Server')
@@ -138,7 +139,7 @@ if __name__ == '__main__':
     # docker rm $(docker ps -a -q) && docker image prune
     generate_proto()
     copy_gen_api()
-    # remove_gen_folders_from_common()
+    remove_gen_folders_from_common()
     copy_common()
     build()
     # remove_copied_folders()
