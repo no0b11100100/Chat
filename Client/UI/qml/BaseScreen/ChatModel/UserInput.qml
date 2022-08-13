@@ -32,6 +32,7 @@ Rectangle {
 
             onClicked: {
                 root.action(input.text)
+                input.text = ""
             }
         }
 

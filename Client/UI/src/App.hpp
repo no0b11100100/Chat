@@ -26,6 +26,7 @@ public:
     {
         initModels(parent);
         m_currentModel = m_models[LOG_IN_MODEL];
+        QObject::connect(this, &App::activateBaseScreen, this, &App::changeToBaseScreen);
     }
 
     void initModels(QObject* parent) {
@@ -42,12 +43,16 @@ public:
     }
 
 private:
+    // TODO: investigate delay
     std::string signUpAction(SignUp data) {
         auto result = m_grpcClient.baseService().signUp(data);
         auto userID = result.user_id();
         if ((int)result.status() == 0) {
             m_userID = userID;
-            changeToBaseScreen(result);
+            std::thread([this, result](){
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                emit activateBaseScreen(result);
+            }).detach();
         }
         return result.statusmessage();
     }
@@ -57,24 +62,26 @@ private:
         auto userID = result.user_id();
         if ((int)result.status() == 0) {
             m_userID = userID;
-            changeToBaseScreen(result);
+            std::thread([this, result](){
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                emit activateBaseScreen(result);
+            }).detach();
         }
         return result.statusmessage();
     }
 
+public slots:
     void changeToBaseScreen(user::Response userData)
     {
         m_currentModel = m_models[BASE_SCREEN_MODEL];
         BaseScreen* baseScreen = static_cast<BaseScreen*>(m_currentModel.get());
         baseScreen->SetUser(userData);
-        std::thread([this](){
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-            emit modelChanged();
-        }).detach();
+        emit modelChanged();
     }
 
 signals:
     void modelChanged();
+    void activateBaseScreen(user::Response);
 
 private:
     GRPCClient m_grpcClient;

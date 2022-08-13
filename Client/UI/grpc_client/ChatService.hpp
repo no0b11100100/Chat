@@ -109,7 +109,8 @@ public:
         ClientContext context;
 
         request.set_chat_id(chatID);
-        request.set_allocated_message(&message);
+        Message* msg = request.mutable_message();
+        *msg = message;
 
         Status status = _stub->sendMessage(&context, request, &reply);
 

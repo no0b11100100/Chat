@@ -4,6 +4,9 @@
 #include "ChatListModel.hpp"
 #include "../../../grpc_client/Client.hpp"
 
+#include <chrono>
+#include <thread>
+
 class BaseScreen : public QObject
 {
     Q_OBJECT
@@ -28,6 +31,7 @@ public:
 
     void SetUser(user::Response userData)
     {
+        // std::this_thread::sleep_for(std::chrono::seconds(20));
         auto chats = m_client->chatService().GetChats(userData.user_id());
         m_chatList->SetChats(chats);
     }

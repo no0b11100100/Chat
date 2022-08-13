@@ -32,28 +32,28 @@ set(PROJECT_SOURCES
         grpc_client/ChatService.hpp
         grpc_client/Client.hpp
 
-        json/Types/Base.hpp
-        json/Types/Integer/Integer.h
-        json/Types/Integer/Integer.cpp
-        json/Types/Number/Number.h
-        json/Types/Number/Number.cpp
-        json/Types/Bool/Bool.h
-        json/Types/Bool/Bool.cpp
-        json/Types/String/String.h
-        json/Types/String/String.cpp
-        json/Types/Null/Null.h
-        json/Types/Null/Null.cpp
-        json/Types/Vector/Vector.h
-        json/Types/Vector/Vector.cpp
-        json/Types/Map/Map.h
-        json/Types/Map/Map.cpp
-        json/Types/Map/Pair.hpp
-        json/Types/Iterator/Iteartor.h
-        json/Types/Value/Dumper.hpp
-        json/Types/Value/Separators.hpp
-        json/Types/Value/Parser.hpp
-        json/Types/Value/Value.h
-        json/Types/Value/Value.cpp
+        # json/Types/Base.hpp
+        # json/Types/Integer/Integer.h
+        # json/Types/Integer/Integer.cpp
+        # json/Types/Number/Number.h
+        # json/Types/Number/Number.cpp
+        # json/Types/Bool/Bool.h
+        # json/Types/Bool/Bool.cpp
+        # json/Types/String/String.h
+        # json/Types/String/String.cpp
+        # json/Types/Null/Null.h
+        # json/Types/Null/Null.cpp
+        # json/Types/Vector/Vector.h
+        # json/Types/Vector/Vector.cpp
+        # json/Types/Map/Map.h
+        # json/Types/Map/Map.cpp
+        # json/Types/Map/Pair.hpp
+        # json/Types/Iterator/Iteartor.h
+        # json/Types/Value/Dumper.hpp
+        # json/Types/Value/Separators.hpp
+        # json/Types/Value/Parser.hpp
+        # json/Types/Value/Value.h
+        # json/Types/Value/Value.cpp
 
         src/Models/SignInUpModel.hpp
         src/Models/BaseScreen/ChatModel.hpp
