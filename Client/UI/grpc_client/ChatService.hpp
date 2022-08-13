@@ -102,12 +102,16 @@ public:
 
     }
 
-    void SendMessage(ExchangedMessage message)
+    void SendMessage(std::string chatID, Message message)
     {
+        ExchangedMessage request;
         google::protobuf::Empty reply;
         ClientContext context;
 
-        Status status = _stub->sendMessage(&context, message, &reply);
+        request.set_chat_id(chatID);
+        request.set_allocated_message(&message);
+
+        Status status = _stub->sendMessage(&context, request, &reply);
 
         if (!status.ok()) {
             std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;

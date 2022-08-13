@@ -51,7 +51,7 @@ func (chat *ChatService) GetChats(_ context.Context, userID *api.UserID) (*api.C
 	c.ChatId = "1"
 	c.Title = "ALice"
 	c.SecondLine = ""
-	c.LastMessage = ""
+	c.LastMessage = "test message"
 	c.UnreadedCount = 0
 	c.Cover = ""
 	chats.Chats = append(chats.Chats, &c)

@@ -25,11 +25,12 @@ public:
 
     QString name() const { return "ChatModel"; }
     QObject* header() { return m_header.get(); }
-    bool chatSelected() const { return m_isChatSelected; }
+    bool chatSelected() const { return m_currentChatID != ""; }
 
     ChatModel(QObject* parent = nullptr)
         : QAbstractListModel{parent},
-        m_header{new Header(parent)}
+        m_header{new Header(parent)},
+        m_currentChatID{""}
     {}
 
     int rowCount(const QModelIndex& parent) const override
@@ -48,9 +49,14 @@ public:
 
     void SetHeader(const Header& header)
     {
-        m_isChatSelected = true;
-        emit chatSelectedChanged();
         m_header->SetTitle(header.title());
+    }
+
+    void SaveSelectedChatID(QString chatID)
+    {
+        qDebug() << "Select chat" << chatID;
+        m_currentChatID = chatID;
+        emit chatSelectedChanged();
     }
 
     void SetMessages(const chat::Messages& messages)
@@ -65,17 +71,26 @@ public:
             QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
             QJsonObject message_json = object.object();
             std::string text = message_json["text"].toString().toStdString();
-            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(text), false, this));
+            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(text), false));
         }
 
         emit endResetModel();
     }
 
+    Q_INVOKABLE void sendMessage(QString message)
+    {
+        emit beginResetModel();
+        m_messages.emplace_back(new SimpleMessage(message, true));
+        emit endResetModel();
+        emit sendingMessage(m_currentChatID, message);
+    }
+
 signals:
     void chatSelectedChanged();
+    void sendingMessage(QString, QString);
 
 private:
     std::vector<std::unique_ptr<QObject>> m_messages;
     std::unique_ptr<Header> m_header;
-    bool m_isChatSelected;
+    QString m_currentChatID;
 };

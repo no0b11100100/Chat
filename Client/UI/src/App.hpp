@@ -47,9 +47,7 @@ private:
         auto userID = result.user_id();
         if ((int)result.status() == 0) {
             m_userID = userID;
-            std::thread([this, result](){
-                changeToBaseScreen(result);
-            }).detach();
+            changeToBaseScreen(result);
         }
         return result.statusmessage();
     }
@@ -59,9 +57,7 @@ private:
         auto userID = result.user_id();
         if ((int)result.status() == 0) {
             m_userID = userID;
-            std::thread([this, result](){
-                changeToBaseScreen(result);
-            }).detach();
+            changeToBaseScreen(result);
         }
         return result.statusmessage();
     }
@@ -71,9 +67,10 @@ private:
         m_currentModel = m_models[BASE_SCREEN_MODEL];
         BaseScreen* baseScreen = static_cast<BaseScreen*>(m_currentModel.get());
         baseScreen->SetUser(userData);
-
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        emit modelChanged();
+        std::thread([this](){
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            emit modelChanged();
+        }).detach();
     }
 
 signals:

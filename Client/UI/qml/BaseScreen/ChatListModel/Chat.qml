@@ -11,9 +11,14 @@ Rectangle {
         border.color: "black"
         border.width: 1
 
-        Text {
-            text: root.model.title
-            // anchors.centerIn: parent
+        Column {
+            Text {
+                text: root.model.title
+                // anchors.centerIn: parent
+            }
+            Text {
+                text: root.model.lastMessage
+            }
         }
 
         MouseArea{

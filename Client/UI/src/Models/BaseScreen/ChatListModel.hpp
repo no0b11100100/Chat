@@ -42,19 +42,22 @@ public:
         auto chat = findChatByID(chatID);
         Header header;
         header.SetTitle(chat->title());
-        // TODO: Add second line
         emit chatSelected(header, chatID);
     }
 
     void SetChats(chat::Chats chats)
     {
-        m_chats.clear();
         for(const auto& chat : chats.chats())
         {
-            m_chats.emplace_back(new ChatInformation(QString::fromStdString(chat.chat_id()), QString::fromStdString(chat.title()), this));
+            m_chats.emplace_back(std::make_shared<ChatInformation>(QString::fromStdString(chat.chat_id()), QString::fromStdString(chat.title()), QString::fromStdString(chat.lastmessage())));
         }
     }
 
+    void SetLastMessage(QString chatID, QString message)
+    {
+        auto chat = findChatByID(chatID);
+        chat->UpdateLastMessage(message);
+    }
 
 signals:
     void chatSelected(const Header&, QString);

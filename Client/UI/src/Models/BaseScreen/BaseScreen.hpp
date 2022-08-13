@@ -17,7 +17,8 @@ public:
           m_chatList{new ChatListModel(parent)},
           m_client{client}
     {
-        QObject::connect(m_chatList.get(), &ChatListModel::chatSelected,this, &BaseScreen::setChat); //m_chatModel.get(), &ChatModel::updateChatModel);
+        QObject::connect(m_chatList.get(), &ChatListModel::chatSelected, this, &BaseScreen::setChat); //m_chatModel.get(), &ChatModel::updateChatModel);
+        QObject::connect(m_chatModel.get(), &ChatModel::sendingMessage, this, &BaseScreen::sendMessage);
     }
 
     QObject* chatModel() { return m_chatModel.get(); }
@@ -35,9 +36,18 @@ public:
 public slots:
     void setChat(const Header& header, QString chatID)
     {
+        m_chatModel->SaveSelectedChatID(chatID);
         m_chatModel->SetHeader(header);
         auto messages = m_client->chatService().GetMessages(chatID.toStdString(), "", chat::Direction::Forward);
         m_chatModel->SetMessages(messages);
+    }
+
+    void sendMessage(QString chatID, QString message)
+    {
+        m_chatList->SetLastMessage(chatID, message);
+        //TODO: add message properly
+        // chat::Message msg;
+        // m_client->chatService().SendMessage(chatID.toStdString(), msg);
     }
 
 private:
