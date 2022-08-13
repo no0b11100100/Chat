@@ -47,14 +47,23 @@ func makeRequest[T ResponseType](send func(common.Command, common.ChannelType), 
 func (chat *ChatService) GetChats(_ context.Context, userID *api.UserID) (*api.Chats, error) {
 	log.Info.Printf("GetChats %+v\n", *userID)
 	var chats api.Chats
-	makeRequest(chat.sender.Send, common.GetUserChatsCommand, *userID, &chats)
+	var c api.ChatInfo
+	c.ChatId = "1"
+	c.Title = "ALice"
+	c.SecondLine = ""
+	c.LastMessage = ""
+	c.UnreadedCount = 0
+	c.Cover = ""
+	chats.Chats = append(chats.Chats, &c)
+	// makeRequest(chat.sender.Send, common.GetUserChatsCommand, *userID, &chats)
 	return &chats, nil
 }
 
 func (chat *ChatService) GetMessages(_ context.Context, messageChan *api.MessageChan) (*api.Messages, error) {
 	log.Info.Printf("GetMessages %+v\n", *messageChan)
 	var messages api.Messages
-	makeRequest(chat.sender.Send, common.GetMessagesCommand, *messageChan, &messages)
+	messages.Messages = append(messages.Messages, &api.Message{MessageJson: string([]byte(`{"text":"test message"}`))})
+	// makeRequest(chat.sender.Send, common.GetMessagesCommand, *messageChan, &messages)
 	return &messages, nil
 }
 

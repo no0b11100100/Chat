@@ -53,7 +53,7 @@ public:
         return reply;
     }
 
-    Messages GetMessages(std::string from, Direction direction)
+    Messages GetMessages(std::string chatID, std::string from, Direction direction)
     {
         MessageChan request;
         Messages reply;
@@ -61,6 +61,7 @@ public:
 
         request.set_message_id(from);
         request.set_direction(direction);
+        request.set_chat_id(chatID);
 
         Status status = _stub->getMessages(&context, request, &reply);
 

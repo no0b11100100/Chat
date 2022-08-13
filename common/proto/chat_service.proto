@@ -26,6 +26,7 @@ enum Direction {
 message MessageChan {
     string message_id=1;
     Direction direction=2;
+    string chat_id=3;
 }
 
 enum MessageType {

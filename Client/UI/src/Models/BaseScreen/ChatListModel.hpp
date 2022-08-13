@@ -7,6 +7,7 @@
 
 #include "Chat.hpp"
 #include "Header.hpp"
+#include "../../../grpc_client/proto_gen/chat_service.pb.h"
 
 #include <QDebug>
 
@@ -20,11 +21,7 @@ public:
 
     ChatListModel(QObject* parent = nullptr)
         : QAbstractListModel{parent}
-    {
-        m_chats.emplace_back(new ChatInformation("1", "First chat", parent));
-        m_chats.emplace_back(new ChatInformation("2", "Second chat", parent));
-        m_chats.emplace_back(new ChatInformation("3", "Third chat", parent));
-    }
+    {}
 
     int rowCount(const QModelIndex& parent) const override
     {
@@ -49,15 +46,18 @@ public:
         emit chatSelected(header, chatID);
     }
 
+    void SetChats(chat::Chats chats)
+    {
+        m_chats.clear();
+        for(const auto& chat : chats.chats())
+        {
+            m_chats.emplace_back(new ChatInformation(QString::fromStdString(chat.chat_id()), QString::fromStdString(chat.title()), this));
+        }
+    }
+
+
 signals:
     void chatSelected(const Header&, QString);
-
-public slots:
-    void setLastMessage(QString chatID, QString message)
-    {
-        auto chat = findChatByID(chatID);
-        chat->UpdateLastMessage(message);
-    }
 
 private:
     std::vector<std::shared_ptr<ChatInformation>> m_chats;

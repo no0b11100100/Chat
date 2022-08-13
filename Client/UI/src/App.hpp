@@ -7,7 +7,7 @@
 
 #include <QObject>
 
-#include "../grpc_client/Client.hpp"
+// #include "../grpc_client/Client.hpp"
 #include "Models/SignInUpModel.hpp"
 #include "Models/BaseScreen/BaseScreen.hpp"
 
@@ -33,7 +33,7 @@ public:
             [this](SignIn data){ return signInAction(data); },
             [this](SignUp data){ return signUpAction(data); },
             parent);
-        m_models[BASE_SCREEN_MODEL] = std::make_unique<BaseScreen>(parent);
+        m_models[BASE_SCREEN_MODEL] = std::make_unique<BaseScreen>(&m_grpcClient, parent);
     }
 
     QObject* currentModel()
@@ -47,8 +47,8 @@ private:
         auto userID = result.user_id();
         if ((int)result.status() == 0) {
             m_userID = userID;
-            std::thread([this](){
-                changeToBaseScreen();
+            std::thread([this, result](){
+                changeToBaseScreen(result);
             }).detach();
         }
         return result.statusmessage();
@@ -59,17 +59,20 @@ private:
         auto userID = result.user_id();
         if ((int)result.status() == 0) {
             m_userID = userID;
-            std::thread([this](){
-                changeToBaseScreen();
+            std::thread([this, result](){
+                changeToBaseScreen(result);
             }).detach();
         }
         return result.statusmessage();
     }
 
-    void changeToBaseScreen()
+    void changeToBaseScreen(user::Response userData)
     {
-        std::this_thread::sleep_for(std::chrono::seconds(2));
         m_currentModel = m_models[BASE_SCREEN_MODEL];
+        BaseScreen* baseScreen = static_cast<BaseScreen*>(m_currentModel.get());
+        baseScreen->SetUser(userData);
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
         emit modelChanged();
     }
 
