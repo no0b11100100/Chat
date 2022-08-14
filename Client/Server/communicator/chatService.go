@@ -21,11 +21,11 @@ func NewChatService(sender RemoteServerInterface) *ChatService {
 }
 
 type ResponseType interface {
-	api.Messages | api.Chats
+	[]*api.Message | api.Chats | empty.Empty
 }
 
 func makeRequest[T ResponseType](send func(common.Command, common.ChannelType), command common.CommandType, payload interface{}, response *T) {
-	c := common.Command{Type: common.GetUserChatsCommand}
+	c := common.Command{Type: command}
 	var err error
 	c.Payload, err = json.Marshal(payload)
 
@@ -33,39 +33,44 @@ func makeRequest[T ResponseType](send func(common.Command, common.ChannelType), 
 		log.Warning.Println(err)
 	}
 
-	ch := make(common.ChannelType)
-	defer close(ch)
-	send(c, ch)
+	if response == nil {
+		send(c, nil)
+	} else {
+		ch := make(common.ChannelType)
+		defer close(ch)
+		send(c, ch)
 
-	result := <-ch
+		result := <-ch
 
-	err = json.Unmarshal(result.Payload, &response)
-	if err != nil {
-		log.Warning.Println(err)
+		err = json.Unmarshal(result.Payload, &response)
+		if err != nil {
+			log.Warning.Println(err)
+		}
 	}
 }
 
 func (chat *ChatService) GetChats(_ context.Context, userID *api.UserID) (*api.Chats, error) {
 	log.Info.Printf("GetChats %+v\n", *userID)
 	var chats api.Chats
-	var c api.ChatInfo
-	c.ChatId = "1"
-	c.Title = "ALice"
-	c.SecondLine = ""
-	c.LastMessage = "test message"
-	c.UnreadedCount = 0
-	c.Cover = ""
-	chats.Chats = append(chats.Chats, &c)
-	// makeRequest(chat.sender.Send, common.GetUserChatsCommand, *userID, &chats)
+	// var c api.ChatInfo
+	// c.ChatId = "1"
+	// c.Title = "ALice"
+	// c.SecondLine = ""
+	// c.LastMessage = "test message"
+	// c.UnreadedCount = 0
+	// c.Cover = ""
+	// chats.Chats = append(chats.Chats, &c)
+	makeRequest(chat.sender.Send, common.GetUserChatsCommand, *userID, &chats)
 	return &chats, nil
 }
 
 func (chat *ChatService) GetMessages(_ context.Context, messageChan *api.MessageChan) (*api.Messages, error) {
 	log.Info.Printf("GetMessages %+v\n", *messageChan)
-	var messages api.Messages
-	messages.Messages = append(messages.Messages, &api.Message{MessageJson: string([]byte(`{"text":"test message"}`))})
-	// makeRequest(chat.sender.Send, common.GetMessagesCommand, *messageChan, &messages)
-	return &messages, nil
+	var messages []*api.Message
+	// messages.Messages = append(messages.Messages, &api.Message{MessageJson: string([]byte(`{"text":"test message"}`))})
+	makeRequest(chat.sender.Send, common.GetMessagesCommand, *messageChan, &messages)
+	result := &api.Messages{Messages: messages}
+	return result, nil
 }
 
 func (chat *ChatService) ReadMessage(context.Context, *api.ReadMessage) (*empty.Empty, error) {
@@ -82,9 +87,16 @@ func (chat *ChatService) ChatChanged(*empty.Empty, api.Chat_ChatChangedServer) e
 
 func (chat *ChatService) SendMessage(_ context.Context, message *api.ExchangedMessage) (*empty.Empty, error) {
 	log.Info.Printf("SendMessage %+v\n", *message)
-	// go func() {
-	chat.messageChan <- message
-	// }()
+	// chat.messageChan <- message
+	c := common.Command{Type: common.SendMessageCommand}
+	var err error
+	c.Payload, err = json.Marshal(*message)
+
+	if err != nil {
+		log.Warning.Println(err)
+	}
+	chat.sender.Send(c, nil)
+
 	return &empty.Empty{}, nil
 }
 

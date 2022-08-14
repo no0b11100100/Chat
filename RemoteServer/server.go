@@ -116,9 +116,10 @@ func (s *Server) addHandlers() {
 	s.handlers[common.SignUp] = s.SignUp
 
 	s.handlers[common.GetUserChatsCommand] = s.GetUserChats
-	s.handlers[common.GetChatInfoCommand] = s.GetChatInfo
-	s.handlers[common.GetParticipantInfoCommand] = s.GetParticipantInfo
+	// s.handlers[common.GetChatInfoCommand] = s.GetChatInfo
+	// s.handlers[common.GetParticipantInfoCommand] = s.GetParticipantInfo
 	s.handlers[common.GetMessagesCommand] = s.GetMessages
+	s.handlers[common.SendMessageCommand] = s.SendMessage
 }
 
 func (s *Server) send(conn net.Conn, responce common.CommandResponce) {

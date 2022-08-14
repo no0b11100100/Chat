@@ -2,9 +2,10 @@ package main
 
 import (
 	"Chat/RemoteServer/common"
+	log "Chat/RemoteServer/common/logger"
+	api "Chat/RemoteServer/structs"
 	"encoding/json"
 	"fmt"
-	"log"
 )
 
 func (s *Server) SignIn(payload []byte) common.CommandResponce {
@@ -13,7 +14,7 @@ func (s *Server) SignIn(payload []byte) common.CommandResponce {
 	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.SignInOK, Type: common.SignIn}}
 
 	if err != nil {
-		log.Println(err)
+		log.Warning.Println(err)
 		response.Command.Status = common.ServerError
 		return response
 	}
@@ -34,7 +35,7 @@ func (s *Server) SignUp(payload []byte) common.CommandResponce {
 	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.SignUpOK, Type: common.SignUp}}
 
 	if err != nil {
-		log.Println(err)
+		log.Warning.Println(err)
 		response.Command.Status = common.ServerError
 		return response
 	}
@@ -51,21 +52,47 @@ func (s *Server) SignUp(payload []byte) common.CommandResponce {
 }
 
 func (s *Server) GetUserChats(payload []byte) common.CommandResponce {
+	log.Info.Println("GetUserChats", payload)
 	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetUserChatsCommand}}
-	return response
-}
+	userID := api.UserID{}
 
-func (s *Server) GetChatInfo(payload []byte) common.CommandResponce {
-	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetChatInfoCommand}}
-	return response
-}
+	err := json.Unmarshal(payload, &userID)
+	if err != nil {
+		log.Warning.Println(err)
+	}
 
-func (s *Server) GetParticipantInfo(payload []byte) common.CommandResponce {
-	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetParticipantInfoCommand}}
+	chats := s.database.GetUserChats(userID.UserId)
+
+	p, err := json.Marshal(chats)
+	if err != nil {
+		log.Warning.Println(err)
+	}
+
+	response.Command.Payload = p
+
 	return response
 }
 
 func (s *Server) GetMessages(payload []byte) common.CommandResponce {
 	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetMessagesCommand}}
+	messageChan := api.MessageChan{}
+	err := json.Unmarshal(payload, &messageChan)
+	if err != nil {
+		log.Warning.Println(err)
+	}
+
+	messages := s.database.GetMessages(messageChan.ChatId, messageChan.MessageId, messageChan.Direction)
+	p, err := json.Marshal(messages)
+	if err != nil {
+		log.Warning.Println(err)
+	}
+	response.Command.Payload = p
+
+	return response
+}
+
+func (s *Server) SendMessage(payload []byte) common.CommandResponce {
+	log.Info.Println("SendMessage", payload)
+	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.SendMessageCommand}}
 	return response
 }

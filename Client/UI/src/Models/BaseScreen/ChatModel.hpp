@@ -63,14 +63,13 @@ public:
     {
         emit beginResetModel();
         m_messages.clear();
-        m_messages.emplace_back(new SimpleMessage("Message", false, this));
         for(const auto& message : messages.messages())
         {
             //TODO: use own json
             auto s = message.message_json();
             QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
             QJsonObject message_json = object.object();
-            std::string text = message_json["text"].toString().toStdString();
+            std::string text = message_json["message"].toString().toStdString();
             m_messages.emplace_back(new SimpleMessage(QString::fromStdString(text), false));
         }
 

@@ -12,6 +12,8 @@ const (
 	GetParticipantInfoCommand
 	GetMessagesCommand
 
+	SendMessageCommand
+
 	Max
 )
 
