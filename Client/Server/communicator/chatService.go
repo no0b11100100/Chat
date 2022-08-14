@@ -16,8 +16,32 @@ type ChatService struct {
 	messageChan chan *api.ExchangedMessage
 }
 
-func NewChatService(sender RemoteServerInterface) *ChatService {
-	return &ChatService{sender: sender, messageChan: make(chan *api.ExchangedMessage)}
+func NewChatService(sender RemoteServerInterface, notification common.ChannelType) *ChatService {
+	chatService := &ChatService{sender: sender, messageChan: make(chan *api.ExchangedMessage)}
+
+	go chatService.handleNotification(notification)
+
+	return chatService
+}
+
+func (chat *ChatService) handleNotification(ch common.ChannelType) {
+	for {
+		for data := range ch {
+			if data.Type == common.NotifyMessageCommand {
+				var message api.ExchangedMessage
+				err := json.Unmarshal(data.Payload, &message)
+				if err == nil {
+					chat.messageChan <- &message
+				} else {
+					log.Warning.Println(string(data.Payload), err)
+				}
+			}
+		}
+	}
+}
+
+func (chat *ChatService) IsHandledTopic(topic common.CommandType) bool {
+	return topic == common.NotifyMessageCommand
 }
 
 type ResponseType interface {

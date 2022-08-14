@@ -19,10 +19,22 @@ type Communicator struct {
 
 func NewCommunicator() *Communicator {
 	ch := make(common.ChannelType)
+	chatServiceNotification := make(common.ChannelType)
 	remoteServer := app.NewRemoteServer(ch)
-	c := &Communicator{userService: NewUserService(remoteServer), chatService: NewChatService(remoteServer), remoteServer: remoteServer, notification: ch}
+	c := &Communicator{userService: NewUserService(remoteServer), chatService: NewChatService(remoteServer, chatServiceNotification), remoteServer: remoteServer, notification: ch}
+	go c.handleServerNotifications(ch, chatServiceNotification)
 
 	return c
+}
+
+func (c *Communicator) handleServerNotifications(ch common.ChannelType, chatServiceChan common.ChannelType) {
+	for {
+		for data := range ch {
+			if c.chatService.IsHandledTopic(data.Type) {
+				chatServiceChan <- data
+			}
+		}
+	}
 }
 
 func (c *Communicator) runGRPCClient() {

@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-func (s *Server) SignIn(payload []byte) common.CommandResponce {
+func (s *Server) SignIn(payload []byte) *common.CommandResponce {
 	user := common.User{}
 	err := json.Unmarshal(payload, &user)
 	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.SignInOK, Type: common.SignIn}}
@@ -16,20 +16,20 @@ func (s *Server) SignIn(payload []byte) common.CommandResponce {
 	if err != nil {
 		log.Warning.Println(err)
 		response.Command.Status = common.ServerError
-		return response
+		return &response
 	}
 
 	status, userID := s.database.ValidateUser(user)
 	if !status {
 		response.Command.Status = common.SignInError
-		return response
+		return &response
 	}
 
 	response.Command.Payload = []byte(string(fmt.Sprintf("{\"user_id\":\"%v\"}", userID)))
-	return response
+	return &response
 }
 
-func (s *Server) SignUp(payload []byte) common.CommandResponce {
+func (s *Server) SignUp(payload []byte) *common.CommandResponce {
 	user := common.User{}
 	err := json.Unmarshal(payload, &user)
 	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.SignUpOK, Type: common.SignUp}}
@@ -37,21 +37,21 @@ func (s *Server) SignUp(payload []byte) common.CommandResponce {
 	if err != nil {
 		log.Warning.Println(err)
 		response.Command.Status = common.ServerError
-		return response
+		return &response
 	}
 
 	if !s.database.IsEmailUnique(user.Email) {
 		response.Command.Status = common.SignUpInvalidEmail
-		return response
+		return &response
 	}
 
 	_, userID := s.database.RegisterUser(user)
 
 	response.Command.Payload = []byte(string(fmt.Sprintf("{\"user_id\":\"%v\"}", userID)))
-	return response
+	return &response
 }
 
-func (s *Server) GetUserChats(payload []byte) common.CommandResponce {
+func (s *Server) GetUserChats(payload []byte) *common.CommandResponce {
 	log.Info.Println("GetUserChats", payload)
 	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetUserChatsCommand}}
 	userID := api.UserID{}
@@ -70,10 +70,10 @@ func (s *Server) GetUserChats(payload []byte) common.CommandResponce {
 
 	response.Command.Payload = p
 
-	return response
+	return &response
 }
 
-func (s *Server) GetMessages(payload []byte) common.CommandResponce {
+func (s *Server) GetMessages(payload []byte) *common.CommandResponce {
 	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.GetMessagesCommand}}
 	messageChan := api.MessageChan{}
 	err := json.Unmarshal(payload, &messageChan)
@@ -88,11 +88,12 @@ func (s *Server) GetMessages(payload []byte) common.CommandResponce {
 	}
 	response.Command.Payload = p
 
-	return response
+	return &response
 }
 
-func (s *Server) SendMessage(payload []byte) common.CommandResponce {
+func (s *Server) SendMessage(payload []byte) *common.CommandResponce {
 	log.Info.Println("SendMessage", payload)
-	response := common.CommandResponce{Type: common.Response, Command: common.Command{Status: common.OK, Type: common.SendMessageCommand}}
-	return response
+	//TODO: get chatID
+	s.broadcastChat("chatID", payload)
+	return nil
 }

@@ -27,6 +27,8 @@ using chat::ReadMessage;
 using chat::ChatData;
 
 
+using MessageNotificationCallback = std::function<void(ExchangedMessage)>;
+
 // https://gist.github.com/ppLorins/d4484b61f12b2d87ac5c8d50d0808974
 // https://github.com/grpc/grpc/blob/master/examples/cpp/route_guide/route_guide_client.cc
 class ChatService final
@@ -121,7 +123,7 @@ public:
 
     //Note: Run in separate thread
     //TODO: change argument(s)
-    void MessagesUpdated(std::function<void(std::string)> handler)
+    void MessagesUpdated(MessageNotificationCallback handler)
     {
         // std::thread t([this, handler](){
         google::protobuf::Empty request;
@@ -131,7 +133,7 @@ public:
         std::unique_ptr< ClientReader<ExchangedMessage> > reader(_stub->recieveMessage(&context, request));
         while(reader->Read(&reply))
         {
-            handler(reply.chat_id());
+            handler(reply);
         }
 
         Status status = reader->Finish();

@@ -8,11 +8,9 @@ const (
 	SignOut
 
 	GetUserChatsCommand
-	GetChatInfoCommand
-	GetParticipantInfoCommand
 	GetMessagesCommand
-
 	SendMessageCommand
+	NotifyMessageCommand
 
 	Max
 )

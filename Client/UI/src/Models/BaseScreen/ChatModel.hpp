@@ -84,6 +84,21 @@ public:
         emit sendingMessage(m_currentChatID, message);
     }
 
+    void AddMessage(chat::ExchangedMessage message)
+    {
+        if(m_currentChatID != "" && QString::fromStdString(message.chat_id()) == m_currentChatID)
+        {
+            auto msg = message.message();
+            auto s = msg.message_json();
+            QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
+            QJsonObject message_json = object.object();
+            std::string text = message_json["message"].toString().toStdString();
+            emit beginResetModel();
+            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(text), false));
+            emit endResetModel();
+        }
+    }
+
 signals:
     void chatSelectedChanged();
     void sendingMessage(QString, QString);

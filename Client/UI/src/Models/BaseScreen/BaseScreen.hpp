@@ -23,7 +23,7 @@ public:
         QObject::connect(m_chatList.get(), &ChatListModel::chatSelected, this, &BaseScreen::setChat);
         QObject::connect(m_chatModel.get(), &ChatModel::sendingMessage, this, &BaseScreen::sendMessage);
         std::thread([this](){
-                m_client->chatService().MessagesUpdated([](std::string msg){std::cout << msg << std::endl;});
+                m_client->chatService().MessagesUpdated([this](chat::ExchangedMessage msg){handleMessageNotification(msg);});
             }).detach();
     }
 
@@ -61,4 +61,14 @@ private:
     std::unique_ptr<ChatModel> m_chatModel;
     std::unique_ptr<ChatListModel> m_chatList;
     GRPCClient* m_client;
+
+    void handleMessageNotification(chat::ExchangedMessage message)
+    {
+        m_chatModel->AddMessage(message);
+        auto s = message.message().message_json();
+        QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
+        QJsonObject message_json = object.object();
+        std::string text = message_json["message"].toString().toStdString();
+        m_chatList->SetLastMessage(QString::fromStdString(message.chat_id()), QString::fromStdString(text));
+    }
 };
