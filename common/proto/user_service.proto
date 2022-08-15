@@ -34,6 +34,14 @@ message Response {
     string statusMessage=6;
 }
 
+message UserInfo {
+    string user_id=1;
+    string name=2;
+    string nickName=3;
+    string photo=4;
+    repeated string chats=5;
+}
+
 message UserData {
     string json=1;
 }

@@ -5,6 +5,7 @@ package chat;
 option go_package = "/;api";
 import "google/protobuf/empty.proto";
 
+
 message ChatInfo {
     string chat_id=1;
     string title=2;
@@ -12,6 +13,8 @@ message ChatInfo {
     string lastMessage=4;
     int64 unreadedCount=5;
     string cover=6;
+    repeated string participants = 7;
+    Messages messages=8;
 }
 
 message Chats {

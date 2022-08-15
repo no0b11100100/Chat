@@ -76,14 +76,6 @@ func makeRequest[T ResponseType](send func(common.Command, common.ChannelType), 
 func (chat *ChatService) GetChats(_ context.Context, userID *api.UserID) (*api.Chats, error) {
 	log.Info.Printf("GetChats %+v\n", *userID)
 	var chats api.Chats
-	// var c api.ChatInfo
-	// c.ChatId = "1"
-	// c.Title = "ALice"
-	// c.SecondLine = ""
-	// c.LastMessage = "test message"
-	// c.UnreadedCount = 0
-	// c.Cover = ""
-	// chats.Chats = append(chats.Chats, &c)
 	makeRequest(chat.sender.Send, common.GetUserChatsCommand, *userID, &chats)
 	return &chats, nil
 }

@@ -38,7 +38,7 @@ type Database interface {
 	RegisterUser(common.User) (bool, string)
 	GetUserChats(string) api.Chats
 	// GetChatParticipants(string) []api.ParticipantInfo
-	GetMessages(string, string, api.Direction) []api.Message
+	GetMessages(string, string, api.Direction) []*api.Message
 	// GetUsers() []common.User
 	// GetChatMessages(string) []common.Message
 	// AddMessage(common.Message)
@@ -74,6 +74,13 @@ func (db *DB) Connect() {
 
 	db.tables["Users"] = users
 	db.tables["Chats"] = chats
+
+	// ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+	// _, _ = db.tables["Chats"].InsertOne(ctx, api.ChatInfo{Messages: &api.Messages{Messages: []*api.Message{&api.Message{MessageJson: string([]byte(`{"message":"test message"}`))}}},
+	// 	ChatId: "1", Title: "Test chat", LastMessage: "test message", Participants: []string{"726ac197-8640-43cc-9f54-0006780957f1"}})
+	// if err != nil {
+	// 	log.Warning.Println(err)
+	// }
 
 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
 	if err != nil {
@@ -135,73 +142,51 @@ func (db *DB) RegisterUser(user common.User) (bool, string) {
 	return true, user.ID
 }
 
+func (db *DB) getChatInfo(chatID string) api.ChatInfo {
+	log.Info.Println(chatID)
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	var chat api.ChatInfo
+	err := db.tables["Chats"].FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&chat)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+	}
+
+	return chat
+}
+
 func (db *DB) GetUserChats(userID string) api.Chats {
 	log.Info.Println("GetUserChatsr", userID)
 	result := make([]*api.ChatInfo, 0)
-	// ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
-	// cur, err := db.tables["Users"].Find(ctx, bson.M{"user_id": userID})
-	// if err != nil {
-	// 	log.Warning.Println("DB error:", err)
-	// }
+	var user api.UserInfo
 
-	// for cur.Next(ctx) {
-	// 	var chat api.ChatInfo
-	// 	err = cur.Decode(&chat)
-	// 	if err != nil {
-	// 		log.Warning.Println("DB error:", err)
-	// 	}
+	err := db.tables["Users"].FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+	}
 
-	// 	result = append(result, &chat)
-	// }
+	for _, chatID := range user.Chats {
+		chat := db.getChatInfo(chatID)
+		result = append(result, &chat)
+	}
 
-	// if err := cur.Err(); err != nil {
-	// 	log.Error.Println(err)
-	// }
-
-	// cur.Close(ctx)
-
-	result = append(result, &api.ChatInfo{ChatId: "1", LastMessage: "test message", Title: "Test chat"})
+	log.Info.Println(result)
 
 	return api.Chats{Chats: result}
 }
 
-// func (db *DB) getParticipantInfo(userID string) api.ParticipantInfo {
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-// 	var participant api.ParticipantInfo
-// 	if err := db.tables["Users"].FindOne(ctx, bson.M{"user_id": userID}).Decode(&participant); err != nil {
-// 		log.Warning.Println(err)
-// 	}
-
-// 	return participant
-// }
-
-// func (db *DB) GetChatParticipants(chatID string) []api.ParticipantInfo {
-// 	log.Info.Println("GetChatParticipants", chatID)
-// 	result := make([]api.ParticipantInfo, 0)
-// 	var chat api.ChatInformation
-
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-// 	err := db.tables["Chats"].FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&chat)
-// 	if err != nil {
-// 		log.Warning.Println("DB error:", err)
-// 	}
-
-// 	for _, userID := range chat.Participants {
-// 		result = append(result, db.getParticipantInfo(userID.UserId))
-// 	}
-
-// 	return result
-// }
-
 // If message_from is empty - return all available messages for chat
 // otherwise - messages from provided message_id
-func (db *DB) GetMessages(chatID string, message_from string, direction api.Direction) []api.Message {
+func (db *DB) GetMessages(chatID string, message_from string, direction api.Direction) []*api.Message {
 	log.Info.Printf("GetMessages %v < %v >\n", chatID, message_from)
-	result := make([]api.Message, 0)
-	if chatID == "1" {
-		result = append(result, api.Message{MessageJson: string([]byte(`{"sender":"Alice","message":"test message", "sender_id":"726ac197-8640-43cc-9f54-0006780957f1"}`))})
-	}
+	chat := db.getChatInfo(chatID)
+
+	return chat.Messages.Messages
+	// result := make([]api.Message, 0)
+	// if chatID == "1" {
+	// 	result = append(result, api.Message{MessageJson: string([]byte(`{"sender":"Alice","message":"test message", "sender_id":"726ac197-8640-43cc-9f54-0006780957f1"}`))})
+	// }
 	// if message_from == "" {
 	// 	var chat api.ChatInfo
 	// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -219,5 +204,5 @@ func (db *DB) GetMessages(chatID string, message_from string, direction api.Dire
 	// 	}
 	// }
 
-	return result
+	// return result
 }
