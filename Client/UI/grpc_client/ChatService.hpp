@@ -6,6 +6,8 @@
 
 #include "proto_gen/chat_service.grpc.pb.h"
 
+#include <QDebug>
+
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
@@ -77,7 +79,7 @@ public:
     void ReadingMessage(std::string chatID, std::string messageID)
     {
         ReadMessage request;
-        google::protobuf::Empty reply;
+        chat::Status reply;
         ClientContext context;
 
         request.set_chat_id(chatID);
@@ -93,7 +95,7 @@ public:
 
     void EditChat(ChatData request)
     {
-        google::protobuf::Empty reply;
+        chat::Status reply;
         ClientContext context;
 
         Status status = _stub->editChat(&context, request, &reply);
@@ -107,7 +109,7 @@ public:
     void SendMessage(std::string chatID, Message message)
     {
         ExchangedMessage request;
-        google::protobuf::Empty reply;
+        chat::Status reply;
         ClientContext context;
 
         request.set_chat_id(chatID);
@@ -118,6 +120,8 @@ public:
 
         if (!status.ok()) {
             std::cout << "SignIn error " << status.error_code() << ": " << status.error_message() << std::endl;
+        } else {
+            qDebug() << "SendMessage response " << QString::fromStdString(reply.status());
         }
     }
 

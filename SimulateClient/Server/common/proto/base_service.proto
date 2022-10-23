@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package base;
+
+option go_package = "/;api";
+
+message SignIn {
+    string email=1;
+    string password=2;
+}
+
+message Result {
+    string user_id=1;
+    string errorMessage=2;
+}
+
+message SignUp {
+    string name=1;
+    string nickName=2;
+    string email=3;
+    string password=4;
+    string confirmedPassword=5;
+}
+
+service Base {
+    rpc signIn(SignIn) returns(Result);
+    rpc signUp(SignUp) returns(Result);
+}

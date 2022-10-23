@@ -97,6 +97,10 @@ public:
             m_messages.emplace_back(new SimpleMessage(QString::fromStdString(text), false));
             emit endResetModel();
         }
+        else
+        {
+            qDebug() << "Not add message" << m_currentChatID << QString::fromStdString(message.chat_id());
+        }
     }
 
 signals:

@@ -1,0 +1,8 @@
+-rootPath
+/home/wlandos/Projects/Chat/SimulateClient/UI
+-cmake-output
+-output-file
+/home/wlandos/Projects/Chat/SimulateClient/UI/build/.qt_plugins/Qt6_QmlPlugins_Imports_UI.cmake
+-importPath
+/usr/lib/qt6/qml
+/home/wlandos/Projects/Chat/SimulateClient/UI/build

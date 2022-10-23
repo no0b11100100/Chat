@@ -1,6 +1,7 @@
 package common
 
 type Command struct {
+	ID string `json:"id"`
 	Type    CommandType   `json:"type"`
 	Status  CommandStatus `json:"status"`
 	Payload []byte        `json:"payload,omitempty"`

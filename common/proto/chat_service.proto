@@ -67,14 +67,18 @@ message ReadMessage {
     string message_id=2;
 }
 
+message Status {
+    string status = 1;
+}
+
 service Chat {
     rpc getChats(UserID) returns(Chats);
     rpc getMessages(MessageChan) returns(Messages);
 
-    rpc readMessage(ReadMessage) returns(google.protobuf.Empty);
-    rpc editChat(ChatData) returns(google.protobuf.Empty);
+    rpc readMessage(ReadMessage) returns(Status);
+    rpc editChat(ChatData) returns(Status);
     rpc chatChanged(google.protobuf.Empty) returns(stream ChatData);
 
-    rpc sendMessage(ExchangedMessage) returns(google.protobuf.Empty);
+    rpc sendMessage(ExchangedMessage) returns(Status);
     rpc recieveMessage(google.protobuf.Empty) returns(stream ExchangedMessage);
 }

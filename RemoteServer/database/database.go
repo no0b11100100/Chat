@@ -146,7 +146,7 @@ func (db *DB) getChatInfo(chatID string) api.ChatInfo {
 	log.Info.Println(chatID)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	var chat api.ChatInfo
-	err := db.tables["Chats"].FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&chat)
+	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatId": chatID}).Decode(&chat)
 	if err != nil {
 		log.Warning.Println("DB error:", err)
 	}

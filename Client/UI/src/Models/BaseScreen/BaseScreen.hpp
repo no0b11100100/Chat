@@ -53,7 +53,11 @@ public slots:
     {
         m_chatList->SetLastMessage(chatID, message);
         //TODO: add message properly
+        //TODO: move logic for Message to ChatModel
         chat::Message msg;
+        std::string message_json = "{\"message\":\"" + message.toStdString() + "\"}";
+        msg.set_message_json(message_json);
+        qDebug() << "Before SendMessage";
         m_client->chatService().SendMessage(chatID.toStdString(), msg);
     }
 
@@ -64,6 +68,7 @@ private:
 
     void handleMessageNotification(chat::ExchangedMessage message)
     {
+        qDebug() << "handleMessage";
         m_chatModel->AddMessage(message);
         auto s = message.message().message_json();
         QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
