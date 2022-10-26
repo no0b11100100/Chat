@@ -6,3 +6,4 @@ RemoteServer/data
 Client/UI/build/
 common/proto/*.txt
 doc/**
+SimulateClient/**

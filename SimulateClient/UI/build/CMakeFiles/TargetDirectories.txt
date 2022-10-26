@@ -1,5 +1,0 @@
-/home/wlandos/Projects/Chat/SimulateClient/UI/build/CMakeFiles/UI.dir
-/home/wlandos/Projects/Chat/SimulateClient/UI/build/CMakeFiles/UI_qmlimportscan.dir
-/home/wlandos/Projects/Chat/SimulateClient/UI/build/CMakeFiles/edit_cache.dir
-/home/wlandos/Projects/Chat/SimulateClient/UI/build/CMakeFiles/rebuild_cache.dir
-/home/wlandos/Projects/Chat/SimulateClient/UI/build/CMakeFiles/UI_autogen.dir
