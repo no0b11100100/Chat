@@ -3,6 +3,7 @@ import QtQuick.Controls
 
 Rectangle {
     id: root
+    property var action
 
     height: input.height
 
@@ -28,6 +29,11 @@ Rectangle {
             height: root.height
             text: "Send"
             visible: root.visible
+
+            onClicked: {
+                root.action(input.text)
+                input.text = ""
+            }
         }
 
     }

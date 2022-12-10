@@ -13,12 +13,17 @@ Window {
     color: "green"
 
     ScreenController {
+        id: screenConttroller
         anchors.fill: parent
         model: _models.model
     }
 
     Backend {
         id: _models
+
+        onModelChanged: {
+            screenConttroller.changeScreen()
+        }
     }
 
 }

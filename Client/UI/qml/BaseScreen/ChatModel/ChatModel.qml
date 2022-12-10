@@ -47,6 +47,7 @@ Rectangle {
             id: userInput
             width: root.width
             visible: root.model.isChatSelected
+            action: root.model.sendMessage
         }
     }
 }

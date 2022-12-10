@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-class ChatInfo : public QObject
+class ChatInformation : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString title READ title CONSTANT)
@@ -10,10 +10,11 @@ class ChatInfo : public QObject
     Q_PROPERTY(QString id READ id CONSTANT)
 
 public:
-    ChatInfo(const QString& id, const QString& title, QObject* parent = nullptr)
+    ChatInformation(const QString& id, const QString& title, const QString& lastMessage, QObject* parent = nullptr)
         : QObject{parent},
         m_title{title},
-        m_id{id}
+        m_id{id},
+        m_lastMessage{lastMessage}
     {}
 
     QString title() const { return m_title; }

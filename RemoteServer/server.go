@@ -2,6 +2,7 @@ package main
 
 import (
 	"Chat/RemoteServer/common"
+	log "Chat/RemoteServer/common/logger"
 	"Chat/RemoteServer/database"
 	"bufio"
 	"encoding/base64"
@@ -12,7 +13,15 @@ import (
 	"sync"
 )
 
-type Handler func([]byte) common.CommandResponce
+type responseType int
+
+const (
+	noResponse responseType = iota
+	normal
+	broadcast
+)
+
+type Handler func([]byte, string) (*common.CommandResponce, responseType)
 
 type Server struct {
 	// key - (ip address)user id, value - connection
@@ -20,6 +29,7 @@ type Server struct {
 	listener net.Listener
 	database database.Database
 	handlers map[common.CommandType]Handler
+	mu       *sync.Mutex
 }
 
 func NewServer() *Server {
@@ -41,6 +51,7 @@ func NewServer() *Server {
 		listener: ln,
 		handlers: make(map[common.CommandType]Handler),
 		database: database.NewDatabase(),
+		mu:       new(sync.Mutex),
 	}
 
 	s.addHandlers()
@@ -88,6 +99,8 @@ func (s *Server) processConnection(conn net.Conn) {
 }
 
 func (s *Server) handleCommand(payload string, conn net.Conn) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	decodedPayload, err := base64.StdEncoding.DecodeString(payload)
 	if err != nil {
 		panic(err)
@@ -100,15 +113,25 @@ func (s *Server) handleCommand(payload string, conn net.Conn) {
 		fmt.Println("handleCommand unmarshal error", err)
 	}
 
-	var responce common.CommandResponce
+	log.Info.Println("Command", c.Type)
+	var responce *common.CommandResponce
+	var t responseType
 	if handler, ok := s.handlers[c.Type]; ok {
-		responce = handler(c.Payload)
+		responce, t = handler(c.Payload, c.ID)
 	} else {
 		fmt.Println("Unknown command", c.Type)
 		responce.Command.Status = common.UnknownCommand
 	}
 
-	s.send(conn, responce)
+	switch t {
+	case normal:
+		s.send(conn, *responce)
+	case broadcast:
+		s.send(conn, *responce)
+		s.broadcastChat("", c.Payload)
+	default:
+		log.Info.Println("Skip response for", c.Type)
+	}
 }
 
 func (s *Server) addHandlers() {
@@ -116,9 +139,8 @@ func (s *Server) addHandlers() {
 	s.handlers[common.SignUp] = s.SignUp
 
 	s.handlers[common.GetUserChatsCommand] = s.GetUserChats
-	s.handlers[common.GetChatInfoCommand] = s.GetChatInfo
-	s.handlers[common.GetParticipantInfoCommand] = s.GetParticipantInfo
 	s.handlers[common.GetMessagesCommand] = s.GetMessages
+	s.handlers[common.SendMessageCommand] = s.SendMessage
 }
 
 func (s *Server) send(conn net.Conn, responce common.CommandResponce) {
@@ -129,7 +151,34 @@ func (s *Server) send(conn net.Conn, responce common.CommandResponce) {
 		return
 	}
 
+	s.notify(conn, bytes)
+}
+
+func (s *Server) notify(conn net.Conn, bytes []byte) {
+	log.Info.Println("Notify", conn.RemoteAddr().String())
 	payload := base64.StdEncoding.EncodeToString(bytes)
 	payload = payload + "\n"
 	conn.Write([]byte(payload))
+}
+
+func (s *Server) broadcastChat(_ string, commandPayload []byte) {
+	notification := common.CommandResponce{Type: common.Notification, Command: common.Command{Status: common.OK, Type: common.NotifyMessageCommand}}
+	// /////
+	// msg := api.ExchangedMessage{ChatId: "1", Message: &api.Message{MessageJson: string([]byte(`{"message": "notification"}`))}}
+	// commandPayload, _ = json.Marshal(msg)
+	// /////
+	notification.Command.Payload = commandPayload
+	payload, err := json.Marshal(notification)
+	if err != nil {
+		log.Warning.Println(err)
+	}
+	s.cache.Range(func(k, v interface{}) bool {
+		if conn, ok := v.(net.Conn); ok {
+			s.notify(conn, payload)
+		} else {
+			log.Error.Printf("Cannot cast %+T to net.conn", v)
+		}
+
+		return true
+	})
 }

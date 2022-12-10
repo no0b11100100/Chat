@@ -7,6 +7,7 @@
 
 #include "Chat.hpp"
 #include "Header.hpp"
+#include "../../../grpc_client/proto_gen/chat_service.pb.h"
 
 #include <QDebug>
 
@@ -20,11 +21,7 @@ public:
 
     ChatListModel(QObject* parent = nullptr)
         : QAbstractListModel{parent}
-    {
-        m_chats.emplace_back(new ChatInfo("1", "First chat", parent));
-        m_chats.emplace_back(new ChatInfo("2", "Second chat", parent));
-        m_chats.emplace_back(new ChatInfo("3", "Third chat", parent));
-    }
+    {}
 
     int rowCount(const QModelIndex& parent) const override
     {
@@ -45,26 +42,32 @@ public:
         auto chat = findChatByID(chatID);
         Header header;
         header.SetTitle(chat->title());
-        // TODO: Add second line
         emit chatSelected(header, chatID);
     }
 
-signals:
-    void chatSelected(const Header&, QString);
+    void SetChats(chat::Chats chats)
+    {
+        for(const auto& chat : chats.chats())
+        {
+            m_chats.emplace_back(std::make_shared<ChatInformation>(QString::fromStdString(chat.chat_id()), QString::fromStdString(chat.title()), QString::fromStdString(chat.lastmessage())));
+        }
+    }
 
-public slots:
-    void setLastMessage(QString chatID, QString message)
+    void SetLastMessage(QString chatID, QString message)
     {
         auto chat = findChatByID(chatID);
         chat->UpdateLastMessage(message);
     }
 
-private:
-    std::vector<std::shared_ptr<ChatInfo>> m_chats;
+signals:
+    void chatSelected(const Header&, QString);
 
-    std::shared_ptr<ChatInfo> findChatByID(QString id)
+private:
+    std::vector<std::shared_ptr<ChatInformation>> m_chats;
+
+    std::shared_ptr<ChatInformation> findChatByID(QString id)
     {
-        auto it = std::find_if(m_chats.begin(), m_chats.end(), [&](const std::shared_ptr<ChatInfo>& chat){
+        auto it = std::find_if(m_chats.begin(), m_chats.end(), [&](const std::shared_ptr<ChatInformation>& chat){
             return chat->id() == id;
         });
 

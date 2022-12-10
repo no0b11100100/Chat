@@ -1,32 +1,41 @@
-package communicator
+package services
 
 import (
 	"Chat/Client/Server/api"
 	"Chat/Client/Server/common"
+	"Chat/Client/Server/interfaces"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+
+	"github.com/golang/protobuf/ptypes/empty"
 )
 
-type BaseService struct {
-	api.UnimplementedBaseServer
-	sender RemoteServerInterface
+type userService struct {
+	api.UnimplementedChatServer
+	sender interfaces.Sender
+	api.UnimplementedUserServer
 	errors map[common.CommandStatus]string
 }
 
-func NewBaseService(sender RemoteServerInterface) *BaseService {
+func NewUserService(sender interfaces.Sender) *userService {
 	errors := map[common.CommandStatus]string{
 		common.SignInOK:           "Successfully log in",
 		common.SignInError:        "Invalid email or password",
 		common.SignUpOK:           "You successfully created a new account",
 		common.SignUpInvalidEmail: "This email already in use",
 	}
-
-	return &BaseService{sender: sender, errors: errors}
+	return &userService{sender: sender, errors: errors}
 }
 
-func (s *BaseService) SignIn(_ context.Context, userData *api.SignIn) (*api.Result, error) {
+func (chat *userService) IsHandledTopic(command common.CommandType) bool {
+	return false
+}
+
+func (chat *userService) HandleTopic(common.Command) {}
+
+func (s *userService) SignIn(_ context.Context, userData *api.SignIn) (*api.Response, error) {
 	fmt.Printf("SignIn %+v\n", *userData)
 	c := common.Command{Type: common.SignIn}
 	var err error
@@ -36,30 +45,27 @@ func (s *BaseService) SignIn(_ context.Context, userData *api.SignIn) (*api.Resu
 		log.Println(err)
 	}
 
-	ch := make(common.ChannelType)
-	s.sender.Send(c, ch)
+	response := <-s.sender.Send(c)
 
-	response := <-ch
-	close(ch)
 	log.Println(response)
 
-	var result api.Result
+	var result api.Response
 
 	err = json.Unmarshal(response.Payload, &result)
 	if err != nil {
 		log.Println(err)
 	}
 
-	result.ErrorMessage = s.errors[response.Status]
+	result.StatusMessage = s.errors[response.Status]
 
 	return &result, nil
 }
 
-func (s *BaseService) SignUp(_ context.Context, userData *api.SignUp) (*api.Result, error) {
+func (s *userService) SignUp(_ context.Context, userData *api.SignUp) (*api.Response, error) {
 	fmt.Printf("SignUp %+v\n", *userData)
 
 	if userData.Password != userData.ConfirmedPassword {
-		return &api.Result{ErrorMessage: "Passwords not match"}, nil
+		return &api.Response{StatusMessage: "Passwords not match"}, nil
 	}
 
 	c := common.Command{Type: common.SignUp}
@@ -70,14 +76,11 @@ func (s *BaseService) SignUp(_ context.Context, userData *api.SignUp) (*api.Resu
 		log.Println(err)
 	}
 
-	ch := make(common.ChannelType)
-	s.sender.Send(c, ch)
+	response := <-s.sender.Send(c)
 
-	response := <-ch
-	close(ch)
 	log.Println(response)
 
-	var result api.Result
+	var result api.Response
 
 	if response.Status == common.SignUpOK {
 		err = json.Unmarshal(response.Payload, &result)
@@ -86,7 +89,11 @@ func (s *BaseService) SignUp(_ context.Context, userData *api.SignUp) (*api.Resu
 		}
 	}
 
-	result.ErrorMessage = s.errors[response.Status]
+	result.StatusMessage = s.errors[response.Status]
 
 	return &result, nil
+}
+
+func (s *userService) EditUser(context.Context, *api.UserData) (*empty.Empty, error) {
+	return nil, nil
 }

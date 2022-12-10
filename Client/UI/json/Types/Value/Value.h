@@ -158,6 +158,6 @@ public:
     }
 };
 
-using json = Value;
-
 }
+
+using json = Types::Value;

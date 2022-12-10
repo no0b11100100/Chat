@@ -7,6 +7,10 @@ import "BaseScreen"
 Rectangle {
     id: root
     property var model
+    property var changeScreen: function() {
+        console.log("Change screen")
+        screenLoader.sourceComponent = baseScreen
+    }
 
     Loader {
         id: screenLoader
@@ -76,7 +80,7 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        screenLoader.sourceComponent = baseScreen
+        screenLoader.sourceComponent = signIn
     }
 
 }

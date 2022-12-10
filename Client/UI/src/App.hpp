@@ -7,7 +7,7 @@
 
 #include <QObject>
 
-#include "../grpc_client/Client.hpp"
+// #include "../grpc_client/Client.hpp"
 #include "Models/SignInUpModel.hpp"
 #include "Models/BaseScreen/BaseScreen.hpp"
 
@@ -25,7 +25,8 @@ public:
         m_userID{""}
     {
         initModels(parent);
-        m_currentModel = m_models[BASE_SCREEN_MODEL];
+        m_currentModel = m_models[LOG_IN_MODEL];
+        QObject::connect(this, &App::activateBaseScreen, this, &App::changeToBaseScreen);
     }
 
     void initModels(QObject* parent) {
@@ -33,7 +34,7 @@ public:
             [this](SignIn data){ return signInAction(data); },
             [this](SignUp data){ return signUpAction(data); },
             parent);
-        m_models[BASE_SCREEN_MODEL] = std::make_unique<BaseScreen>(parent);
+        m_models[BASE_SCREEN_MODEL] = std::make_unique<BaseScreen>(&m_grpcClient, parent);
     }
 
     QObject* currentModel()
@@ -42,30 +43,45 @@ public:
     }
 
 private:
+    // TODO: investigate delay
     std::string signUpAction(SignUp data) {
         auto result = m_grpcClient.baseService().signUp(data);
         auto userID = result.user_id();
-        if (userID != "")
-        {
+        if ((int)result.status() == 0) {
             m_userID = userID;
+            std::thread([this, result](){
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                emit activateBaseScreen(result);
+            }).detach();
         }
-        std::cout << "SignUp " << m_userID << std::endl;
-        return result.errormessage();
+        return result.statusmessage();
     }
 
     std::string signInAction(SignIn data) {
         auto result = m_grpcClient.baseService().signIn(data);
         auto userID = result.user_id();
-        if (userID != "")
-        {
+        if ((int)result.status() == 0) {
             m_userID = userID;
+            std::thread([this, result](){
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                emit activateBaseScreen(result);
+            }).detach();
         }
-        std::cout << "SignIn " << m_userID << std::endl;
-        return result.errormessage();
+        return result.statusmessage();
+    }
+
+public slots:
+    void changeToBaseScreen(user::Response userData)
+    {
+        m_currentModel = m_models[BASE_SCREEN_MODEL];
+        BaseScreen* baseScreen = static_cast<BaseScreen*>(m_currentModel.get());
+        baseScreen->SetUser(userData);
+        emit modelChanged();
     }
 
 signals:
     void modelChanged();
+    void activateBaseScreen(user::Response);
 
 private:
     GRPCClient m_grpcClient;

@@ -7,8 +7,8 @@ services:
     build: .
     ports:
       - "8081:8081"
-    links:
-      - mongo
+    # links:
+    #   - mongo
     network_mode: "host"
   mongo:
     container_name: mongo
@@ -18,10 +18,3 @@ services:
     ports:
       - "27017:27017"
     network_mode: "host"
-  # client-server:
-  #   container_name: client-server
-  #   restart: always
-  #   build: ./../Client/Server/
-  #   ports:
-  #     - "8080:8080"
-  #     - "8081:8081"
