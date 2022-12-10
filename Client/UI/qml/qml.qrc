@@ -8,6 +8,7 @@
         <file>LogInScreen/SignScreen.qml</file>
 
         <file>BaseScreen/BaseScreen.qml</file>
+        <file>BaseScreen/SideBar.qml</file>
 
         <file>BaseScreen/ChatModel/ChatModel.qml</file>
         <file>BaseScreen/ChatModel/Header.qml</file>
