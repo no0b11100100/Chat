@@ -40,6 +40,8 @@ message UserInfo {
     string nickName=3;
     string photo=4;
     repeated string chats=5;
+    string email=6;
+    string password=7;
 }
 
 message UserData {

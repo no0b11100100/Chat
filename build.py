@@ -42,6 +42,7 @@ def parse_args():
     parser.add_argument('--client', default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--ui', default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--server', default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--all', default=False, action=argparse.BooleanOptionalAction)
     return parser.parse_args()
 
 
@@ -175,6 +176,11 @@ if __name__ == '__main__':
     # docker rm $(docker ps -a -q) && docker image prune
 
     args = parse_args()
+
+    if args.all:
+        build_client()
+        build_ui()
+        build_server()
 
     if args.client:
         build_client()
