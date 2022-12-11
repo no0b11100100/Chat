@@ -12,10 +12,11 @@ Rectangle {
         Header {
             id: header
             width: root.width
-            model: root.model.header
+            model: root.model == undefined ? undefined : root.model.header
         }
 
         ListView {
+            id: listView
             width: root.width
             height: root.height - header.height - userInput.height
             model: root.model
@@ -25,15 +26,15 @@ Rectangle {
                 model: display
             }
 
-            visible: root.model.isChatSelected
+            visible: root.model == undefined ? true : root.model.isChatSelected
 
             Component.onCompleted: {
-                console.log(root.model === undefined, root.model.name)
+                console.log(root.model === undefined, root.model === undefined ? "UNDEFINED" : root.model.name)
             }
         }
 
         Rectangle {
-            visible: !root.model.isChatSelected
+            visible: root.model == undefined ? true : !root.model.isChatSelected
             width: root.width
             height: root.height
 
@@ -46,7 +47,7 @@ Rectangle {
         UserInput {
             id: userInput
             width: root.width
-            visible: root.model.isChatSelected
+            visible: listView.visible
             action: root.model.sendMessage
         }
     }

@@ -9,11 +9,11 @@ Rectangle {
     Column {
         id: chatInfo
         Text {
-            text: root.model.title
+            text: root.model === undefined ? "" : root.model.title
         }
 
         Text {
-            text: root.model.secondLine
+            text: root.model === undefined ? "" : root.model.secondLine
         }
     }
 }

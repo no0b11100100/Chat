@@ -10,6 +10,9 @@
         <file>BaseScreen/BaseScreen.qml</file>
         <file>BaseScreen/SideBar.qml</file>
 
+        <file>BaseScreen/NotificationModel/NotificationModel.qml</file>
+        <file>BaseScreen/NotificationModel/Notification.qml</file>
+
         <file>BaseScreen/ChatModel/ChatModel.qml</file>
         <file>BaseScreen/ChatModel/Header.qml</file>
         <file>BaseScreen/ChatModel/UserInput.qml</file>

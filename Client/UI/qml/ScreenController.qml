@@ -74,7 +74,7 @@ Rectangle {
             anchors.fill: parent
             model: root.model
             Component.onCompleted: {
-                console.log("Create BaseScreen", root.model === undefined, root.model.name)
+                console.log("Create BaseScreen", root.model === undefined)
             }
         }
     }
