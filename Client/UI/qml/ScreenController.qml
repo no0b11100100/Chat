@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import QtQml
+import QtQml 2.0
 
 import "LogInScreen"
 import "BaseScreen"

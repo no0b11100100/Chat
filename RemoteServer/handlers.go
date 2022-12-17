@@ -47,7 +47,7 @@ func (s *Server) SignUp(payload []byte, id string) (*common.CommandResponce, res
 
 	_, userID := s.database.RegisterUser(user)
 
-	s.database.AddUserToChat(userID, "1") //Just for test: "1" is a test chat
+	s.database.AddUserToChat(userID, "-1") //Just for test: "-1" is a test chat
 
 	response.Command.Payload = []byte(string(fmt.Sprintf("{\"user_id\":\"%v\"}", userID)))
 	return &response, normal

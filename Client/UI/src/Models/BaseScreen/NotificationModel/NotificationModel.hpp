@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QAbstractListModel>
+#include <QDebug>
 
 #include "Notification.hpp"
 
@@ -28,6 +29,7 @@ public:
 
     QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const override
     {
+        qDebug() << "NotificationModel data" << index.isValid() << (role != Qt::DisplayRole);
         if(!index.isValid() || role != Qt::DisplayRole)
             return QVariant();
 

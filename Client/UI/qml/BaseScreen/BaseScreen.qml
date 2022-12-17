@@ -9,6 +9,8 @@ Rectangle {
     property var model
 
     Row {
+        id: row
+        // property bool isNotificationsOpened: true//false
         spacing: 1
         SideBar {
             id: sidebar
@@ -19,7 +21,7 @@ Rectangle {
                 console.log("Press sidebar", id)
                 if(id === "notificationIDButton")
                     pageLoader.sourceComponent = notification
-                if(id === "chatButtonID")
+                if(id === "chatIDButton")
                     pageLoader.sourceComponent = chats
             }
         }
@@ -37,6 +39,7 @@ Rectangle {
                 height: root.height
                 width: root.width / 4 - sidebar.width
                 model: root.model.chatListModel
+                // visible: !row.isNotificationsOpened
                 Component.onCompleted: {
                     console.log("Create ChatListModel", root.model.chatListModel === undefined, _chats.model.name)
                 }
@@ -48,8 +51,9 @@ Rectangle {
             NotificationModel {
                 id: _notification
                 height: root.height
-                width: root.width / 4 - sidebar.width
+                width: chats.width
                 model: root.model.notificationListModel
+                // visible: row.isNotificationsOpened
                 Component.onCompleted: {
                     console.log("Create NotificationModel", root.model.notificationListModel === undefined, _notification.model.name)
                 }

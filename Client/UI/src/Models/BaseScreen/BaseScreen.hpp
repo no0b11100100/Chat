@@ -13,7 +13,7 @@ class BaseScreen : public QObject
     Q_OBJECT
     Q_PROPERTY(QObject* chatModel READ chatModel CONSTANT)
     Q_PROPERTY(QObject* chatListModel READ chatList CONSTANT)
-    Q_PROPERTY(QObject* notificationListModel READ chatList CONSTANT)
+    Q_PROPERTY(QObject* notificationListModel READ notificationListModel CONSTANT)
     Q_PROPERTY(QString name READ name CONSTANT)
 public:
     BaseScreen(GRPCClient* client, QObject* parent = nullptr)

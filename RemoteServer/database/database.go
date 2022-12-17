@@ -48,6 +48,21 @@ type Database interface {
 	AddUserToChat(userID string, chatID string)
 }
 
+func (db *DB) createTestChat() {
+	var chat api.ChatInfo
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatid": "-1"}).Decode(&chat)
+	// if err != nil {
+	// 	if err == mongo.ErrNoDocuments {
+	_, err = db.tables["Chats"].InsertOne(ctx, api.ChatInfo{Messages: &api.Messages{Messages: []*api.Message{&api.Message{MessageJson: string([]byte(`{"message":"test message"}`))}}},
+		ChatId: "-1", Title: "Test chat", LastMessage: "test message", Participants: []string{}})
+	if err != nil {
+		log.Error.Println("createTestChat error:", err)
+	}
+	// 	}
+	// }
+}
+
 func (db *DB) Connect() {
 	fmt.Println("Connect database")
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017/db")
@@ -75,6 +90,8 @@ func (db *DB) Connect() {
 
 	db.tables["Users"] = users
 	db.tables["Chats"] = chats
+
+	// db.createTestChat() //Just for test
 
 	// ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	// _, _ = db.tables["Chats"].InsertOne(ctx, api.ChatInfo{Messages: &api.Messages{Messages: []*api.Message{&api.Message{MessageJson: string([]byte(`{"message":"test message"}`))}}},
@@ -160,14 +177,14 @@ func (db *DB) RegisterUser(userInfo common.User) (bool, string) {
 func (db *DB) AddUserToChat(userID string, chatID string) {
 	var chat api.ChatInfo
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatId": chatID}).Decode(&chat)
+	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatid": chatID}).Decode(&chat)
 	if err != nil {
 		log.Warning.Println("DB error:", err)
 		return
 	}
 
 	chat.Participants = append(chat.Participants, userID)
-	filter := bson.D{{"chatId", chatID}}
+	filter := bson.D{{"chatid", chatID}}
 	update := bson.D{{"$set", bson.D{{"participants", chat.Participants}}}}
 	_, err = db.tables["Chats"].UpdateOne(ctx, filter, update)
 	if err != nil {
@@ -195,7 +212,7 @@ func (db *DB) getChatInfo(chatID string) api.ChatInfo {
 	log.Info.Println(chatID)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	var chat api.ChatInfo
-	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatId": chatID}).Decode(&chat)
+	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatid": chatID}).Decode(&chat)
 	if err != nil {
 		log.Warning.Println("DB error:", err)
 	}
