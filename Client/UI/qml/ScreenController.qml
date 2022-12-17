@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import QtQml
+import QtQml 2.0
 
 import "LogInScreen"
 import "BaseScreen"
@@ -74,7 +74,7 @@ Rectangle {
             anchors.fill: parent
             model: root.model
             Component.onCompleted: {
-                console.log("Create BaseScreen", root.model === undefined, root.model.name)
+                console.log("Create BaseScreen", root.model === undefined)
             }
         }
     }

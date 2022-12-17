@@ -2,6 +2,7 @@
 
 #include "ChatModel.hpp"
 #include "ChatListModel.hpp"
+#include "NotificationModel/NotificationModel.hpp"
 #include "../../../grpc_client/Client.hpp"
 
 #include <chrono>
@@ -12,12 +13,14 @@ class BaseScreen : public QObject
     Q_OBJECT
     Q_PROPERTY(QObject* chatModel READ chatModel CONSTANT)
     Q_PROPERTY(QObject* chatListModel READ chatList CONSTANT)
+    Q_PROPERTY(QObject* notificationListModel READ notificationListModel CONSTANT)
     Q_PROPERTY(QString name READ name CONSTANT)
 public:
     BaseScreen(GRPCClient* client, QObject* parent = nullptr)
         : QObject{parent},
           m_chatModel{new ChatModel(parent)},
           m_chatList{new ChatListModel(parent)},
+          m_notificationModel{new NotificationModel(parent)},
           m_client{client}
     {
         QObject::connect(m_chatList.get(), &ChatListModel::chatSelected, this, &BaseScreen::setChat);
@@ -29,6 +32,7 @@ public:
 
     QObject* chatModel() { return m_chatModel.get(); }
     QObject* chatList() { return m_chatList.get(); }
+    QObject* notificationListModel() { return m_notificationModel.get(); }
 
     QString name() const { return "BaseScreen"; }
 
@@ -64,6 +68,7 @@ public slots:
 private:
     std::unique_ptr<ChatModel> m_chatModel;
     std::unique_ptr<ChatListModel> m_chatList;
+    std::unique_ptr<NotificationModel> m_notificationModel;
     GRPCClient* m_client;
 
     void handleMessageNotification(chat::ExchangedMessage message)

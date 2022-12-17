@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     qmlRegisterType<App, 1>("Models", 1, 0, "Backend");
+    qRegisterMetaType<user::Response>("user::Response");
 
     // used for qml logs
     qSetMessagePattern("%{time HH:mm:ss }%{file}:%{line}: %{message}");

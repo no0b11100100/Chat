@@ -63,6 +63,9 @@ set(PROJECT_SOURCES
         src/Models/BaseScreen/Header.hpp
         src/Models/BaseScreen/Message/SimpleMessage.hpp
 
+        src/Models/BaseScreen/NotificationModel/NotificationModel.hpp
+        src/Models/BaseScreen/NotificationModel/Notification.hpp
+
         src/App.hpp
         Logger/Logger.hpp
 )
