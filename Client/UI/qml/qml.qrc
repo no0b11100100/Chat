@@ -17,6 +17,11 @@
         <file>BaseScreen/ChatModel/Header.qml</file>
         <file>BaseScreen/ChatModel/UserInput.qml</file>
 
+        <file>BaseScreen/CalendarModel/CalendarModel.qml</file>
+        <file>BaseScreen/CalendarModel/Date.qml</file>
+        <file>BaseScreen/CalendarModel/Meetings.qml</file>
+        <file>BaseScreen/CalendarModel/Time.qml</file>
+
         <file>BaseScreen/ChatModel/Message/SimpleMessage.qml</file>
 
         <file>BaseScreen/ChatListModel/ChatListModel.qml</file>

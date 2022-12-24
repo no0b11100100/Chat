@@ -3,6 +3,7 @@ import QtQuick 2.0
 import "ChatListModel"
 import "ChatModel"
 import "NotificationModel"
+import "CalendarModel"
 
 Rectangle {
     id: root
@@ -16,13 +17,24 @@ Rectangle {
             id: sidebar
             width: 30
             height: root.height
-            buttons: [{"id": "notificationIDButton", "text":"notification"}, {"id": "chatIDButton", "text":"chat"}, {"id": "textIDButton", "text":"mail"}, {"id": "todoIDButton", "text":"TODO"}]
+            buttons: [{"id": "notificationIDButton", "text":"notification"}, {"id": "chatIDButton", "text":"chat"}, {"id": "textIDButton", "text":"mail"}, {"id":"calendarIDbutton", "text":"calendar"}, {"id": "todoIDButton", "text":"TODO"}]
             action: function(id) {
                 console.log("Press sidebar", id)
                 if(id === "notificationIDButton")
+                {
                     pageLoader.sourceComponent = notification
+                    pageLoader.width = root.width / 4 - sidebar.width
+                }
                 if(id === "chatIDButton")
+                {
                     pageLoader.sourceComponent = chats
+                    pageLoader.width = root.width / 4 - sidebar.width
+                }
+                if(id === "calendarIDbutton")
+                {
+                    pageLoader.sourceComponent = calendar
+                    pageLoader.width = root.width - sidebar.width
+                }
             }
         }
 
@@ -59,6 +71,20 @@ Rectangle {
                 }
             }
         }
+
+        Component {
+            id: calendar
+            CalendarModel {
+                height: root.height
+                width: chats.width - sidebar.width
+                model: [1,2,3,4,5,6,7]
+                // visible: row.isNotificationsOpened
+                Component.onCompleted: {
+                    console.log("Create CalendarModel")//, root.model.notificationListModel === undefined, _notification.model.name)
+                }
+            }
+        }
+
 
         ChatModel {
             id: chatMessages
