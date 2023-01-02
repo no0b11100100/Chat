@@ -3,7 +3,7 @@ build-UI-Desktop_Qt_6_2_0_GCC_64bit-Debug/
 todo.txt
 .vscode
 RemoteServer/data
-Client/UI/build/
+Client/build/
 common/proto/*.txt
 doc/**
 SimulateClient/**
