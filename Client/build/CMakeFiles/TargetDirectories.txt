@@ -1,4 +1,0 @@
-/home/wlandos/Folder/Projects/Chat/Client/build/CMakeFiles/UI.dir
-/home/wlandos/Folder/Projects/Chat/Client/build/CMakeFiles/edit_cache.dir
-/home/wlandos/Folder/Projects/Chat/Client/build/CMakeFiles/rebuild_cache.dir
-/home/wlandos/Folder/Projects/Chat/Client/build/CMakeFiles/UI_autogen.dir

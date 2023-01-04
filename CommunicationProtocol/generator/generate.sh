@@ -1,0 +1,1 @@
+python3 codegen.py --input chat_service.qface --output ./gen/

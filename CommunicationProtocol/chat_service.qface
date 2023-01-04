@@ -1,0 +1,15 @@
+module chat 1.0
+
+struct Message {
+    string message
+}
+
+struct Chat {
+    string chatId
+}
+
+interface ChatService {
+    void sendMessage(Message)
+    list<Chat> getUserChats(string)
+    signal notifyMessage(Message)
+}

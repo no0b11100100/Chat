@@ -39,14 +39,14 @@ func NewServer() *Server {
 	}
 
 	s.server = grpc.NewServer()
-	s.initServices()
 	s.database.Connect()
+	s.initServices()
 
 	return s
 }
 
 func (s *Server) initServices() {
-	userService := services.NewUserService()
+	userService := services.NewUserService(s.database)
 	chatService := services.NewChatService()
 
 	api.RegisterChatServer(s.server, chatService)

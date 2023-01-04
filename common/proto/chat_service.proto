@@ -60,6 +60,7 @@ message ChatData {
 message ExchangedMessage {
     string chat_id=1;
     Message message=2;
+    string sender_id=3;
 }
 
 message ReadMessage {
@@ -80,5 +81,5 @@ service Chat {
     rpc chatChanged(google.protobuf.Empty) returns(stream ChatData);
 
     rpc sendMessage(ExchangedMessage) returns(Status);
-    rpc recieveMessage(google.protobuf.Empty) returns(stream ExchangedMessage);
+    rpc recieveMessage(UserID) returns(stream ExchangedMessage);
 }

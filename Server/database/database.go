@@ -2,6 +2,7 @@ package database
 
 import (
 	api "Chat/Server/api"
+	interfaces "Chat/Server/interfaces"
 	log "Chat/Server/logger"
 	"context"
 	"fmt"
@@ -30,20 +31,10 @@ func NewDatabase() *DB {
 }
 
 type Database interface {
+	interfaces.UserServiceDatabase
+	interfaces.ChatServiceDatabase
 	Connect()
 	Close()
-	IsEmailUnique(string) bool
-	ValidateUser(api.UserInfo) (bool, string)
-	RegisterUser(api.UserInfo) (bool, string)
-	GetUserChats(string) api.Chats
-	// GetChatParticipants(string) []api.ParticipantInfo
-	GetMessages(string, string, api.Direction) []*api.Message
-	// GetUsers() []api.UserInfo
-	// GetChatMessages(string) []common.Message
-	// AddMessage(common.Message)
-	// AddChat(common.Chat) error
-	// AddUserToChat(string) error
-	// LeaveChat(string, string) error
 	AddUserToChat(userID string, chatID string)
 }
 
@@ -128,11 +119,11 @@ func (db *DB) IsEmailUnique(email string) bool {
 	return false
 }
 
-func (db *DB) ValidateUser(user api.UserInfo) (bool, string) {
-	log.Info.Println("Validate user", user)
+func (db *DB) ValidateUser(email, password string) (bool, string) {
+	log.Info.Println("Validate user", email, password)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	var record bson.M
-	if err := db.tables["Users"].FindOne(ctx, bson.M{"email": user.Email, "password": user.Password}).Decode(&record); err != nil {
+	if err := db.tables["Users"].FindOne(ctx, bson.M{"email": email, "password": password}).Decode(&record); err != nil {
 		log.Warning.Println(err)
 		return false, ""
 	}
@@ -147,7 +138,15 @@ func (db *DB) ValidateUser(user api.UserInfo) (bool, string) {
 	return true, userID
 }
 
-func (db *DB) RegisterUser(user api.UserInfo) (bool, string) {
+func (db *DB) RegisterUser(data *api.SignUp) (bool, string) {
+	user := api.UserInfo{
+		Email:    data.Email,
+		Password: data.Password,
+		Name:     data.Name,
+		NickName: data.NickName,
+		Photo:    data.Photo,
+	}
+
 	user.UserId = uuid.New().String()
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	_, err := db.tables["Users"].InsertOne(ctx, user)

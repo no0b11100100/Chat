@@ -1,0 +1,32 @@
+module chat 1.0;
+
+struct Message {
+    string message;
+}
+
+struct Chat {
+    string chatId;
+}
+
+struct Status {
+    int status
+}
+
+// system struct
+struct MessageData {
+    string endpoint
+    int topic
+    string payload
+    Type type
+}
+
+enum Type {
+    Request,
+    Notification
+}
+
+interface ChatService {
+    Status sendMessage(Message message);
+    list<Chat> getUserChats(string userID, int value);
+    signal notifyMessage(Message message, string data);
+}

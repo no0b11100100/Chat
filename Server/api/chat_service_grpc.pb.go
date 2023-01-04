@@ -29,7 +29,7 @@ type ChatClient interface {
 	EditChat(ctx context.Context, in *ChatData, opts ...grpc.CallOption) (*Status, error)
 	ChatChanged(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (Chat_ChatChangedClient, error)
 	SendMessage(ctx context.Context, in *ExchangedMessage, opts ...grpc.CallOption) (*Status, error)
-	RecieveMessage(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (Chat_RecieveMessageClient, error)
+	RecieveMessage(ctx context.Context, in *UserID, opts ...grpc.CallOption) (Chat_RecieveMessageClient, error)
 }
 
 type chatClient struct {
@@ -117,7 +117,7 @@ func (c *chatClient) SendMessage(ctx context.Context, in *ExchangedMessage, opts
 	return out, nil
 }
 
-func (c *chatClient) RecieveMessage(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (Chat_RecieveMessageClient, error) {
+func (c *chatClient) RecieveMessage(ctx context.Context, in *UserID, opts ...grpc.CallOption) (Chat_RecieveMessageClient, error) {
 	stream, err := c.cc.NewStream(ctx, &Chat_ServiceDesc.Streams[1], "/chat.Chat/recieveMessage", opts...)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ type ChatServer interface {
 	EditChat(context.Context, *ChatData) (*Status, error)
 	ChatChanged(*empty.Empty, Chat_ChatChangedServer) error
 	SendMessage(context.Context, *ExchangedMessage) (*Status, error)
-	RecieveMessage(*empty.Empty, Chat_RecieveMessageServer) error
+	RecieveMessage(*UserID, Chat_RecieveMessageServer) error
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -185,7 +185,7 @@ func (UnimplementedChatServer) ChatChanged(*empty.Empty, Chat_ChatChangedServer)
 func (UnimplementedChatServer) SendMessage(context.Context, *ExchangedMessage) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
 }
-func (UnimplementedChatServer) RecieveMessage(*empty.Empty, Chat_RecieveMessageServer) error {
+func (UnimplementedChatServer) RecieveMessage(*UserID, Chat_RecieveMessageServer) error {
 	return status.Errorf(codes.Unimplemented, "method RecieveMessage not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
@@ -313,7 +313,7 @@ func _Chat_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(in
 }
 
 func _Chat_RecieveMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(empty.Empty)
+	m := new(UserID)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}

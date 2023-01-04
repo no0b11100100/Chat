@@ -81,7 +81,7 @@ def build_server():
     remote_server_path = os.path.join(current_path, 'Server')
     os.chdir(remote_server_path)
     os.system('docker compose build')
-    remove_copied_folders_in_server()
+    # remove_copied_folders_in_server()
 
 
 def generate_ui_proto():
@@ -126,7 +126,7 @@ def build_ui():
     buildsystem_path = os.path.join(ui_path, 'third-party','vcpkg','scripts','buildsystems','vcpkg.cmake')
     if os.system(f'cmake .. -DCMAKE_TOOLCHAIN_FILE={buildsystem_path} && make -j7') != 0:
         os._exit(1)
-    remove_copied_folders_in_ui()
+    # remove_copied_folders_in_ui()
 
 
 if __name__ == '__main__':
