@@ -9,42 +9,90 @@
 #include <unordered_map>
 
 //enums
-{% for enum in module.enums: %}
-enum class {{enum.name}}
+enum class Type
 {
-    {% for member in enum.members %}
-    {{member.unique_name}} = {{member.value}}
-    {% endfor %}
+    Request = 0
+    Notification = 1
 };
 
-{% endfor %}
 
 //structs
-{% for struct in module.structs: %}
-struct {{struct.name}} : public ClassParser
+struct Message : public ClassParser
 {
-{% for field in struct.fields %}
-    {{field.cpp_type}} {{field.cap_name}};
-{% endfor -%}
-
-    virtual Value toJson() override
+    std::string Message;
+virtual Value toJson() override
     {
         Value js({});
-        {% for field in struct.fields %}
-        js["{{field.cap_name}}"] = {{field.cap_name}};
-        {% endfor -%}
-        return js;
+        js["Message"] = Message;
+return js;
     }
 
     virtual void fromJson(Value js) override
     {
-        {% for field in struct.fields %}
-        {{field.cap_name}} = js["{{field.cap_name}}"];
-        {% endfor -%}
-    }
+        Message = js["Message"];
+}
 };
 
-{% endfor %}
+struct Chat : public ClassParser
+{
+    std::string ChatId;
+    std::vector<string> Participants;
+virtual Value toJson() override
+    {
+        Value js({});
+        js["ChatId"] = ChatId;
+        js["Participants"] = Participants;
+return js;
+    }
+
+    virtual void fromJson(Value js) override
+    {
+        ChatId = js["ChatId"];
+        Participants = js["Participants"];
+}
+};
+
+struct Status : public ClassParser
+{
+    int Status;
+virtual Value toJson() override
+    {
+        Value js({});
+        js["Status"] = Status;
+return js;
+    }
+
+    virtual void fromJson(Value js) override
+    {
+        Status = js["Status"];
+}
+};
+
+struct MessageData : public ClassParser
+{
+    std::string Endpoint;
+    int Topic;
+    std::string Payload;
+    Type Type;
+virtual Value toJson() override
+    {
+        Value js({});
+        js["Endpoint"] = Endpoint;
+        js["Topic"] = Topic;
+        js["Payload"] = Payload;
+        js["Type"] = Type;
+return js;
+    }
+
+    virtual void fromJson(Value js) override
+    {
+        Endpoint = js["Endpoint"];
+        Topic = js["Topic"];
+        Payload = js["Payload"];
+        Type = js["Type"];
+}
+};
+
 
 //client
 class Waiter
@@ -151,57 +199,54 @@ protected:
     }
 };
 
-{% for interface in module.interfaces: %}
 
-class {{interface}}Stub : Base
+class ChatServiceStub : Base
 {
-    {% for signal in interface.signals %}
-    std::vector<std::function<void({%- for parameter in signal.parameters -%}  {{parameter.cpp_type}} {{parameter.name}},{%- endfor -%})>> m_{{signal.cap_name}}Callbacks;
-    {% endfor %}
+    std::vector<std::function<void(Message message,std::string data,)>> m_NotifyMessageCallbacks;
 public:
     ChatService(const std::string& addr)
         : Base(addr)
     {
-        {% for signal in interface.signals %}
-        addSignalHandler("{{interface}}.{{signal.cap_name}}", [this](std::string payload){ on{{signal.cap_name}}(payload); })
-        {% endfor %}
+        addSignalHandler("ChatService.NotifyMessage", [this](std::string payload){ onNotifyMessage(payload); })
     }
 
-    {% for signal in interface.signals %}
-    void SubscribeTo{{signal.cap_name}}Event(std::function<void({%- for parameter in signal.parameters -%}  {{parameter.cpp_type}} {{parameter.name}},{%- endfor -%})> callback)
+    void SubscribeToNotifyMessageEvent(std::function<void(Message message,std::string data,)> callback)
     {
-        m_{{signal.cap_name}}Callbacks.push_back(callback);
+        m_NotifyMessageCallbacks.push_back(callback);
     }
-    {% endfor %}
 
-    {% for operation in interface.operations %}
-    {{operation.cpp_type}} {{operation.cap_name}}({%- for parameter in operation.parameters -%}{{parameter.name}} {{parameter.go_type}},{%- endfor -%})
+    Status SendMessage(message Message,)
     {
-        json args = json::array({ {%- for parameter in operation.parameters -%}{{parameter.name}} {{parameter.go_type}},{%- endfor -%} });
+        json args = json::array({message Message,});
         MessageData message;
-        message.Endpoint = "{{interface}}.{{operation.cap_name}}";
+        message.Endpoint = "ChatService.SendMessage";
         message.Topic = 0;//TODO
         message.Payload = args.dump();
-        return Request(message.toJson().dump()).GetData<{{operation.cpp_type}}>();
+        return Request(message.toJson().dump()).GetData<Status>();
     }
-    {% endfor %}
+    std::vector<Chat> GetUserChats(userID string,value int,)
+    {
+        json args = json::array({userID string,value int,});
+        MessageData message;
+        message.Endpoint = "ChatService.GetUserChats";
+        message.Topic = 0;//TODO
+        message.Payload = args.dump();
+        return Request(message.toJson().dump()).GetData<std::vector<Chat>>();
+    }
 
 private:
-    {% for signal in interface.signals %}
-    void on{{signal.cap_name}}(const std::string& payload)
+    void onNotifyMessage(const std::string& payload)
     {
         json response = json::parse(payload);
         int i = 0;
-        {% for parameter in signal.parameters %}
-        {{parameter.cpp_type}} {{parameter.name}} = response[i];
+        Message message = response[i];
         ++i;
-        {% endfor %}
+        std::string data = response[i];
+        ++i;
 
-        for(const auto& call : m_{{signal.cap_name}}Callbacks)
+        for(const auto& call : m_NotifyMessageCallbacks)
         {
-            call({%- for parameter in signal.parameters -%}  {{parameter.cpp_type}} {{parameter.name}},{%- endfor -%});
+            call(Message message,std::string data,);
         }
     }
-    {% endfor %}
 };
-{% endfor %}

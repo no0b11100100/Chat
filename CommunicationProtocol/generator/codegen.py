@@ -22,6 +22,28 @@ args = parser.parse_args()
 yaml_annotate = ".go.annotate"
 
 
+def cpp_type(self: object) -> object:
+    if self.type.is_primitive:
+        if self.type.name == 'real':
+            return 'float'
+        if self.type.name == 'string':
+            return 'std::string'
+        return self.type
+    elif self.type.is_void:
+        return ""
+    elif self.type.is_list:
+        return 'std::vector<{0}>'.format(go_type(self.type.nested))
+    elif self.type.is_map:
+        return 'map<std::string,{0}>'.format(go_type(self.type.nested))
+    else:
+        split = self.type.name.split(".")
+        if len(split) > 1:
+            if self.type.name.rpartition('.')[0] == self.module.name:
+                return split[-1]
+            return ''.join(split[:-1]) + '.' + split[-1]
+        else:
+            return split[0]
+
 def go_type(self: object) -> object:
     if self.type.is_primitive:
         if self.type.name == 'real':
@@ -203,6 +225,11 @@ setattr(qface.idl.domain.Module, 'struct_imports', property(struct_imports))
 
 setattr(qface.idl.domain.TypeSymbol, 'go_type', property(go_type))
 setattr(qface.idl.domain.Field, 'go_type', property(go_type))
+
+setattr(qface.idl.domain.Field, 'cpp_type', property(cpp_type))
+setattr(qface.idl.domain.Parameter, 'cpp_type', property(cpp_type))
+setattr(qface.idl.domain.Operation, 'cpp_type', property(cpp_type))
+
 setattr(qface.idl.domain.Operation, 'go_type', property(go_type))
 setattr(qface.idl.domain.Property, 'go_type', property(go_type))
 setattr(qface.idl.domain.Parameter, 'go_type', property(go_type))
@@ -247,17 +274,17 @@ def generate():
             ctx.update({'path': module_path})
             if module.interfaces:
                 generator.write('{{path}}/' + module.name_parts[-1].lower() + '_server.go', 'server.go.template', ctx)
-                generator.write('{{path}}/' + module.name_parts[-1].lower() + '_client.go', 'client_cpp.go.template', ctx)
+                generator.write('{{path}}/' + module.name_parts[-1].lower() + '_client.hpp', 'client_cpp.go.template', ctx)
             #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_interface.go', 'interface.go.template', ctx)
             #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_base.go', 'base.go.template', ctx)
             #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_dbus_adapter.go', 'dbus_adapter.go.template', ctx)
             #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_dbus_proxy.go', 'dbus_proxy.go.template', ctx)
-            if module.enums:
-                generator.write('{{path}}/' + module.name_parts[-1].lower() + '_enum.go', 'enum.go.template', ctx)
-                generator.write('{{path}}/' + module.name_parts[-1].lower() + '_enum.hpp', 'enum_cpp.go.template', ctx)
-            if module.structs:
-                generator.write('{{path}}/' + module.name_parts[-1].lower() + '_struct.go', 'struct.go.template', ctx)
-                generator.write('{{path}}/' + module.name_parts[-1].lower() + '_struct.hpp', 'struct_cpp.go.template', ctx)
+            # if module.enums:
+            #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_enum.go', 'enum.go.template', ctx)
+            #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_enum.hpp', 'enum_cpp.go.template', ctx)
+            # if module.structs:
+            #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_struct.go', 'struct.go.template', ctx)
+            #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_struct.hpp', 'struct_cpp.go.template', ctx)
 
 
 if __name__ == '__main__':

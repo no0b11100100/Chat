@@ -4,26 +4,60 @@ package chat
 import (
     "encoding/json"
     "net"
+    "net/textproto"
+    "bufio"
+    "fmt"
 )
 
+//enums
+type Type int
+
+const (
+Request = 0
+Notification = 1
+)
+
+//structs
+type Message struct {
+    Message string `json:"Message"`
+}
+type Chat struct {
+    ChatId string `json:"ChatId"`
+    Participants []string `json:"Participants"`
+}
+type Status struct {
+    Status int `json:"Status"`
+}
+type MessageData struct {
+    Endpoint string `json:"Endpoint"`
+    Topic int `json:"Topic"`
+    Payload string `json:"Payload"`
+    Type Type `json:"Type"`
+}
+
+//server
+type ServerContext struct {
+    ConnectionAddress string
+}
+type disconnectionCallback = func(string)
+
+type ChatServiceConnectionCallback = func(string, ChatServiceNotifier)
+
 type ChatServiceServerImpl interface {
-    SendMessage(message Message,) Status
-    GetUserChats(userID string,value int,) []Chat
+    SendMessage(ServerContext,message Message,) Status
+    GetUserChats(ServerContext,userID string,value int,) []Chat
 }
 
 type ChatServiceNotifier interface {
     NotifyMessage(message Message,data string,)
 }
 
-
-type Notificator struct {
+type ChatServiceNotificator struct {
 	conn net.Conn
 }
 
-type connectionCallback = func(string, Notifier)
-type disconnectionCallback = func(string)
 
-func(n *Notificator) NotifyMessage(message Message,data string,) {
+func(n *ChatServiceNotificator) NotifyMessage(message Message,data string,) {
     args := make([]string, 0)
     var bytes []byte
     bytes, _ = json.Marshal(message)
@@ -47,7 +81,7 @@ func(n *Notificator) NotifyMessage(message Message,data string,) {
 type ChatServiceServer struct {
 	listener              net.Listener
 	impl                  ChatServiceServerImpl
-	notifierObservers     []connectionCallback
+	notifierObservers     []ChatServiceConnectionCallback
 	disconectionObservers []disconnectionCallback
 }
 
@@ -55,12 +89,16 @@ func NewChatServiceServer(addr string) *ChatServiceServer {
 	ln, _ := net.Listen("tcp", addr)
 	server := &ChatServiceServer{
 		listener: ln,
+        notifierObservers: make([]ChatServiceConnectionCallback, 0),
+        disconectionObservers: make([]disconnectionCallback, 0)
 	}
 
 	return server
 }
 
-
+func (s *ChatServiceServer) SetServerImpl(impl ChatServiceServerImpl) {
+    s.impl = impl
+}
 
 func (s *ChatServiceServer) Serve() {
 	for {
@@ -100,29 +138,37 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
     json.Unmarshal([]byte(payload), &recievedMessage)
     switch recievedMessage.Endpoint {
         case "ChatService.SendMessage":
-            args := make([]string, 0)
+            args := make([]json.RawMessage, 0)
             json.Unmarshal([]byte(recievedMessage.Payload), &args)
             var index int
+
             var message Message
             json.Unmarshal([]byte(args[index]), &message)
-            index = index + 1
-            response := s.impl.SendMessage(message,)
+            index++
+
+            serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+            response := s.impl.SendMessage(serverContex,message,)
             bytes, _ := json.Marshal(response)
             messageToSend := recievedMessage
             messageToSend.Payload = string(bytes)
             responseData, _ := json.Marshal(messageToSend)
             conn.Write(responseData)
         case "ChatService.GetUserChats":
-            args := make([]string, 0)
+            args := make([]json.RawMessage, 0)
             json.Unmarshal([]byte(recievedMessage.Payload), &args)
             var index int
+
             var userID string
             json.Unmarshal([]byte(args[index]), &userID)
-            index = index + 1
+            index++
+
+
             var value int
             json.Unmarshal([]byte(args[index]), &value)
-            index = index + 1
-            response := s.impl.GetUserChats(userID,value,)
+            index++
+
+            serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+            response := s.impl.GetUserChats(serverContex,userID,value,)
             bytes, _ := json.Marshal(response)
             messageToSend := recievedMessage
             messageToSend.Payload = string(bytes)
@@ -132,7 +178,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 }
 
 // Events
-func (s *ChatServiceServer) SubscribeToNewConnectionEvent(observer connectionCallback) {
+func (s *ChatServiceServer) SubscribeToNewConnectionEvent(observer ChatServiceConnectionCallback) {
 	s.notifierObservers = append(s.notifierObservers, observer)
 }
 
@@ -141,7 +187,7 @@ func (s *ChatServiceServer) SubscribeToDisconnectionEvent(observer disconnection
 }
 
 func (s *ChatServiceServer) emitNewConnectionEvent(conn net.Conn) {
-	notificator := &Notificator{conn: conn}
+	notificator := &ChatServiceNotificator{conn: conn}
 
 	for _, callback := range s.notifierObservers {
 		callback(conn.RemoteAddr().String(), notificator)
@@ -153,3 +199,5 @@ func (s *ChatServiceServer) emitDisconnectionEvent(conn net.Conn) {
 		callback(conn.RemoteAddr().String())
 	}
 }
+
+
