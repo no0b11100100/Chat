@@ -2,6 +2,8 @@
 
 qface-gen:
 	@echo "Generate qface"
-	@ docker build -t qface_gen -f Dockerfile .
-	@ docker run --user $(shell id -u):$(shell id -g) --rm -v $(shell pwd):/workspace --workdir /workspace qface_gen sh ./generate.sh
+	@docker build -t qface_gen -f Dockerfile .
+	@docker run --user $(shell id -u):$(shell id -g) --rm -v $(shell pwd):/workspace --workdir /workspace qface_gen sh ./generate.sh
+	@gofmt -w ./gen/chat/chat_server.go
+	@clang-format -i gen/chat/chat_client.hpp
 .PHONY: proto-gen

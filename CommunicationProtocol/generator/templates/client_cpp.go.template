@@ -7,6 +7,7 @@
 #include <memory>
 #include <future>
 #include <unordered_map>
+#include <chrono>
 
 //enums
 {% for enum in module.enums: %}
@@ -83,49 +84,49 @@ public:
 
 class Base
 {
-    std::unique_ptr<QTcpSocket> m_connection;
+    std::unique_ptr<Client> m_connection;
     std::unordered_map<std::string, std::function<void(std::string)>> m_signals;
 public:
     Base(const std::string& addr)
+     : m_connection{new Client([this](const std::string& s){handleServerMessage(s);})}
     {
-        //TODO: create connection
-        std::thread([this](){recieve();}).detach();
+        m_connection->connectToServer();
     }
 
-    const Waiter& Request(payload std::string)
+    const Waiter& Request(MessageData& message)
     {
-        int requestID = 0;
-        m_connection->send(paylaod);
-        w = Waiter(requestID);
+        message.Topic = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+        m_connection->sendPayload(message.toJson().dump());
+        w = Waiter(message.Topic);
         waiters.push_back(w);
         return waiters.back();
     }
 
 private:
-    void recieve()
+    void handleServerMessage(const std::string& message)
     {
-        while(m_connection->read()){
-            //TODO: unmarshal to struct DataStruct
-            MessageData data;
-            if (data.type == Notification) {
-                auto result = isSignalHandlable(data.Endpoint);
-                if(result.has_value())
-                {
-                    auto handler = result.value();
-                    handler(data.Payload);
-                }
-            }
-            else
+        json js = json::parse(payload);
+        MessageData data;
+        data = js;
+        if (data.type == Notification) {
+            auto result = isSignalHandlable(data.Endpoint);
+            if(result.has_value())
             {
-                for(auto& waiter : waiters)
-                {
-                    if waiter.IsTopic(data.Topic) {
-                        waiter.SetResponse(data.Payload);
-                        break;
-                    }
+                auto handler = result.value();
+                handler(data.Payload);
+            }
+        }
+        else
+        {
+            for(auto& waiter : waiters)
+            {
+                if waiter.IsTopic(data.Topic) {
+                    waiter.SetResponse(data.Payload);
+                    break;
                 }
             }
         }
+
     }
 
     std::optional<std::function<void(std::string)>> isSignalHandlable(const std::string& name)
@@ -180,9 +181,8 @@ public:
         json args = json::array({ {%- for parameter in operation.parameters -%}{{parameter.name}} {{parameter.go_type}},{%- endfor -%} });
         MessageData message;
         message.Endpoint = "{{interface}}.{{operation.cap_name}}";
-        message.Topic = 0;//TODO
         message.Payload = args.dump();
-        return Request(message.toJson().dump()).GetData<{{operation.cpp_type}}>();
+        return Request(message).GetData<{{operation.cpp_type}}>();
     }
     {% endfor %}
 

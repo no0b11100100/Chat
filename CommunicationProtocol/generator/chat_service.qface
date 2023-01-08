@@ -6,6 +6,7 @@ struct Message {
 
 struct Chat {
     string chatId;
+    list<string> participants
 }
 
 struct Status {
@@ -15,7 +16,7 @@ struct Status {
 // system struct
 struct MessageData {
     string endpoint
-    int topic
+    string topic
     string payload
     Type type
 }

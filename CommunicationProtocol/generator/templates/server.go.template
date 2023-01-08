@@ -40,13 +40,13 @@ type {{interface}}ConnectionCallback = func(string, {{interface}}Notifier)
 
 type {{interface}}ServerImpl interface {
     {% for operation in interface.operations %}
-    {{operation.cap_name}}(ServerContext, {%- for parameter in operation.parameters -%}{{parameter.name}} {{parameter.go_type}},{%- endfor -%}) {{operation.go_type}}
+    {{operation.cap_name}}(ServerContext, {%- for parameter in operation.parameters -%}{{parameter.go_type}},{%- endfor -%}) {{operation.go_type}}
     {% endfor %}
 }
 
 type {{interface}}Notifier interface {
     {% for signal in interface.signals %}
-    {{signal.cap_name}}({%- for parameter in signal.parameters -%} {{parameter.name}} {{parameter.go_type}},{%- endfor -%})
+    {{signal.cap_name}}({%- for parameter in signal.parameters -%}{{parameter.go_type}},{%- endfor -%})
     {% endfor %}
 }
 
@@ -90,7 +90,7 @@ func New{{interface}}Server(addr string) *{{interface}}Server {
 	server := &{{interface}}Server{
 		listener: ln,
         notifierObservers: make([]{{interface}}ConnectionCallback, 0),
-        disconectionObservers: make([]disconnectionCallback, 0)
+        disconectionObservers: make([]disconnectionCallback, 0),
 	}
 
 	return server
