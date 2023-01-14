@@ -10,6 +10,7 @@
 // #include "../grpc_client/Client.hpp"
 #include "Models/SignInUpModel.hpp"
 #include "Models/BaseScreen/BaseScreen.hpp"
+#include "../services/Client.hpp"
 
 constexpr const char* LOG_IN_MODEL = "logInModel";
 constexpr const char* BASE_SCREEN_MODEL = "baseScreenModel";
@@ -31,10 +32,10 @@ public:
 
     void initModels(QObject* parent) {
         m_models[LOG_IN_MODEL] = std::make_unique<Models::SignInUpModel>(
-            [this](SignIn data){ return signInAction(data); },
-            [this](SignUp data){ return signUpAction(data); },
+            [this](user::SignIn data){ return signInAction(data); },
+            [this](user::SignUp data){ return signUpAction(data); },
             parent);
-        m_models[BASE_SCREEN_MODEL] = std::make_unique<BaseScreen>(&m_grpcClient, parent);
+        m_models[BASE_SCREEN_MODEL] = std::make_unique<BaseScreen>(&m_Client, parent);
     }
 
     QObject* currentModel()
@@ -44,30 +45,30 @@ public:
 
 private:
     // TODO: investigate delay
-    std::string signUpAction(SignUp data) {
-        auto result = m_grpcClient.baseService().signUp(data);
-        auto userID = result.user_id();
-        if ((int)result.status() == 0) {
+    std::string signUpAction(user::SignUp data) {
+        auto result = m_Client.userService().signUp(data);
+        auto userID = result.UserID;
+        if ((int)result.Status == 0) {
             m_userID = userID;
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 emit activateBaseScreen(result);
             }).detach();
         }
-        return result.statusmessage();
+        return result.StatusMessage;
     }
 
-    std::string signInAction(SignIn data) {
-        auto result = m_grpcClient.baseService().signIn(data);
-        auto userID = result.user_id();
-        if ((int)result.status() == 0) {
+    std::string signInAction(user::SignIn data) {
+        auto result = m_Client.userService().signIn(data);
+        auto userID = result.UserID;
+        if ((int)result.Status == 0) {
             m_userID = userID;
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 emit activateBaseScreen(result);
             }).detach();
         }
-        return result.statusmessage();
+        return result.StatusMessage;
     }
 
 public slots:
@@ -84,7 +85,7 @@ signals:
     void activateBaseScreen(user::Response);
 
 private:
-    GRPCClient m_grpcClient;
+    Client m_Client;
     std::unordered_map<std::string, std::shared_ptr<QObject>> m_models;
     std::shared_ptr<QObject> m_currentModel;
     std::string m_userID;

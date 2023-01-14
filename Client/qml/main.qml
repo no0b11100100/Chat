@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Window 2.0
 import QtQuick.Controls 2.0
 
-import Models 1.0
+// import Models 1.0
 
 Window {
     id: _root
@@ -12,18 +12,18 @@ Window {
     title: qsTr("Hello World")
     color: "green"
 
-    ScreenController {
-        id: screenConttroller
-        anchors.fill: parent
-        model: _models.model
-    }
+    // ScreenController {
+    //     id: screenConttroller
+    //     anchors.fill: parent
+    //     model: _models.model
+    // }
 
-    Backend {
-        id: _models
+    // Backend {
+    //     id: _models
 
-        onModelChanged: {
-            screenConttroller.changeScreen()
-        }
-    }
+    //     onModelChanged: {
+    //         screenConttroller.changeScreen()
+    //     }
+    // }
 
 }

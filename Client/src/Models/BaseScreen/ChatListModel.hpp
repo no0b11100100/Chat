@@ -7,7 +7,7 @@
 
 #include "Chat.hpp"
 #include "Header.hpp"
-#include "../../../grpc_client/proto_gen/chat_service.pb.h"
+#include "../../../services/ChatService.hpp"
 
 #include <QDebug>
 
@@ -45,11 +45,11 @@ public:
         emit chatSelected(header, chatID);
     }
 
-    void SetChats(chat::Chats chats)
+    void SetChats(const std::vector<chat::Chat>& chats)
     {
-        for(const auto& chat : chats.chats())
+        for(const auto& chat : chats)
         {
-            m_chats.emplace_back(std::make_shared<ChatInformation>(QString::fromStdString(chat.chat_id()), QString::fromStdString(chat.title()), QString::fromStdString(chat.lastmessage())));
+            m_chats.emplace_back(std::make_shared<ChatInformation>(QString::fromStdString(chat.ChatID), QString::fromStdString(chat.Title), QString::fromStdString(chat.LastMessage)));
         }
     }
 

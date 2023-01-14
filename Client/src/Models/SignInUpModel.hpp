@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../grpc_client/proto_gen/user_service.pb.h"
+#include "../../services/UserService.hpp"
 
 #include <functional>
 
@@ -32,8 +32,8 @@ public:
         emit statusMessage("");
         qDebug() << email << password;
         SignIn data;
-        data.set_email(email.toStdString());
-        data.set_password(password.toStdString());
+        data.Email = email.toStdString();
+        data.Password = password.toStdString();
         std::string message = m_signInAction(data);
         emit statusMessage(message.c_str());
     }
@@ -42,11 +42,11 @@ public:
         qDebug() << name << email << password << confirmedPassword;
         emit statusMessage("");
         SignUp data;
-        data.set_name(name.toStdString());
-        data.set_nickname(nickName.toStdString());
-        data.set_email(email.toStdString());
-        data.set_password(password.toStdString());
-        data.set_confirmedpassword(confirmedPassword.toStdString());
+        data.Name = name.toStdString();
+        data.NickName = nickName.toStdString();
+        data.Email = email.toStdString();
+        data.Password = password.toStdString();
+        data.ConfirmedPassword = confirmedPassword.toStdString();
 
         std::string message = m_signUpAction(data);
         emit statusMessage(message.c_str());

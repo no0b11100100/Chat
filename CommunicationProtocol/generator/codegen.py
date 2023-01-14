@@ -32,9 +32,10 @@ def cpp_type(self: object) -> object:
     elif self.type.is_void:
         return ""
     elif self.type.is_list:
-        return 'std::vector<{0}>'.format(go_type(self.type.nested))
+        print("###", self.type.nested, cpp_type(self.type.nested))
+        return 'std::vector<{0}>'.format(cpp_type(self.type.nested))
     elif self.type.is_map:
-        return 'map<std::string,{0}>'.format(go_type(self.type.nested))
+        return 'map<std::string,{0}>'.format(cpp_type(self.type.nested))
     else:
         split = self.type.name.split(".")
         if len(split) > 1:
@@ -183,36 +184,6 @@ def construct_gomod_tag(module, output):
     return os.path.join(go_mod + abs_path.replace(commonprefix, ''), module_path)
 
 
-def generate_annotate(input, output: str):
-    inputs = input if isinstance(input, (list, tuple)) else [input]
-    for input in inputs:
-        path = Path.getcwd() / str(input)
-        if path.isfile():
-            write_annotate(path, output)
-        else:
-            for document in path.walkfiles("*.qface"):
-                write_annotate(document, output)
-
-
-def write_annotate(document: Path, output: str):
-    system = FileSystem.parse(document)
-    f = open(document.stripext() + yaml_annotate, "w")
-    for module in system.modules:
-        f.write(module.name + ":\n   gomod:\n    \"" + construct_gomod_tag(module, output) + "\"")
-    f.close()
-
-
-def merge_generated_annotation(input, system: System):
-    inputs = input if isinstance(input, (list, tuple)) else [input]
-    for input in inputs:
-        path = Path.getcwd() / str(input)
-        if path.isfile():
-            FileSystem.merge_annotations(system, path.stripext() + yaml_annotate)
-        else:
-            for document in path.walkfiles("*.qface"):
-                FileSystem.merge_annotations(system, document.stripext() + yaml_annotate)
-
-
 def is_one_argument(self):
     return len(self.param_size()) == 1
 
@@ -257,11 +228,9 @@ setattr(qface.idl.domain.Signal, 'param_size', property(param_size))
 
 def generate():
     here = Path(__file__).dirname()
-    generate_annotate(args.input, args.output)
     system = FileSystem.parse(args.input)
     module_to_generate = [module.name for module in system.modules]
     system = FileSystem.parse(args.input + args.dependency)
-    merge_generated_annotation(args.input + args.dependency, system)
     output = args.output
     generator = Generator(search_path=Path(here / 'templates'))
     generator.destination = output
@@ -272,9 +241,13 @@ def generate():
             ctx.update({'module': module})
             module_path = '/'.join(module.name_parts)
             ctx.update({'path': module_path})
+            if not module.interfaces and module.structs:
+                generator.write('{{path}}/' + module.name_parts[-1].lower() + '.go', 'common.go.template', ctx)
+                generator.write('{{path}}/' + module.name_parts[-1].lower() + '.hpp', 'common_cpp.go.template', ctx)
             if module.interfaces:
                 generator.write('{{path}}/' + module.name_parts[-1].lower() + '_server.go', 'server.go.template', ctx)
                 generator.write('{{path}}/' + module.name_parts[-1].lower() + '_client.hpp', 'client_cpp.go.template', ctx)
+
             #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_interface.go', 'interface.go.template', ctx)
             #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_base.go', 'base.go.template', ctx)
             #     generator.write('{{path}}/' + module.name_parts[-1].lower() + '_dbus_adapter.go', 'dbus_adapter.go.template', ctx)

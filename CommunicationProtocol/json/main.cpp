@@ -4,36 +4,44 @@
 using namespace Types;
 using namespace std;
 
-class Data : public ClassParser
-{
-    int val;
-public:
+// #include "String/Char.hpp"
+// #include "Value/Value.h"
 
-    Data()
-    : val{10}
-    {}
+// class Data : public ClassParser
+// {
+//     int val;
+//     std::string s;
+// public:
 
-    void reset() {
-        val = 20;
-    }
+//     Data()
+//     : val{10},
+//     s{"some string"}
+//     {}
 
-    void print()
-    {
-        std::cout << val << std::endl;
-    }
+//     void reset() {
+//         val = 20;
+//         s = "reset";
+//     }
 
-    virtual Value toJson() override
-    {
-        Value js({});
-        js["value"] = val;
-        return js;
-    }
+//     void print()
+//     {
+//         std::cout << val << " " << s << std::endl;
+//     }
 
-    virtual void fromJson(Value js) override
-    {
-        val = js["value"];
-    }
-};
+//     virtual Value toJson() override
+//     {
+//         Value js({});
+//         js["value"] = val;
+//         js["data"] = s;
+//         return js;
+//     }
+
+//     virtual void fromJson(Value js) override
+//     {
+//         val = js["value"];
+//         s = js["data"];
+//     }
+// };
 
 
 int main()
@@ -75,21 +83,45 @@ int main()
     // Value js({});
     // cout << js << endl;
 
-    Data d;
-    d.print();
+
+
+
+
+
+
+    // Data d;
+    // d.print();
+    // Value js;
+
+    // js = d;
+
+    // cout << js << endl;
+
+    // d.reset();
+    // d.print();
+
+    // d = js;
+
+    // d.print();
+
+    // const char * v = js["data"];
+
+    // Value js;
+    // js = Value::array({1,2,3});
+
+    // std::vector<int> v;
+    // v = static_cast<vector<int>>(js);
+
     Value js;
-    js = d;
+    js = Value::array({"s", "a", "m"});
 
-    cout << js << endl;
+    std::string s = js[0];
 
-    d.reset();
-    d.print();
+    cout << s;
 
-    d = js;
-
-    d.print();
-
-
+    // std::string str = "value";
+    // String<Types::Value> s(str);
+    // s.print();
 
 
     return 0;

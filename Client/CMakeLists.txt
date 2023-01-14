@@ -10,50 +10,24 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set (VCPKG_HOME "${CMAKE_SOURCE_DIR}/third-party/vcpkg")
-set (CMAKE_TOOLCHAIN_FILE "${VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake")
+#set (VCPKG_HOME "${CMAKE_SOURCE_DIR}/third-party/vcpkg")
+#set (CMAKE_TOOLCHAIN_FILE "${VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake")
 
-find_package(gRPC CONFIG REQUIRED)
-find_package(Protobuf CONFIG REQUIRED)
-find_package(absl CONFIG REQUIRED)
+#find_package(gRPC CONFIG REQUIRED)
+#find_package(Protobuf CONFIG REQUIRED)
+#find_package(absl CONFIG REQUIRED)
 find_package(Threads REQUIRED)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/grpc_client/proto_gen/ SUB_SOURCES)
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/json/ SUB_SOURCES)
-
 set(PROJECT_SOURCES
-        ${SUB_SOURCES}
         main.cpp
         qml/qml.qrc
-        grpc_client/UserService.hpp
-        grpc_client/ChatService.hpp
-        grpc_client/Client.hpp
 
-        # json/Types/Base.hpp
-        # json/Types/Integer/Integer.h
-        # json/Types/Integer/Integer.cpp
-        # json/Types/Number/Number.h
-        # json/Types/Number/Number.cpp
-        # json/Types/Bool/Bool.h
-        # json/Types/Bool/Bool.cpp
-        # json/Types/String/String.h
-        # json/Types/String/String.cpp
-        # json/Types/Null/Null.h
-        # json/Types/Null/Null.cpp
-        # json/Types/Vector/Vector.h
-        # json/Types/Vector/Vector.cpp
-        # json/Types/Map/Map.h
-        # json/Types/Map/Map.cpp
-        # json/Types/Map/Pair.hpp
-        # json/Types/Iterator/Iteartor.h
-        # json/Types/Value/Dumper.hpp
-        # json/Types/Value/Separators.hpp
-        # json/Types/Value/Parser.hpp
-        # json/Types/Value/Value.h
-        # json/Types/Value/Value.cpp
+        services/UserService.hpp
+        services/ChatService.hpp
+        services/Client.hpp
 
         src/Models/SignInUpModel.hpp
         src/Models/BaseScreen/ChatModel.hpp
@@ -68,6 +42,36 @@ set(PROJECT_SOURCES
 
         src/App.hpp
         Logger/Logger.hpp
+
+
+        communication/json/Bool/Bool.h
+        communication/json/Bool/Bool.cpp
+        communication/json/Integer/Integer.h
+        communication/json/Integer/Integer.cpp
+        communication/json/Iterator/Iteartor.h
+        communication/json/Map/Map.h
+        communication/json/Map/Map.cpp
+        communication/json/Map/Pair.hpp
+        communication/json/Null/Null.h
+        communication/json/Null/Null.cpp
+        communication/json/Number/Number.h
+        communication/json/Number/Number.cpp
+        communication/json/String/String.h
+        communication/json/String/String.cpp
+        communication/json/Value/Value.h
+        communication/json/Value/Value.cpp
+        communication/json/Value/Dumper.hpp
+        communication/json/Value/Parser.hpp
+        communication/json/Value/Separators.hpp
+        communication/json/Vector/Vector.h
+        communication/json/Vector/Vector.cpp
+        communication/json/Base.hpp
+
+        communication/chat_client.hpp
+        communication/common.hpp
+        communication/defaultClient.hpp
+        communication/user_client.hpp
+
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -96,7 +100,7 @@ endif()
 target_compile_definitions(UI
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(UI
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick absl::status gRPC::grpc++ gRPC::grpc++_unsecure gRPC::grpc++_reflection protobuf::libprotobuf)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick) #absl::status gRPC::grpc++ gRPC::grpc++_unsecure gRPC::grpc++_reflection protobuf::libprotobuf)
 
 set_target_properties(UI PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

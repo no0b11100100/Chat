@@ -101,6 +101,8 @@ public:
         if(isVector()) return static_cast<VectorType*>(m_data.get())->at(index);
     }
 
+    operator const char*() const = delete;
+
     template<class T>
     operator T() const
     {
@@ -115,6 +117,7 @@ public:
             result.fromJson(*this);
             return result;
         }
+        else if constexpr(std::is_enum_v<T>) static_cast<int>(*static_cast<Integer*>(m_data.get()));
         else return T();
     }
 

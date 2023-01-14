@@ -19,6 +19,7 @@ add_executable(ValueSystem
     Bool/Bool.h
     Bool/Bool.cpp
 
+    String/Char.hpp
     String/String.h
     String/String.cpp
 

@@ -8,14 +8,12 @@ import (
 	"Chat/Server/api"
 	log "Chat/Server/logger"
 	"Chat/Server/services"
-
-	"google.golang.org/grpc"
 )
 
 type Server struct {
 	database database.Database
 	listener net.Listener
-	server   *grpc.Server
+	server   *api.Server
 }
 
 func NewServer() *Server {
@@ -38,7 +36,7 @@ func NewServer() *Server {
 		listener: ln,
 	}
 
-	s.server = grpc.NewServer()
+	s.server = api.NewServer()
 	s.database.Connect()
 	s.initServices()
 
@@ -46,15 +44,20 @@ func NewServer() *Server {
 }
 
 func (s *Server) initServices() {
-	userService := services.NewUserService(s.database)
-	chatService := services.NewChatService()
+	userService := api.NewUserServiceServer("localhost:8080")
+	userServiceImpl := services.NewUserService(s.database)
+	userService.SetServerImpl(userServiceImpl)
 
-	api.RegisterChatServer(s.server, chatService)
-	api.RegisterUserServer(s.server, userService)
+	chatService := api.NewChatServiceServer("localhost:8081")
+	chatServiceImpl := services.NewChatService()
+	chatService.SetServerImpl(chatServiceImpl)
+
+	s.server.AddServer(userService)
+	s.server.AddServer(chatService)
 }
 
 func (s *Server) Serve() {
-	err := s.server.Serve(s.listener)
+	err := s.server.Serve()
 
 	if err != nil {
 		log.Error.Println(err)
@@ -64,5 +67,5 @@ func (s *Server) Serve() {
 
 func (s *Server) Shutdown() {
 	s.database.Close()
-	s.server.GracefulStop()
+	s.server.Stop()
 }

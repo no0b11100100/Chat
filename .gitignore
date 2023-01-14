@@ -7,3 +7,4 @@ Client/build/
 common/proto/*.txt
 doc/**
 SimulateClient/**
+api/**

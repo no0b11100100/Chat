@@ -1,0 +1,35 @@
+module user 1.0;
+
+struct Response {
+    string userID
+    string name
+    string nickName
+    string photo
+    ResponseStatus status
+    string statusMessage
+}
+
+
+struct SignIn {
+    string email
+    string password
+}
+
+struct SignUp {
+    string name
+    string nickName
+    string email
+    string password
+    string confirmedPassword
+    string photo
+}
+
+enum ResponseStatus {
+    OK,
+    Error
+}
+
+interface UserService {
+    Response signIn(SignIn data);
+    Response signUp(SignUp data);
+};

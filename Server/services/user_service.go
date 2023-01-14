@@ -3,14 +3,9 @@ package services
 import (
 	"Chat/Server/api"
 	interfaces "Chat/Server/interfaces"
-	log "Chat/Server/logger"
-	"context"
-
-	"github.com/golang/protobuf/ptypes/empty"
 )
 
 type UserService struct {
-	api.UnimplementedUserServer
 	database interfaces.UserServiceDatabase
 }
 
@@ -18,43 +13,40 @@ func NewUserService(database interfaces.UserServiceDatabase) *UserService {
 	return &UserService{database: database}
 }
 
-func (s *UserService) SignIn(_ context.Context, userData *api.SignIn) (response *api.Response, err error) {
-	log.Info.Printf("SignIn %+v\n", *userData)
+func (s *UserService) SignIn(_ api.ServerContext, userData api.SignIn) api.Response {
+	// log.Info.Printf("SignIn %+v\n", userData)
+	// response := api.Response{}
+	// status, userID := s.database.ValidateUser(userData.Email, userData.Password)
+	// if !status {
+	// 	response.Status = api.OK
+	// 	return response
+	// }
 
-	status, userID := s.database.ValidateUser(userData.Email, userData.Password)
-	if !status {
-		response.Status = api.ResponseStatus_OK
-		return
-	}
+	// response.UserID = userID
 
-	response.UserId = userID
-
-	return
+	// return response
+	return api.Response{}
 }
+func (s *UserService) SignUp(_ api.ServerContext, userData api.SignUp) api.Response {
+	// log.Info.Printf("SignUp %+v\n", userData)
+	// response := api.Response{}
+	// if userData.Password != userData.ConfirmedPassword {
+	// 	response.Status = api.OK
+	// 	response.StatusMessage = "Passwords not match"
+	// 	return response
+	// }
 
-func (s *UserService) SignUp(_ context.Context, userData *api.SignUp) (response *api.Response, err error) {
-	log.Info.Printf("SignUp %+v\n", *userData)
+	// if !s.database.IsEmailUnique(userData.Email) {
+	// 	response.Status = api.OK
+	// 	response.StatusMessage = "Email already in use"
+	// 	return response
+	// }
 
-	if userData.Password != userData.ConfirmedPassword {
-		response.Status = api.ResponseStatus_OK
-		response.StatusMessage = "Passwords not match"
-		return
-	}
+	// _, userID := s.database.RegisterUser(userData)
+	// s.database.AddUserToChat(userID, "-1") //Just for test: "-1" is a test chat
 
-	if !s.database.IsEmailUnique(userData.Email) {
-		response.Status = api.ResponseStatus_OK
-		response.StatusMessage = "Email already in use"
-		return
-	}
+	// response.UserId = userID
 
-	_, userID := s.database.RegisterUser(userData)
-	s.database.AddUserToChat(userID, "-1") //Just for test: "-1" is a test chat
-
-	response.UserId = userID
-
-	return
-}
-
-func (s *UserService) EditUser(context.Context, *api.UserData) (*empty.Empty, error) {
-	return nil, nil
+	// return response
+	return api.Response{}
 }
