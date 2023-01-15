@@ -149,6 +149,7 @@ public:
     static Value parse(const std::string&);
 
     std::string dump();
+    std::string prettyDump();
 
     Iterator<Value> begin()
     {

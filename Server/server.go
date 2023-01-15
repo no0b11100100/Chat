@@ -52,6 +52,8 @@ func (s *Server) initServices() {
 	chatServiceImpl := services.NewChatService(s.database)
 	chatService.SetServerImpl(chatServiceImpl)
 
+	chatService.SubscribeToNewConnectionEvent(chatServiceImpl.HandleNewConnection)
+
 	s.server.AddServer(userService)
 	s.server.AddServer(chatService)
 }

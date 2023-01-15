@@ -98,12 +98,21 @@ func (db *DB) Connect() {
 
 	// db.createTestChat() //Just for test
 
-	// ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-	// _, _ = db.tables["Chats"].InsertOne(ctx, api,Chat{Messages: &api.Messages{Messages: []*api.Message{&api.Message{MessageJson: string([]byte(`{"message":"test message"}`))}}},
-	// 	ChatId: "1", Title: "Test chat", LastMessage: "test message", Participants: []string{"726ac197-8640-43cc-9f54-0006780957f1"}})
-	// if err != nil {
-	// 	log.Warning.Println(err)
-	// }
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+	_, _ = db.tables["Chats"].InsertOne(ctx, api.Chat{
+		Messages: []api.Message{
+			{
+				MessageJSON: string([]byte(`{"message":"test message"}`)),
+			},
+		},
+		ChatID:       "-1",
+		Title:        "Test chat",
+		LastMessage:  "test message",
+		Participants: []string{},
+	})
+	if err != nil {
+		log.Warning.Println(err)
+	}
 
 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
 	if err != nil {
@@ -175,39 +184,41 @@ func (db *DB) RegisterUser(data api.SignUp) (bool, string) {
 	return true, user.UserID
 }
 
-// func (db *DB) AddUserToChat(userID string, chatID string) {
-// 	var chat ChatInfo
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-// 	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatid": chatID}).Decode(&chat)
-// 	if err != nil {
-// 		log.Warning.Println("DB error:", err)
-// 		return
-// 	}
+func (db *DB) AddUserToChat(userID string, chatID string) {
+	var chat api.Chat
+	var chatTagger api.ChatTagger
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err := db.tables["Chats"].FindOne(ctx, bson.M{chatTagger.ChatID: chatID}).Decode(&chat)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+		return
+	}
 
-// 	chat.Participants = append(chat.Participants, userID)
-// 	filter := bson.D{{"chatid", chatID}}
-// 	update := bson.D{{"$set", bson.D{{"participants", chat.Participants}}}}
-// 	_, err = db.tables["Chats"].UpdateOne(ctx, filter, update)
-// 	if err != nil {
-// 		log.Warning.Println("DB error:", err)
-// 		return
-// 	}
+	chat.Participants = append(chat.Participants, userID)
+	filter := bson.D{{chatTagger.ChatID, chatID}}
+	update := bson.D{{"$set", bson.D{{chatTagger.Participants, chat.Participants}}}}
+	_, err = db.tables["Chats"].UpdateOne(ctx, filter, update)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+		return
+	}
 
-// 	var user api.UserInfo
-// 	if err := db.tables["Users"].FindOne(ctx, bson.M{"userid": userID}).Decode(&user); err != nil {
-// 		log.Warning.Println(err)
-// 		return
-// 	}
+	var user api.UserInfo
+	var userTagger api.UserInfoTagger
+	if err := db.tables["Users"].FindOne(ctx, bson.M{userTagger.UserID: userID}).Decode(&user); err != nil {
+		log.Warning.Println(err)
+		return
+	}
 
-// 	user.Chats = append(user.Chats, chatID)
-// 	filter = bson.D{{"userid", userID}}
-// 	update = bson.D{{"$set", bson.D{{"chats", user.Chats}}}}
-// 	_, err = db.tables["Users"].UpdateOne(ctx, filter, update)
-// 	if err != nil {
-// 		log.Warning.Println("DB error:", err)
-// 		return
-// 	}
-// }
+	user.Chats = append(user.Chats, chatID)
+	filter = bson.D{{userTagger.UserID, userID}}
+	update = bson.D{{"$set", bson.D{{userTagger.Chats, user.Chats}}}}
+	_, err = db.tables["Users"].UpdateOne(ctx, filter, update)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+		return
+	}
+}
 
 func (db *DB) getChatInfo(chatID string) api.Chat {
 	log.Info.Println(chatID)

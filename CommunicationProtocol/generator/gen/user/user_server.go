@@ -7,19 +7,20 @@ import (
 	"fmt"
 	"net"
 	"net/textproto"
+	"strings"
 )
 
 //enums
 
 // structs
 type UserInfo struct {
-	UserID   string   `json:"UserID",omitempty bson:"UserID"`
-	Name     string   `json:"Name",omitempty bson:"Name"`
-	NickName string   `json:"NickName",omitempty bson:"NickName"`
-	Photo    string   `json:"Photo",omitempty bson:"Photo"`
-	Chats    []string `json:"Chats",omitempty bson:"Chats"`
-	Email    string   `json:"Email",omitempty bson:"Email"`
-	Password string   `json:"Password",omitempty bson:"Password"`
+	UserID   string   `json:"UserID",omitempty bson:"userid"`
+	Name     string   `json:"Name",omitempty bson:"name"`
+	NickName string   `json:"NickName",omitempty bson:"nickname"`
+	Photo    string   `json:"Photo",omitempty bson:"photo"`
+	Chats    []string `json:"Chats",omitempty bson:"chats"`
+	Email    string   `json:"Email",omitempty bson:"email"`
+	Password string   `json:"Password",omitempty bson:"password"`
 }
 
 type UserInfoTagger struct {
@@ -34,20 +35,20 @@ type UserInfoTagger struct {
 
 func UserInfoTags() UserInfoTagger {
 	return UserInfoTagger{
-		UserID:   "UserID",
-		Name:     "Name",
-		NickName: "NickName",
-		Photo:    "Photo",
-		Chats:    "Chats",
-		Email:    "Email",
-		Password: "Password",
+		UserID:   strings.ToLower("UserID"),
+		Name:     strings.ToLower("Name"),
+		NickName: strings.ToLower("NickName"),
+		Photo:    strings.ToLower("Photo"),
+		Chats:    strings.ToLower("Chats"),
+		Email:    strings.ToLower("Email"),
+		Password: strings.ToLower("Password"),
 	}
 }
 
 type Response struct {
-	Info          UserInfo       `json:"Info",omitempty bson:"Info"`
-	Status        ResponseStatus `json:"Status",omitempty bson:"Status"`
-	StatusMessage string         `json:"StatusMessage",omitempty bson:"StatusMessage"`
+	Info          UserInfo       `json:"Info",omitempty bson:"info"`
+	Status        ResponseStatus `json:"Status",omitempty bson:"status"`
+	StatusMessage string         `json:"StatusMessage",omitempty bson:"statusmessage"`
 }
 
 type ResponseTagger struct {
@@ -58,15 +59,15 @@ type ResponseTagger struct {
 
 func ResponseTags() ResponseTagger {
 	return ResponseTagger{
-		Info:          "Info",
-		Status:        "Status",
-		StatusMessage: "StatusMessage",
+		Info:          strings.ToLower("Info"),
+		Status:        strings.ToLower("Status"),
+		StatusMessage: strings.ToLower("StatusMessage"),
 	}
 }
 
 type SignIn struct {
-	Email    string `json:"Email",omitempty bson:"Email"`
-	Password string `json:"Password",omitempty bson:"Password"`
+	Email    string `json:"Email",omitempty bson:"email"`
+	Password string `json:"Password",omitempty bson:"password"`
 }
 
 type SignInTagger struct {
@@ -76,18 +77,18 @@ type SignInTagger struct {
 
 func SignInTags() SignInTagger {
 	return SignInTagger{
-		Email:    "Email",
-		Password: "Password",
+		Email:    strings.ToLower("Email"),
+		Password: strings.ToLower("Password"),
 	}
 }
 
 type SignUp struct {
-	Name              string `json:"Name",omitempty bson:"Name"`
-	NickName          string `json:"NickName",omitempty bson:"NickName"`
-	Email             string `json:"Email",omitempty bson:"Email"`
-	Password          string `json:"Password",omitempty bson:"Password"`
-	ConfirmedPassword string `json:"ConfirmedPassword",omitempty bson:"ConfirmedPassword"`
-	Photo             string `json:"Photo",omitempty bson:"Photo"`
+	Name              string `json:"Name",omitempty bson:"name"`
+	NickName          string `json:"NickName",omitempty bson:"nickname"`
+	Email             string `json:"Email",omitempty bson:"email"`
+	Password          string `json:"Password",omitempty bson:"password"`
+	ConfirmedPassword string `json:"ConfirmedPassword",omitempty bson:"confirmedpassword"`
+	Photo             string `json:"Photo",omitempty bson:"photo"`
 }
 
 type SignUpTagger struct {
@@ -101,12 +102,12 @@ type SignUpTagger struct {
 
 func SignUpTags() SignUpTagger {
 	return SignUpTagger{
-		Name:              "Name",
-		NickName:          "NickName",
-		Email:             "Email",
-		Password:          "Password",
-		ConfirmedPassword: "ConfirmedPassword",
-		Photo:             "Photo",
+		Name:              strings.ToLower("Name"),
+		NickName:          strings.ToLower("NickName"),
+		Email:             strings.ToLower("Email"),
+		Password:          strings.ToLower("Password"),
+		ConfirmedPassword: strings.ToLower("ConfirmedPassword"),
+		Photo:             strings.ToLower("Photo"),
 	}
 }
 
@@ -192,34 +193,34 @@ func (s *UserServiceServer) handleCommand(payload string, conn net.Conn) {
 	switch recievedMessage.Endpoint {
 	case "UserService.SignIn":
 		args := make([]json.RawMessage, 0)
-		json.Unmarshal([]byte(recievedMessage.Payload), &args)
+		json.Unmarshal(recievedMessage.Payload, &args)
 		var index int
 
 		var data SignIn
-		json.Unmarshal([]byte(args[index]), &data)
+		json.Unmarshal(args[index], &data)
 		index++
 
 		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.SignIn(serverContex, data)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
-		messageToSend.Payload = string(bytes)
+		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
 		conn.Write(responseData)
 	case "UserService.SignUp":
 		args := make([]json.RawMessage, 0)
-		json.Unmarshal([]byte(recievedMessage.Payload), &args)
+		json.Unmarshal(recievedMessage.Payload, &args)
 		var index int
 
 		var data SignUp
-		json.Unmarshal([]byte(args[index]), &data)
+		json.Unmarshal(args[index], &data)
 		index++
 
 		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.SignUp(serverContex, data)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
-		messageToSend.Payload = string(bytes)
+		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
 		conn.Write(responseData)
 	}

@@ -30,7 +30,7 @@ func (chat *ChatService) GetUserChats(_ api.ServerContext, userID string) []api.
 }
 
 func (chat *ChatService) GetChatMessages(_ api.ServerContext, chatID string) []api.Message {
-	return []api.Message{} //chat.database.GetMessages(chatID)
+	return chat.database.GetMessages(chatID)
 }
 
 func (chat *ChatService) HandleNewConnection(address string, notifier api.ChatServiceNotifier) {

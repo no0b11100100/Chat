@@ -23,7 +23,7 @@ struct {{struct.name}} : public Types::ClassParser
     {{field.cpp_type}} {{field.cap_name}};
 {% endfor -%}
 
-    virtual json toJson() override
+    virtual json toJson() const override
     {
         json js({});
         {% for field in struct.fields %}
@@ -70,10 +70,9 @@ public:
     {% for operation in interface.operations %}
     {{operation.cpp_type}} {{operation.cap_name}}({%- for parameter in operation.parameters -%}{{parameter.cpp_type}} {{parameter.name}},{%- endfor -%})
     {
-        json args = json::array({ {%- for parameter in operation.parameters -%}{{parameter.name}},{%- endfor -%} });
         Common::MessageData _message;
+        _message.Payload = json::array({ {%- for parameter in operation.parameters -%}{{parameter.name}},{%- endfor -%} });
         _message.Endpoint = "{{interface}}.{{operation.cap_name}}";
-        _message.Payload = args.dump();
         return Request(_message).GetData<{{operation.cpp_type}}>();
     }
     {% endfor %}

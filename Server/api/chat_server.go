@@ -7,15 +7,16 @@ import (
 	"fmt"
 	"net"
 	"net/textproto"
+	"strings"
 )
 
 //enums
 
 // structs
 type Message struct {
-	MessageJSON string `json:"MessageJSON",omitempty bson:"MessageJSON"`
-	ChatID      string `json:"ChatID",omitempty bson:"ChatID"`
-	SenderID    string `json:"SenderID",omitempty bson:"SenderID"`
+	MessageJSON string `json:"MessageJSON",omitempty bson:"messagejson"`
+	ChatID      string `json:"ChatID",omitempty bson:"chatid"`
+	SenderID    string `json:"SenderID",omitempty bson:"senderid"`
 }
 
 type MessageTagger struct {
@@ -26,21 +27,21 @@ type MessageTagger struct {
 
 func MessageTags() MessageTagger {
 	return MessageTagger{
-		MessageJSON: "MessageJSON",
-		ChatID:      "ChatID",
-		SenderID:    "SenderID",
+		MessageJSON: strings.ToLower("MessageJSON"),
+		ChatID:      strings.ToLower("ChatID"),
+		SenderID:    strings.ToLower("SenderID"),
 	}
 }
 
 type Chat struct {
-	ChatID        string    `json:"ChatID",omitempty bson:"ChatID"`
-	Title         string    `json:"Title",omitempty bson:"Title"`
-	SecondLine    string    `json:"SecondLine",omitempty bson:"SecondLine"`
-	LastMessage   string    `json:"LastMessage",omitempty bson:"LastMessage"`
-	UnreadedCount int       `json:"UnreadedCount",omitempty bson:"UnreadedCount"`
-	Cover         string    `json:"Cover",omitempty bson:"Cover"`
-	Participants  []string  `json:"Participants",omitempty bson:"Participants"`
-	Messages      []Message `json:"Messages",omitempty bson:"Messages"`
+	ChatID        string    `json:"ChatID",omitempty bson:"chatid"`
+	Title         string    `json:"Title",omitempty bson:"title"`
+	SecondLine    string    `json:"SecondLine",omitempty bson:"secondline"`
+	LastMessage   string    `json:"LastMessage",omitempty bson:"lastmessage"`
+	UnreadedCount int       `json:"UnreadedCount",omitempty bson:"unreadedcount"`
+	Cover         string    `json:"Cover",omitempty bson:"cover"`
+	Participants  []string  `json:"Participants",omitempty bson:"participants"`
+	Messages      []Message `json:"Messages",omitempty bson:"messages"`
 }
 
 type ChatTagger struct {
@@ -56,14 +57,14 @@ type ChatTagger struct {
 
 func ChatTags() ChatTagger {
 	return ChatTagger{
-		ChatID:        "ChatID",
-		Title:         "Title",
-		SecondLine:    "SecondLine",
-		LastMessage:   "LastMessage",
-		UnreadedCount: "UnreadedCount",
-		Cover:         "Cover",
-		Participants:  "Participants",
-		Messages:      "Messages",
+		ChatID:        strings.ToLower("ChatID"),
+		Title:         strings.ToLower("Title"),
+		SecondLine:    strings.ToLower("SecondLine"),
+		LastMessage:   strings.ToLower("LastMessage"),
+		UnreadedCount: strings.ToLower("UnreadedCount"),
+		Cover:         strings.ToLower("Cover"),
+		Participants:  strings.ToLower("Participants"),
+		Messages:      strings.ToLower("Messages"),
 	}
 }
 
@@ -85,16 +86,16 @@ type ChatServiceNotificator struct {
 }
 
 func (n *ChatServiceNotificator) RecieveMessage(message Message) {
-	args := make([]string, 0)
+	args := make([]json.RawMessage, 0)
 	var bytes []byte
 	bytes, _ = json.Marshal(message)
-	args = append(args, string(bytes))
+	args = append(args, json.RawMessage(bytes))
 
 	bytes, _ = json.Marshal(args)
 
 	messageToSend := MessageData{}
 	messageToSend.Endpoint = "ChatService.RecieveMessage"
-	messageToSend.Payload = string(bytes)
+	messageToSend.Payload = json.RawMessage(bytes)
 	messageToSend.Type = Notification
 
 	payloadToSend, _ := json.Marshal(messageToSend)
@@ -169,50 +170,50 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 	switch recievedMessage.Endpoint {
 	case "ChatService.SendMessage":
 		args := make([]json.RawMessage, 0)
-		json.Unmarshal([]byte(recievedMessage.Payload), &args)
+		json.Unmarshal(recievedMessage.Payload, &args)
 		var index int
 
 		var message Message
-		json.Unmarshal([]byte(args[index]), &message)
+		json.Unmarshal(args[index], &message)
 		index++
 
 		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.SendMessage(serverContex, message)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
-		messageToSend.Payload = string(bytes)
+		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
 		conn.Write(responseData)
 	case "ChatService.GetUserChats":
 		args := make([]json.RawMessage, 0)
-		json.Unmarshal([]byte(recievedMessage.Payload), &args)
+		json.Unmarshal(recievedMessage.Payload, &args)
 		var index int
 
 		var userID string
-		json.Unmarshal([]byte(args[index]), &userID)
+		json.Unmarshal(args[index], &userID)
 		index++
 
 		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.GetUserChats(serverContex, userID)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
-		messageToSend.Payload = string(bytes)
+		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
 		conn.Write(responseData)
 	case "ChatService.GetChatMessages":
 		args := make([]json.RawMessage, 0)
-		json.Unmarshal([]byte(recievedMessage.Payload), &args)
+		json.Unmarshal(recievedMessage.Payload, &args)
 		var index int
 
 		var chatID string
-		json.Unmarshal([]byte(args[index]), &chatID)
+		json.Unmarshal(args[index], &chatID)
 		index++
 
 		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.GetChatMessages(serverContex, chatID)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
-		messageToSend.Payload = string(bytes)
+		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
 		conn.Write(responseData)
 	}

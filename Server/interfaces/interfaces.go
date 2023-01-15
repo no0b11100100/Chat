@@ -8,7 +8,7 @@ type UserServiceDatabase interface {
 	IsEmailUnique(string) bool
 	ValidateUser(email, password string) (bool, string)
 	RegisterUser(api.SignUp) (bool, string)
-	// AddUserToChat(userID string, chatID string)
+	AddUserToChat(userID string, chatID string)
 }
 
 type ChatServiceDatabase interface {

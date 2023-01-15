@@ -3,7 +3,7 @@ module common 1.0;
 struct MessageData {
     string endpoint
     string topic
-    string payload
+    json payload
     MessageType type
 }
 

@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <chrono>
 #include <optional>
+#include <iostream>
 
 namespace Common
 {
@@ -30,7 +31,7 @@ struct {{struct.name}} : public Types::ClassParser
     {{field.cpp_type}} {{field.cap_name}};
 {% endfor -%}
 
-    virtual json toJson() override
+    virtual json toJson() const override
     {
         json js({});
         {% for field in struct.fields %}
@@ -129,6 +130,7 @@ private:
             for(auto& waiter : m_waiters)
             {
                 if(waiter.IsTopic(data.Topic)) {
+                    std::cout << "Process topic " << data.Topic << std::endl;
                     waiter.SetResponse(data.Payload);
                     break;
                 }

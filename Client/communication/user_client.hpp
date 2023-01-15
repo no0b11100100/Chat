@@ -17,7 +17,7 @@ struct UserInfo : public Types::ClassParser {
   std::vector<std::string> Chats;
   std::string Email;
   std::string Password;
-  virtual json toJson() override {
+  virtual json toJson() const override {
     json js({});
     js["UserID"] = UserID;
     js["Name"] = Name;
@@ -44,7 +44,7 @@ struct Response : public Types::ClassParser {
   UserInfo Info;
   ResponseStatus Status;
   std::string StatusMessage;
-  virtual json toJson() override {
+  virtual json toJson() const override {
     json js({});
     js["Info"] = Info;
     js["Status"] = Status;
@@ -62,7 +62,7 @@ struct Response : public Types::ClassParser {
 struct SignIn : public Types::ClassParser {
   std::string Email;
   std::string Password;
-  virtual json toJson() override {
+  virtual json toJson() const override {
     json js({});
     js["Email"] = Email;
     js["Password"] = Password;
@@ -82,7 +82,7 @@ struct SignUp : public Types::ClassParser {
   std::string Password;
   std::string ConfirmedPassword;
   std::string Photo;
-  virtual json toJson() override {
+  virtual json toJson() const override {
     json js({});
     js["Name"] = Name;
     js["NickName"] = NickName;
@@ -110,17 +110,15 @@ public:
   UserServiceStub(const std::string &addr) : Common::Base(addr) {}
 
   Response SignIn(SignIn data) {
-    json args = json::array({data});
     Common::MessageData _message;
+    _message.Payload = json::array({data});
     _message.Endpoint = "UserService.SignIn";
-    _message.Payload = args.dump();
     return Request(_message).GetData<Response>();
   }
   Response SignUp(SignUp data) {
-    json args = json::array({data});
     Common::MessageData _message;
+    _message.Payload = json::array({data});
     _message.Endpoint = "UserService.SignUp";
-    _message.Payload = args.dump();
     return Request(_message).GetData<Response>();
   }
 

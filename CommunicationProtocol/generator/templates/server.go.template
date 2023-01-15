@@ -7,6 +7,7 @@ import (
     "net/textproto"
     "bufio"
     "fmt"
+    "strings"
 )
 
 
@@ -25,7 +26,7 @@ const (
 {% for struct in module.structs: %}
 type {{struct.name}} struct {
 {% for field in struct.fields %}
-    {{field.cap_name}} {{field.go_type}} `json:"{{field.cap_name}}",omitempty bson:"{{field.cap_name}}"`
+    {{field.cap_name}} {{field.go_type}} `json:"{{field.cap_name}}",omitempty bson:"{{field.cap_name.lower()}}"`
 {% endfor -%}
 }
 
@@ -38,7 +39,7 @@ type {{struct.name}}Tagger struct {
 func {{struct.name}}Tags() {{struct.name}}Tagger {
     return {{struct.name}}Tagger {
     {% for field in struct.fields %}
-    {{field.cap_name}}: "{{field.cap_name}}",
+    {{field.cap_name}}: strings.ToLower("{{field.cap_name}}"),
     {% endfor -%}
     }
 }
@@ -69,18 +70,18 @@ type {{interface}}Notificator struct {
 
 {% for signal in interface.signals %}
 func(n *{{interface}}Notificator) {{signal.cap_name}}({%- for parameter in signal.parameters -%} {{parameter.name}} {{parameter.go_type}},{%- endfor -%}) {
-    args := make([]string, 0)
+    args := make([]json.RawMessage, 0)
     var bytes []byte
     {%for parameter in signal.parameters%}
     bytes, _ = json.Marshal({{parameter.name}})
-    args = append(args, string(bytes))
+    args = append(args, json.RawMessage(bytes))
     {% endfor %}
 
     bytes , _ = json.Marshal(args)
 
     messageToSend := MessageData{}
     messageToSend.Endpoint = "{{interface}}.{{signal.cap_name}}"
-    messageToSend.Payload = string(bytes)
+    messageToSend.Payload = json.RawMessage(bytes)
     messageToSend.Type = Notification
 
     payloadToSend, _ := json.Marshal(messageToSend)
@@ -158,12 +159,12 @@ func (s *{{interface}}Server) handleCommand(payload string, conn net.Conn) {
         {% for operation in interface.operations %}
         case "{{interface}}.{{operation.cap_name}}":
             args := make([]json.RawMessage, 0)
-            json.Unmarshal([]byte(recievedMessage.Payload), &args)
+            json.Unmarshal(recievedMessage.Payload, &args)
             var index int
             {% for parameter in operation.parameters %}
 
             var {{parameter.name}} {{parameter.go_type}}
-            json.Unmarshal([]byte(args[index]), &{{parameter.name}})
+            json.Unmarshal(args[index], &{{parameter.name}})
             index++
 
             {% endfor %}
@@ -171,7 +172,7 @@ func (s *{{interface}}Server) handleCommand(payload string, conn net.Conn) {
             response := s.impl.{{operation.cap_name}}(serverContex, {%- for parameter in operation.parameters -%} {{parameter.name}},{%- endfor -%})
             bytes, _ := json.Marshal(response)
             messageToSend := recievedMessage
-            messageToSend.Payload = string(bytes)
+            messageToSend.Payload = json.RawMessage(bytes)
             responseData, _ := json.Marshal(messageToSend)
             conn.Write(responseData)
         {% endfor %}

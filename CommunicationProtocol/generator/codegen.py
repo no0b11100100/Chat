@@ -63,6 +63,8 @@ def go_type(self: object) -> object:
                 return split[-1]
             return ''.join(split[:-1]) + '.' + split[-1]
         else:
+            if split[0] == 'json':
+                return 'json.RawMessage'
             return split[0]
 
 

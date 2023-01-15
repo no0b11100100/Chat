@@ -7,6 +7,7 @@
 #include <chrono>
 #include <functional>
 #include <future>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -21,9 +22,9 @@ enum class MessageType { Request = 0, Notification = 1 };
 struct MessageData : public Types::ClassParser {
   std::string Endpoint;
   std::string Topic;
-  std::string Payload;
+  json Payload;
   MessageType Type;
-  virtual json toJson() override {
+  virtual json toJson() const override {
     json js({});
     js["Endpoint"] = Endpoint;
     js["Topic"] = Topic;
@@ -35,7 +36,7 @@ struct MessageData : public Types::ClassParser {
   virtual void fromJson(json js) override {
     Endpoint = static_cast<std::string>(js["Endpoint"]);
     Topic = static_cast<std::string>(js["Topic"]);
-    Payload = static_cast<std::string>(js["Payload"]);
+    Payload = static_cast<json>(js["Payload"]);
     Type = static_cast<MessageType>(js["Type"]);
   }
 };
@@ -114,6 +115,7 @@ private:
     } else {
       for (auto &waiter : m_waiters) {
         if (waiter.IsTopic(data.Topic)) {
+          std::cout << "Process topic " << data.Topic << std::endl;
           waiter.SetResponse(data.Payload);
           break;
         }

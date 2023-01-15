@@ -13,7 +13,7 @@ struct Message : public Types::ClassParser {
   std::string MessageJSON;
   std::string ChatID;
   std::string SenderID;
-  virtual json toJson() override {
+  virtual json toJson() const override {
     json js({});
     js["MessageJSON"] = MessageJSON;
     js["ChatID"] = ChatID;
@@ -37,7 +37,7 @@ struct Chat : public Types::ClassParser {
   std::string Cover;
   std::vector<std::string> Participants;
   std::vector<Message> Messages;
-  virtual json toJson() override {
+  virtual json toJson() const override {
     json js({});
     js["ChatID"] = ChatID;
     js["Title"] = Title;
@@ -80,24 +80,21 @@ public:
   }
 
   ResponseStatus SendMessage(Message message) {
-    json args = json::array({message});
     Common::MessageData _message;
+    _message.Payload = json::array({message});
     _message.Endpoint = "ChatService.SendMessage";
-    _message.Payload = args.dump();
     return Request(_message).GetData<ResponseStatus>();
   }
   std::vector<Chat> GetUserChats(std::string userID) {
-    json args = json::array({userID});
     Common::MessageData _message;
+    _message.Payload = json::array({userID});
     _message.Endpoint = "ChatService.GetUserChats";
-    _message.Payload = args.dump();
     return Request(_message).GetData<std::vector<Chat>>();
   }
   std::vector<Message> GetChatMessages(std::string chatID) {
-    json args = json::array({chatID});
     Common::MessageData _message;
+    _message.Payload = json::array({chatID});
     _message.Endpoint = "ChatService.GetChatMessages";
-    _message.Payload = args.dump();
     return Request(_message).GetData<std::vector<Message>>();
   }
 
