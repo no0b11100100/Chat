@@ -47,7 +47,6 @@ public:
         is >> value.m_value;
         return is;
     }
-
 };
 
 }

@@ -135,3 +135,9 @@ std::string Value::dump()
     Dumper dumper;
     return dumper.dump(*this);
 }
+
+std::string Value::prettyDump()
+{
+    Dumper dumper;
+    return dumper.prettyDump(*this);
+}

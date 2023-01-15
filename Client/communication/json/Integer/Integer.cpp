@@ -21,3 +21,4 @@ std::size_t Types::Integer::size() const
     // TODO: add exception
     return 0;
 }
+

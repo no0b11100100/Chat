@@ -37,12 +37,13 @@ public:
         return static_cast<T>(m_value);
     }
 
-    friend std::ostream &operator <<(std::ostream& os, const Integer& i)
+    friend std::ostream& operator <<(std::ostream & os, const Integer& i)
     {
-        os << std::boolalpha << std::to_string(i.m_value);
+        os << std::to_string(i.m_value);
         return os;
     }
-    friend std::istream &operator >>(std::istream& is, Integer& value)
+
+    friend std::istream& operator >>(std::istream & is, Integer& value)
     {
         is >> value.m_value;
         return is;

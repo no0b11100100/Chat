@@ -21,7 +21,7 @@ namespace Types {
 class Value;
 class ClassParser {
 public:
-    virtual Value toJson() = 0;
+    virtual Value toJson() const = 0;
     virtual void fromJson(Value) = 0;
 };
 
@@ -43,6 +43,7 @@ class Value
         else if constexpr(StringValue<T>) m_data.reset(new String(value));
         else if constexpr(VectorValue<T>) m_data.reset(new VectorType(value));
         else if constexpr(NullValue<T>) m_data.reset(new Null(nullptr));
+        else if constexpr(std::is_enum_v<std::decay_t<decltype(value)>>) m_data.reset(new Integer(static_cast<int>(value)));
         else m_data.reset(new Null());
     }
 
@@ -75,7 +76,11 @@ public:
     ~Value() = default;
 
     template<class T, class = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Value>>>
-    Value(T&& value) { assign(value); }
+    Value(T&& value)
+    {
+        if constexpr(std::is_base_of_v<ClassParser, std::decay_t<T>>) *this = value.toJson();
+        else assign(value);
+    }
 
     template<class T, class = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Value>>>
     void operator=(T&& value)
@@ -100,7 +105,7 @@ public:
     {
         if(isVector()) return static_cast<VectorType*>(m_data.get())->at(index);
 
-        throw std::runtime_error("operator[](IntegerValue index)");
+        throw std::runtime_error("operator[](IntegerValue key)");
     }
 
     operator const char*() const = delete;
@@ -119,9 +124,8 @@ public:
             result.fromJson(*this);
             return result;
         }
-        else if constexpr(std::is_enum_v<T>) static_cast<int>(*static_cast<Integer*>(m_data.get()));
-        // else return T();
-        return T();
+        else if constexpr(std::is_enum_v<std::decay_t<T>>) return static_cast<T>(static_cast<int>(*static_cast<Integer*>(m_data.get())));
+        else return T();
     }
 
     Value &front();
@@ -152,6 +156,7 @@ public:
     static Value parse(const std::string&);
 
     std::string dump();
+    std::string prettyDump();
 
     Iterator<Value> begin()
     {

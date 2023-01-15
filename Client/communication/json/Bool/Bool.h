@@ -32,12 +32,13 @@ public:
     requires BoolValue<T>
     operator T() { return m_value; }
 
-    friend std::ostream &operator <<(std::ostream& os, const Bool& i)
+    friend std::ostream& operator <<(std::ostream & os, const Bool& i)
     {
         os << std::boolalpha << std::to_string(i.m_value);
         return os;
     }
-    friend std::istream &operator >>(std::istream& is, Bool& value)
+
+    friend std::istream& operator >>(std::istream & is, Bool& value)
     {
         is >> value.m_value;
         return is;
