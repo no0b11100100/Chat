@@ -40,7 +40,7 @@ public:
     void SetUser(user::Response userData)
     {
         // std::this_thread::sleep_for(std::chrono::seconds(20));
-        auto chats = m_client->chatService().getUserChats(userData.UserID);
+        auto chats = m_client->chatService().getUserChats(userData.Info.UserID);
         m_chatList->SetChats(chats);
     }
 

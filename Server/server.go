@@ -49,7 +49,7 @@ func (s *Server) initServices() {
 	userService.SetServerImpl(userServiceImpl)
 
 	chatService := api.NewChatServiceServer("localhost:8081")
-	chatServiceImpl := services.NewChatService()
+	chatServiceImpl := services.NewChatService(s.database)
 	chatService.SetServerImpl(chatServiceImpl)
 
 	s.server.AddServer(userService)
@@ -57,12 +57,7 @@ func (s *Server) initServices() {
 }
 
 func (s *Server) Serve() {
-	err := s.server.Serve()
-
-	if err != nil {
-		log.Error.Println(err)
-	}
-
+	s.server.Serve()
 }
 
 func (s *Server) Shutdown() {

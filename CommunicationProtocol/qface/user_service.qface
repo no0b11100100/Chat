@@ -1,14 +1,22 @@
 module user 1.0;
 
-struct Response {
+import types 1.0;
+
+struct UserInfo {
     string userID
     string name
     string nickName
     string photo
+    list<string> chats
+    string email
+    string password
+}
+
+struct Response {
+    UserInfo info
     ResponseStatus status
     string statusMessage
 }
-
 
 struct SignIn {
     string email
@@ -22,11 +30,6 @@ struct SignUp {
     string password
     string confirmedPassword
     string photo
-}
-
-enum ResponseStatus {
-    OK,
-    Error
 }
 
 interface UserService {

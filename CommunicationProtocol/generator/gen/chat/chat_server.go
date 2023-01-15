@@ -13,29 +13,65 @@ import (
 
 // structs
 type Message struct {
-	MessageJSON string `json:"MessageJSON"`
-	ChatID      string `json:"ChatID"`
-	SenderID    string `json:"SenderID"`
+	MessageJSON string `json:"MessageJSON",omitempty bson:"MessageJSON"`
+	ChatID      string `json:"ChatID",omitempty bson:"ChatID"`
+	SenderID    string `json:"SenderID",omitempty bson:"SenderID"`
 }
+
+type MessageTagger struct {
+	MessageJSON string
+	ChatID      string
+	SenderID    string
+}
+
+func MessageTags() MessageTagger {
+	return MessageTagger{
+		MessageJSON: "MessageJSON",
+		ChatID:      "ChatID",
+		SenderID:    "SenderID",
+	}
+}
+
 type Chat struct {
-	ChatID        string    `json:"ChatID"`
-	Title         string    `json:"Title"`
-	SecondLine    string    `json:"SecondLine"`
-	LastMessage   string    `json:"LastMessage"`
-	UnreadedCount int       `json:"UnreadedCount"`
-	Cover         string    `json:"Cover"`
-	Participants  []string  `json:"Participants"`
-	Messages      []Message `json:"Messages"`
+	ChatID        string    `json:"ChatID",omitempty bson:"ChatID"`
+	Title         string    `json:"Title",omitempty bson:"Title"`
+	SecondLine    string    `json:"SecondLine",omitempty bson:"SecondLine"`
+	LastMessage   string    `json:"LastMessage",omitempty bson:"LastMessage"`
+	UnreadedCount int       `json:"UnreadedCount",omitempty bson:"UnreadedCount"`
+	Cover         string    `json:"Cover",omitempty bson:"Cover"`
+	Participants  []string  `json:"Participants",omitempty bson:"Participants"`
+	Messages      []Message `json:"Messages",omitempty bson:"Messages"`
 }
-type Status struct {
-	Status ResponseStatus `json:"Status"`
+
+type ChatTagger struct {
+	ChatID        string
+	Title         string
+	SecondLine    string
+	LastMessage   string
+	UnreadedCount string
+	Cover         string
+	Participants  string
+	Messages      string
+}
+
+func ChatTags() ChatTagger {
+	return ChatTagger{
+		ChatID:        "ChatID",
+		Title:         "Title",
+		SecondLine:    "SecondLine",
+		LastMessage:   "LastMessage",
+		UnreadedCount: "UnreadedCount",
+		Cover:         "Cover",
+		Participants:  "Participants",
+		Messages:      "Messages",
+	}
 }
 
 // server
 type ChatServiceConnectionCallback = func(string, ChatServiceNotifier)
 
 type ChatServiceServerImpl interface {
-	SendMessage(ServerContext, Message) Status
+	SendMessage(ServerContext, Message) ResponseStatus
 	GetUserChats(ServerContext, string) []Chat
 	GetChatMessages(ServerContext, string) []Message
 }
@@ -82,6 +118,12 @@ func NewChatServiceServer(addr string) *ChatServiceServer {
 	}
 
 	return server
+}
+
+func (s *ChatServiceServer) Stop() {
+	if err := s.listener.Close(); err != nil {
+		fmt.Println("ChatServiceServer Stop error:", err)
+	}
 }
 
 func (s *ChatServiceServer) SetServerImpl(impl ChatServiceServerImpl) {

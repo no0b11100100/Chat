@@ -10,7 +10,7 @@ public:
     : m_stub{new chat::ChatServiceStub(addr)}
     {}
 
-    chat::Status sendMessage(std::string chatID, std::string message) {
+    ResponseStatus sendMessage(std::string chatID, std::string message) {
         chat::Message msg;
         return m_stub->SendMessage(msg);
     }

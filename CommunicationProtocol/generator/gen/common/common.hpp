@@ -105,7 +105,7 @@ private:
     json js = json::parse(payload);
     MessageData data;
     data = js;
-    if (data.MessageType == Type::Notification) {
+    if (data.Type == MessageType::Notification) {
       auto result = isSignalHandlable(data.Endpoint);
       if (result.has_value()) {
         auto handler = result.value();

@@ -10,6 +10,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/google/uuid"
+
+	api "Chat/Server/api"
+	interfaces "Chat/Server/interfaces"
 	log "Chat/Server/logger"
 )
 
@@ -44,32 +48,12 @@ func NewDatabase() *DB {
 }
 
 type Database interface {
-	// interfaces.UserServiceDatabase
-	// interfaces.ChatServiceDatabase
+	interfaces.UserServiceDatabase
+	interfaces.ChatServiceDatabase
 	Connect()
 	Close()
-	AddUserToChat(userID string, chatID string)
+	// AddUserToChat(userID string, chatID string)
 }
-
-// type UserInfo struct {
-// 	UserID   string
-// 	Email    string
-// 	Password string
-// 	Name     string
-// 	NickName string
-// 	Photo    string
-// }
-
-// type ChatInfo struct {
-// 	ChatID        string
-// 	Title         string
-// 	SecondLine    string
-// 	LastMessage   string
-// 	UnreadedCount int
-// 	Cover         string
-// 	Participants  []string
-// 	Messages      []api.Message
-// }
 
 // func (db *DB) createTestChat() {
 // 	var chat ChatInfo
@@ -138,56 +122,58 @@ func (db *DB) Close() {
 	log.Info.Println("Connection to MongoDB closed.")
 }
 
-// func (db *DB) IsEmailUnique(email string) bool {
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-// 	var result bson.M
-// 	err := db.tables["Users"].FindOne(ctx, bson.M{"email": email}).Decode(&result)
-// 	if err != nil {
-// 		if err == mongo.ErrNoDocuments {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+func (db *DB) IsEmailUnique(email string) bool {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	var result bson.M
+	var userTagger api.UserInfoTagger
+	err := db.tables["Users"].FindOne(ctx, bson.M{userTagger.Email: email}).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return true
+		}
+	}
+	return false
+}
 
-// func (db *DB) ValidateUser(email, password string) (bool, string) {
-// 	log.Info.Println("Validate user", email, password)
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-// 	var record bson.M
-// 	if err := db.tables["Users"].FindOne(ctx, bson.M{"email": email, "password": password}).Decode(&record); err != nil {
-// 		log.Warning.Println(err)
-// 		return false, ""
-// 	}
-// 	log.Info.Println(record)
+func (db *DB) ValidateUser(email, password string) (bool, string) {
+	log.Info.Println("Validate user", email, password)
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	var record bson.M
+	var userTagger api.UserInfoTagger
+	if err := db.tables["Users"].FindOne(ctx, bson.M{userTagger.Email: email, userTagger.Password: password}).Decode(&record); err != nil {
+		log.Warning.Println(err)
+		return false, ""
+	}
+	log.Info.Println(record)
 
-// 	userID, ok := record["userid"].(string)
-// 	if !ok {
-// 		log.Warning.Println("ValidateUser error")
-// 		return false, ""
-// 	}
+	userID, ok := record["userid"].(string)
+	if !ok {
+		log.Warning.Println("ValidateUser error")
+		return false, ""
+	}
 
-// 	return true, userID
-// }
+	return true, userID
+}
 
-// func (db *DB) RegisterUser(data api.SignUp) (bool, string) {
-// 	user := UserInfo{
-// 		Email:    data.Email,
-// 		Password: data.Password,
-// 		Name:     data.Name,
-// 		NickName: data.NickName,
-// 		Photo:    data.Photo,
-// 	}
+func (db *DB) RegisterUser(data api.SignUp) (bool, string) {
+	user := api.UserInfo{
+		Email:    data.Email,
+		Password: data.Password,
+		Name:     data.Name,
+		NickName: data.NickName,
+		Photo:    data.Photo,
+	}
 
-// 	user.UserID = uuid.New().String()
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-// 	_, err := db.tables["Users"].InsertOne(ctx, user)
-// 	if err != nil {
-// 		log.Warning.Println(err)
-// 		return false, ""
-// 	}
+	user.UserID = uuid.New().String()
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	_, err := db.tables["Users"].InsertOne(ctx, user)
+	if err != nil {
+		log.Warning.Println(err)
+		return false, ""
+	}
 
-// 	return true, user.UserID
-// }
+	return true, user.UserID
+}
 
 // func (db *DB) AddUserToChat(userID string, chatID string) {
 // 	var chat ChatInfo
@@ -223,45 +209,47 @@ func (db *DB) Close() {
 // 	}
 // }
 
-// func (db *DB) getChatInfo(chatID string) ChatInfo {
-// 	log.Info.Println(chatID)
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-// 	var chat ChatInfo
-// 	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatid": chatID}).Decode(&chat)
-// 	if err != nil {
-// 		log.Warning.Println("DB error:", err)
-// 	}
+func (db *DB) getChatInfo(chatID string) api.Chat {
+	log.Info.Println(chatID)
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	var chat api.Chat
+	var chatTagger api.ChatTagger
+	err := db.tables["Chats"].FindOne(ctx, bson.M{chatTagger.ChatID: chatID}).Decode(&chat)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+	}
 
-// 	return chat
-// }
+	return chat
+}
 
-// func (db *DB) GetUserChats(userID string) []api.Chat {
-// 	log.Info.Println("GetUserChatsr", userID)
-// 	result := make([]*api,Chat, 0)
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+func (db *DB) GetUserChats(userID string) []api.Chat {
+	log.Info.Println("GetUserChatsr", userID)
+	result := make([]api.Chat, 0)
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
-// 	var user api.UserInfo
+	var user api.UserInfo
+	var userTagger api.UserInfoTagger
 
-// 	err := db.tables["Users"].FindOne(ctx, bson.M{"userid": userID}).Decode(&user)
-// 	if err != nil {
-// 		log.Warning.Println("DB error:", err)
-// 	}
+	err := db.tables["Users"].FindOne(ctx, bson.M{userTagger.UserID: userID}).Decode(&user)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+	}
 
-// 	for _, chatID := range user.Chats {
-// 		chat := db.getChatInfo(chatID)
-// 		result = append(result, &chat)
-// 	}
+	for _, chatID := range user.Chats {
+		chat := db.getChatInfo(chatID)
+		result = append(result, chat)
+	}
 
-// 	log.Info.Println(result)
+	log.Info.Println(result)
 
-// 	return api.Chats{Chats: result}
-// }
+	return result
+}
 
 // // If message_from is empty - return all available messages for chat
 // // otherwise - messages from provided message_id
-// func (db *DB) GetMessages(chatID string) []api.Message {
-// 	log.Info.Printf("GetMessages %v < %v >\n", chatID)
-// 	chat := db.getChatInfo(chatID)
+func (db *DB) GetMessages(chatID string) []api.Message {
+	log.Info.Printf("GetMessages %v < %v >\n", chatID)
+	chat := db.getChatInfo(chatID)
 
-// 	return chat.Messages
-// }
+	return chat.Messages
+}

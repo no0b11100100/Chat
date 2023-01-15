@@ -2,6 +2,10 @@
 
 #include "common.hpp"
 
+{% for import in module.imports: %}
+    #include "{{import.split()[0]}}.hpp"
+{% endfor %}
+
 namespace {{module.module.name_parts[-1]}} {
 
 //enums

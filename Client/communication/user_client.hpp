@@ -2,27 +2,30 @@
 
 #include "common.hpp"
 
+#include "types.hpp"
+
 namespace user {
 
 // enums
-enum class ResponseStatus { OK = 0, Error = 1 };
 
 // structs
-struct Response : public Types::ClassParser {
+struct UserInfo : public Types::ClassParser {
   std::string UserID;
   std::string Name;
   std::string NickName;
   std::string Photo;
-  ResponseStatus Status;
-  std::string StatusMessage;
+  std::vector<std::string> Chats;
+  std::string Email;
+  std::string Password;
   virtual json toJson() override {
     json js({});
     js["UserID"] = UserID;
     js["Name"] = Name;
     js["NickName"] = NickName;
     js["Photo"] = Photo;
-    js["Status"] = Status;
-    js["StatusMessage"] = StatusMessage;
+    js["Chats"] = Chats;
+    js["Email"] = Email;
+    js["Password"] = Password;
     return js;
   }
 
@@ -31,6 +34,26 @@ struct Response : public Types::ClassParser {
     Name = static_cast<std::string>(js["Name"]);
     NickName = static_cast<std::string>(js["NickName"]);
     Photo = static_cast<std::string>(js["Photo"]);
+    Chats = static_cast<std::vector<std::string>>(js["Chats"]);
+    Email = static_cast<std::string>(js["Email"]);
+    Password = static_cast<std::string>(js["Password"]);
+  }
+};
+
+struct Response : public Types::ClassParser {
+  UserInfo Info;
+  ResponseStatus Status;
+  std::string StatusMessage;
+  virtual json toJson() override {
+    json js({});
+    js["Info"] = Info;
+    js["Status"] = Status;
+    js["StatusMessage"] = StatusMessage;
+    return js;
+  }
+
+  virtual void fromJson(json js) override {
+    Info = static_cast<UserInfo>(js["Info"]);
     Status = static_cast<ResponseStatus>(js["Status"]);
     StatusMessage = static_cast<std::string>(js["StatusMessage"]);
   }

@@ -1,0 +1,39 @@
+#pragma once
+
+#include <string>
+#include <vector>
+#include "json/Value/Value.h"
+
+//enums
+{% for enum in module.enums: %}
+enum class {{enum.name}}
+{ {% for member in enum.members %}{{member.unique_name}} = {{member.value}},{% endfor %}};
+
+{% endfor %}
+
+//structs
+{% for struct in module.structs: %}
+struct {{struct.name}} : public Types::ClassParser
+{
+{% for field in struct.fields %}
+    {{field.cpp_type}} {{field.cap_name}};
+{% endfor -%}
+
+    virtual json toJson() override
+    {
+        json js({});
+        {% for field in struct.fields %}
+        js["{{field.cap_name}}"] = {{field.cap_name}};
+        {% endfor -%}
+        return js;
+    }
+
+    virtual void fromJson(json js) override
+    {
+        {% for field in struct.fields %}
+        {{field.cap_name}} = static_cast<{{field.cpp_type}}>(js["{{field.cap_name}}"]);
+        {% endfor -%}
+    }
+};
+
+{% endfor %}

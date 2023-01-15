@@ -1,5 +1,7 @@
 module chat 1.0;
 
+import types 1.0;
+
 struct Message {
     string messageJSON
     string chatID
@@ -17,12 +19,8 @@ struct Chat {
     list<Message> messages
 }
 
-struct Status {
-    ResponseStatus status
-}
-
 interface ChatService {
-    Status sendMessage(Message message);
+    ResponseStatus sendMessage(Message message);
     list<Chat> getUserChats(string userID);
     list<Message> getChatMessages(string chatID);
 

@@ -2,6 +2,8 @@
 
 #include "common.hpp"
 
+#include "types.hpp"
+
 namespace chat {
 
 // enums
@@ -60,19 +62,6 @@ struct Chat : public Types::ClassParser {
   }
 };
 
-struct Status : public Types::ClassParser {
-  ResponseStatus Status;
-  virtual json toJson() override {
-    json js({});
-    js["Status"] = Status;
-    return js;
-  }
-
-  virtual void fromJson(json js) override {
-    Status = static_cast<ResponseStatus>(js["Status"]);
-  }
-};
-
 class ChatServiceStub : public Common::Base {
   std::vector<std::function<void(Message)>> m_RecieveMessageCallbacks;
 
@@ -90,12 +79,12 @@ public:
     m_RecieveMessageCallbacks.push_back(callback);
   }
 
-  Status SendMessage(Message message) {
+  ResponseStatus SendMessage(Message message) {
     json args = json::array({message});
     Common::MessageData _message;
     _message.Endpoint = "ChatService.SendMessage";
     _message.Payload = args.dump();
-    return Request(_message).GetData<Status>();
+    return Request(_message).GetData<ResponseStatus>();
   }
   std::vector<Chat> GetUserChats(std::string userID) {
     json args = json::array({userID});

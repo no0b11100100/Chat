@@ -28,6 +28,8 @@ def generate_communication():
     path = os.path.join(path, 'CommunicationProtocol', 'generator')
     os.chdir(path)
 
+    print("\n\n\n\n\n\n", path)
+
     os.system("make qface-gen")
 
 
@@ -52,20 +54,41 @@ def copy_server_communication():
         shutil.copy(file, server_api_path)
 
 
+def copy_client_communication():
+    gen_path = os.path.dirname(os.path.abspath(__file__))
+    gen_path = os.path.join(gen_path, 'CommunicationProtocol', 'generator', 'gen')
+    import glob
+
+    print("\n\n")
+    files = []
+    for filename in glob.iglob(gen_path + '**/**', recursive=True):
+        if filename.endswith('.hpp'):
+            files.append(filename)
+
+    server_api_path = os.path.dirname(os.path.abspath(__file__))
+    server_api_path = os.path.join(server_api_path, 'Client', 'communication')
+
+    if not os.path.exists(server_api_path):
+        os.mkdir(server_api_path)
+
+    for file in files:
+        shutil.copy(file, server_api_path)
+
 def build_server():
     print("Build Server")
-    generate_communication()
-    # copy_server_communication()
-    # current_path = os.path.dirname(os.path.abspath(__file__))
-    # remote_server_path = os.path.join(current_path, 'Server')
-    # os.chdir(remote_server_path)
-    # os.system('docker compose build')
+    # generate_communication()
+    copy_server_communication()
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    remote_server_path = os.path.join(current_path, 'Server')
+    os.chdir(remote_server_path)
+    os.system('docker compose build')
     # remove_copied_folders_in_server()
 
 
 def build_ui():
     print("Build UI")
-
+    # generate_communication()
+    copy_client_communication()
     current_path = os.path.dirname(os.path.abspath(__file__))
     ui_path = os.path.join(current_path, 'Client')
     ui_build_folder_path = os.path.join(ui_path, 'build')

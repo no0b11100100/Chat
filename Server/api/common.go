@@ -5,43 +5,43 @@ type ServerContext struct {
 }
 type disconnectionCallback = func(string)
 
-//enums
+// enums
 type MessageType int
 
 const (
-Request = 0
-Notification = 1
+	Request      = 0
+	Notification = 1
 )
 
-//structs
+// structs
 type MessageData struct {
-    Endpoint string `json:"Endpoint"`
-    Topic string `json:"Topic"`
-    Payload string `json:"Payload"`
-    Type MessageType `json:"Type"`
+	Endpoint string      `json:"Endpoint"`
+	Topic    string      `json:"Topic"`
+	Payload  string      `json:"Payload"`
+	Type     MessageType `json:"Type"`
 }
 
 type ServerImpl interface {
-    Serve()
-    Stop()
+	Serve()
+	Stop()
 }
 
 type Server struct {
-    servers []ServerImpl
+	servers []ServerImpl
 }
 
 func NewServer() *Server {
-    return &Server{servers:make([]ServerImpl, 0)}
+	return &Server{servers: make([]ServerImpl, 0)}
 }
 
-func(s *Server) AddServer(server ServerImpl) {
-    s.servers = append(s.servers, server)
+func (s *Server) AddServer(server ServerImpl) {
+	s.servers = append(s.servers, server)
 }
 
-func(s *Server) Serve() {
-    for _, server := range s.servers {
-        server.Serve()
-    }
+func (s *Server) Serve() {
+	for _, server := range s.servers {
+		server.Serve()
+	}
 }
 
-func(s *Server) Stop() {}
+func (s *Server) Stop() {}

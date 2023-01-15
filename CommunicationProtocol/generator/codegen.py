@@ -241,10 +241,16 @@ def generate():
             ctx.update({'module': module})
             module_path = '/'.join(module.name_parts)
             ctx.update({'path': module_path})
-            if not module.interfaces and module.structs:
+
+            print("\n\n", module.name_parts[-1].lower(), "\n\n")
+
+            if module.name_parts[-1].lower() == 'common':
                 generator.write('{{path}}/' + module.name_parts[-1].lower() + '.go', 'common.go.template', ctx)
                 generator.write('{{path}}/' + module.name_parts[-1].lower() + '.hpp', 'common_cpp.go.template', ctx)
-            if module.interfaces:
+            elif not module.interfaces and (module.structs or module.enums):
+                generator.write('{{path}}/' + module.name_parts[-1].lower() + '.go', 'types.go.template', ctx)
+                generator.write('{{path}}/' + module.name_parts[-1].lower() + '.hpp', 'types_cpp.go.template', ctx)
+            elif module.interfaces:
                 generator.write('{{path}}/' + module.name_parts[-1].lower() + '_server.go', 'server.go.template', ctx)
                 generator.write('{{path}}/' + module.name_parts[-1].lower() + '_client.hpp', 'client_cpp.go.template', ctx)
 

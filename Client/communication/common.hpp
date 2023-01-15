@@ -15,10 +15,7 @@
 
 namespace Common {
 // enums
-enum class MessageType {
-  Request = 0,
-  Notification = 1,
-};
+enum class MessageType { Request = 0, Notification = 1 };
 
 // structs
 struct MessageData : public Types::ClassParser {
@@ -108,7 +105,7 @@ private:
     json js = json::parse(payload);
     MessageData data;
     data = js;
-    if (data.MessageType == Type::Notification) {
+    if (data.Type == MessageType::Notification) {
       auto result = isSignalHandlable(data.Endpoint);
       if (result.has_value()) {
         auto handler = result.value();

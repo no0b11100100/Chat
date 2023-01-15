@@ -9,34 +9,105 @@ import (
 	"net/textproto"
 )
 
-// enums
-type ResponseStatus int
-
-const (
-	OK    = 0
-	Error = 1
-)
+//enums
 
 // structs
+type UserInfo struct {
+	UserID   string   `json:"UserID",omitempty bson:"UserID"`
+	Name     string   `json:"Name",omitempty bson:"Name"`
+	NickName string   `json:"NickName",omitempty bson:"NickName"`
+	Photo    string   `json:"Photo",omitempty bson:"Photo"`
+	Chats    []string `json:"Chats",omitempty bson:"Chats"`
+	Email    string   `json:"Email",omitempty bson:"Email"`
+	Password string   `json:"Password",omitempty bson:"Password"`
+}
+
+type UserInfoTagger struct {
+	UserID   string
+	Name     string
+	NickName string
+	Photo    string
+	Chats    string
+	Email    string
+	Password string
+}
+
+func UserInfoTags() UserInfoTagger {
+	return UserInfoTagger{
+		UserID:   "UserID",
+		Name:     "Name",
+		NickName: "NickName",
+		Photo:    "Photo",
+		Chats:    "Chats",
+		Email:    "Email",
+		Password: "Password",
+	}
+}
+
 type Response struct {
-	UserID        string         `json:"UserID"`
-	Name          string         `json:"Name"`
-	NickName      string         `json:"NickName"`
-	Photo         string         `json:"Photo"`
-	Status        ResponseStatus `json:"Status"`
-	StatusMessage string         `json:"StatusMessage"`
+	Info          UserInfo       `json:"Info",omitempty bson:"Info"`
+	Status        ResponseStatus `json:"Status",omitempty bson:"Status"`
+	StatusMessage string         `json:"StatusMessage",omitempty bson:"StatusMessage"`
 }
+
+type ResponseTagger struct {
+	Info          string
+	Status        string
+	StatusMessage string
+}
+
+func ResponseTags() ResponseTagger {
+	return ResponseTagger{
+		Info:          "Info",
+		Status:        "Status",
+		StatusMessage: "StatusMessage",
+	}
+}
+
 type SignIn struct {
-	Email    string `json:"Email"`
-	Password string `json:"Password"`
+	Email    string `json:"Email",omitempty bson:"Email"`
+	Password string `json:"Password",omitempty bson:"Password"`
 }
+
+type SignInTagger struct {
+	Email    string
+	Password string
+}
+
+func SignInTags() SignInTagger {
+	return SignInTagger{
+		Email:    "Email",
+		Password: "Password",
+	}
+}
+
 type SignUp struct {
-	Name              string `json:"Name"`
-	NickName          string `json:"NickName"`
-	Email             string `json:"Email"`
-	Password          string `json:"Password"`
-	ConfirmedPassword string `json:"ConfirmedPassword"`
-	Photo             string `json:"Photo"`
+	Name              string `json:"Name",omitempty bson:"Name"`
+	NickName          string `json:"NickName",omitempty bson:"NickName"`
+	Email             string `json:"Email",omitempty bson:"Email"`
+	Password          string `json:"Password",omitempty bson:"Password"`
+	ConfirmedPassword string `json:"ConfirmedPassword",omitempty bson:"ConfirmedPassword"`
+	Photo             string `json:"Photo",omitempty bson:"Photo"`
+}
+
+type SignUpTagger struct {
+	Name              string
+	NickName          string
+	Email             string
+	Password          string
+	ConfirmedPassword string
+	Photo             string
+}
+
+func SignUpTags() SignUpTagger {
+	return SignUpTagger{
+		Name:              "Name",
+		NickName:          "NickName",
+		Email:             "Email",
+		Password:          "Password",
+		ConfirmedPassword: "ConfirmedPassword",
+		Photo:             "Photo",
+	}
 }
 
 // server
@@ -70,6 +141,12 @@ func NewUserServiceServer(addr string) *UserServiceServer {
 	}
 
 	return server
+}
+
+func (s *UserServiceServer) Stop() {
+	if err := s.listener.Close(); err != nil {
+		fmt.Println("UserServiceServer Stop error:", err)
+	}
 }
 
 func (s *UserServiceServer) SetServerImpl(impl UserServiceServerImpl) {

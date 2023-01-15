@@ -2,49 +2,120 @@
 package api
 
 import (
-    "encoding/json"
-    "net"
-    "net/textproto"
-    "bufio"
-    "fmt"
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"net"
+	"net/textproto"
 )
 
 //enums
-type ResponseStatus int
 
-const (
-OK = 0
-Error = 1
-)
+// structs
+type UserInfo struct {
+	UserID   string   `json:"UserID",omitempty bson:"UserID"`
+	Name     string   `json:"Name",omitempty bson:"Name"`
+	NickName string   `json:"NickName",omitempty bson:"NickName"`
+	Photo    string   `json:"Photo",omitempty bson:"Photo"`
+	Chats    []string `json:"Chats",omitempty bson:"Chats"`
+	Email    string   `json:"Email",omitempty bson:"Email"`
+	Password string   `json:"Password",omitempty bson:"Password"`
+}
 
-//structs
+type UserInfoTagger struct {
+	UserID   string
+	Name     string
+	NickName string
+	Photo    string
+	Chats    string
+	Email    string
+	Password string
+}
+
+func UserInfoTags() UserInfoTagger {
+	return UserInfoTagger{
+		UserID:   "UserID",
+		Name:     "Name",
+		NickName: "NickName",
+		Photo:    "Photo",
+		Chats:    "Chats",
+		Email:    "Email",
+		Password: "Password",
+	}
+}
+
 type Response struct {
-    UserID string `json:"UserID"`
-    Name string `json:"Name"`
-    NickName string `json:"NickName"`
-    Photo string `json:"Photo"`
-    Status ResponseStatus `json:"Status"`
-    StatusMessage string `json:"StatusMessage"`
-}
-type SignIn struct {
-    Email string `json:"Email"`
-    Password string `json:"Password"`
-}
-type SignUp struct {
-    Name string `json:"Name"`
-    NickName string `json:"NickName"`
-    Email string `json:"Email"`
-    Password string `json:"Password"`
-    ConfirmedPassword string `json:"ConfirmedPassword"`
-    Photo string `json:"Photo"`
+	Info          UserInfo       `json:"Info",omitempty bson:"Info"`
+	Status        ResponseStatus `json:"Status",omitempty bson:"Status"`
+	StatusMessage string         `json:"StatusMessage",omitempty bson:"StatusMessage"`
 }
 
-//server
+type ResponseTagger struct {
+	Info          string
+	Status        string
+	StatusMessage string
+}
+
+func ResponseTags() ResponseTagger {
+	return ResponseTagger{
+		Info:          "Info",
+		Status:        "Status",
+		StatusMessage: "StatusMessage",
+	}
+}
+
+type SignIn struct {
+	Email    string `json:"Email",omitempty bson:"Email"`
+	Password string `json:"Password",omitempty bson:"Password"`
+}
+
+type SignInTagger struct {
+	Email    string
+	Password string
+}
+
+func SignInTags() SignInTagger {
+	return SignInTagger{
+		Email:    "Email",
+		Password: "Password",
+	}
+}
+
+type SignUp struct {
+	Name              string `json:"Name",omitempty bson:"Name"`
+	NickName          string `json:"NickName",omitempty bson:"NickName"`
+	Email             string `json:"Email",omitempty bson:"Email"`
+	Password          string `json:"Password",omitempty bson:"Password"`
+	ConfirmedPassword string `json:"ConfirmedPassword",omitempty bson:"ConfirmedPassword"`
+	Photo             string `json:"Photo",omitempty bson:"Photo"`
+}
+
+type SignUpTagger struct {
+	Name              string
+	NickName          string
+	Email             string
+	Password          string
+	ConfirmedPassword string
+	Photo             string
+}
+
+func SignUpTags() SignUpTagger {
+	return SignUpTagger{
+		Name:              "Name",
+		NickName:          "NickName",
+		Email:             "Email",
+		Password:          "Password",
+		ConfirmedPassword: "ConfirmedPassword",
+		Photo:             "Photo",
+	}
+}
+
+// server
 type UserServiceConnectionCallback = func(string, UserServiceNotifier)
 
 type UserServiceServerImpl interface {
-    SignIn(ServerContext,SignIn,) Response
-    SignUp(ServerContext,SignUp,) Response
+	SignIn(ServerContext, SignIn) Response
+	SignUp(ServerContext, SignUp) Response
 }
 
 type UserServiceNotifier interface {
@@ -53,9 +124,6 @@ type UserServiceNotifier interface {
 type UserServiceNotificator struct {
 	conn net.Conn
 }
-
-
-
 
 type UserServiceServer struct {
 	listener              net.Listener
@@ -67,16 +135,22 @@ type UserServiceServer struct {
 func NewUserServiceServer(addr string) *UserServiceServer {
 	ln, _ := net.Listen("tcp", addr)
 	server := &UserServiceServer{
-		listener: ln,
-        notifierObservers: make([]UserServiceConnectionCallback, 0),
-        disconectionObservers: make([]disconnectionCallback, 0),
+		listener:              ln,
+		notifierObservers:     make([]UserServiceConnectionCallback, 0),
+		disconectionObservers: make([]disconnectionCallback, 0),
 	}
 
 	return server
 }
 
+func (s *UserServiceServer) Stop() {
+	if err := s.listener.Close(); err != nil {
+		fmt.Println("UserServiceServer Stop error:", err)
+	}
+}
+
 func (s *UserServiceServer) SetServerImpl(impl UserServiceServerImpl) {
-    s.impl = impl
+	s.impl = impl
 }
 
 func (s *UserServiceServer) Serve() {
@@ -114,41 +188,41 @@ func (s *UserServiceServer) processConnection(conn net.Conn) {
 
 func (s *UserServiceServer) handleCommand(payload string, conn net.Conn) {
 	recievedMessage := MessageData{}
-    json.Unmarshal([]byte(payload), &recievedMessage)
-    switch recievedMessage.Endpoint {
-        case "UserService.SignIn":
-            args := make([]json.RawMessage, 0)
-            json.Unmarshal([]byte(recievedMessage.Payload), &args)
-            var index int
+	json.Unmarshal([]byte(payload), &recievedMessage)
+	switch recievedMessage.Endpoint {
+	case "UserService.SignIn":
+		args := make([]json.RawMessage, 0)
+		json.Unmarshal([]byte(recievedMessage.Payload), &args)
+		var index int
 
-            var data SignIn
-            json.Unmarshal([]byte(args[index]), &data)
-            index++
+		var data SignIn
+		json.Unmarshal([]byte(args[index]), &data)
+		index++
 
-            serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
-            response := s.impl.SignIn(serverContex,data,)
-            bytes, _ := json.Marshal(response)
-            messageToSend := recievedMessage
-            messageToSend.Payload = string(bytes)
-            responseData, _ := json.Marshal(messageToSend)
-            conn.Write(responseData)
-        case "UserService.SignUp":
-            args := make([]json.RawMessage, 0)
-            json.Unmarshal([]byte(recievedMessage.Payload), &args)
-            var index int
+		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		response := s.impl.SignIn(serverContex, data)
+		bytes, _ := json.Marshal(response)
+		messageToSend := recievedMessage
+		messageToSend.Payload = string(bytes)
+		responseData, _ := json.Marshal(messageToSend)
+		conn.Write(responseData)
+	case "UserService.SignUp":
+		args := make([]json.RawMessage, 0)
+		json.Unmarshal([]byte(recievedMessage.Payload), &args)
+		var index int
 
-            var data SignUp
-            json.Unmarshal([]byte(args[index]), &data)
-            index++
+		var data SignUp
+		json.Unmarshal([]byte(args[index]), &data)
+		index++
 
-            serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
-            response := s.impl.SignUp(serverContex,data,)
-            bytes, _ := json.Marshal(response)
-            messageToSend := recievedMessage
-            messageToSend.Payload = string(bytes)
-            responseData, _ := json.Marshal(messageToSend)
-            conn.Write(responseData)
-    }
+		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		response := s.impl.SignUp(serverContex, data)
+		bytes, _ := json.Marshal(response)
+		messageToSend := recievedMessage
+		messageToSend.Payload = string(bytes)
+		responseData, _ := json.Marshal(messageToSend)
+		conn.Write(responseData)
+	}
 }
 
 // Events
@@ -173,5 +247,3 @@ func (s *UserServiceServer) emitDisconnectionEvent(conn net.Conn) {
 		callback(conn.RemoteAddr().String())
 	}
 }
-
-

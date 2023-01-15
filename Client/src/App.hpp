@@ -47,7 +47,7 @@ private:
     // TODO: investigate delay
     std::string signUpAction(user::SignUp data) {
         auto result = m_Client.userService().signUp(data);
-        auto userID = result.UserID;
+        auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
             m_userID = userID;
             std::thread([this, result](){
@@ -60,7 +60,7 @@ private:
 
     std::string signInAction(user::SignIn data) {
         auto result = m_Client.userService().signIn(data);
-        auto userID = result.UserID;
+        auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
             m_userID = userID;
             std::thread([this, result](){

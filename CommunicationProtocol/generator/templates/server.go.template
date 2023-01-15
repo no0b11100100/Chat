@@ -9,6 +9,7 @@ import (
     "fmt"
 )
 
+
 //enums
 {% for enum in module.enums: %}
 type {{enum.name}} int
@@ -24,10 +25,26 @@ const (
 {% for struct in module.structs: %}
 type {{struct.name}} struct {
 {% for field in struct.fields %}
-    {{field.cap_name}} {{field.go_type}} `json:"{{field.cap_name}}"`
+    {{field.cap_name}} {{field.go_type}} `json:"{{field.cap_name}}",omitempty bson:"{{field.cap_name}}"`
 {% endfor -%}
 }
+
+type {{struct.name}}Tagger struct {
+    {% for field in struct.fields %}
+    {{field.cap_name}} string
+    {% endfor -%}
+}
+
+func {{struct.name}}Tags() {{struct.name}}Tagger {
+    return {{struct.name}}Tagger {
+    {% for field in struct.fields %}
+    {{field.cap_name}}: "{{field.cap_name}}",
+    {% endfor -%}
+    }
+}
+
 {% endfor %}
+
 
 //server
 {% for interface in module.interfaces: %}
@@ -89,6 +106,12 @@ func New{{interface}}Server(addr string) *{{interface}}Server {
 	}
 
 	return server
+}
+
+func (s *{{interface}}Server) Stop() {
+    if err := s.listener.Close(); err != nil {
+        fmt.Println("{{interface}}Server Stop error:", err)
+    }
 }
 
 func (s *{{interface}}Server) SetServerImpl(impl {{interface}}ServerImpl) {
