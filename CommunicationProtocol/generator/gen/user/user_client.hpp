@@ -30,13 +30,34 @@ struct UserInfo : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
-    UserID = static_cast<std::string>(js["UserID"]);
-    Name = static_cast<std::string>(js["Name"]);
-    NickName = static_cast<std::string>(js["NickName"]);
-    Photo = static_cast<std::string>(js["Photo"]);
-    Chats = static_cast<std::vector<std::string>>(js["Chats"]);
-    Email = static_cast<std::string>(js["Email"]);
-    Password = static_cast<std::string>(js["Password"]);
+    if (js.isNull())
+      UserID = std::string();
+    else
+      UserID = static_cast<std::string>(js["UserID"]);
+    if (js.isNull())
+      Name = std::string();
+    else
+      Name = static_cast<std::string>(js["Name"]);
+    if (js.isNull())
+      NickName = std::string();
+    else
+      NickName = static_cast<std::string>(js["NickName"]);
+    if (js.isNull())
+      Photo = std::string();
+    else
+      Photo = static_cast<std::string>(js["Photo"]);
+    if (js.isNull())
+      Chats = std::vector<std::string>();
+    else
+      Chats = static_cast<std::vector<std::string>>(js["Chats"]);
+    if (js.isNull())
+      Email = std::string();
+    else
+      Email = static_cast<std::string>(js["Email"]);
+    if (js.isNull())
+      Password = std::string();
+    else
+      Password = static_cast<std::string>(js["Password"]);
   }
 };
 
@@ -53,9 +74,18 @@ struct Response : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
-    Info = static_cast<UserInfo>(js["Info"]);
-    Status = static_cast<ResponseStatus>(js["Status"]);
-    StatusMessage = static_cast<std::string>(js["StatusMessage"]);
+    if (js.isNull())
+      Info = UserInfo();
+    else
+      Info = static_cast<UserInfo>(js["Info"]);
+    if (js.isNull())
+      Status = ResponseStatus();
+    else
+      Status = static_cast<ResponseStatus>(js["Status"]);
+    if (js.isNull())
+      StatusMessage = std::string();
+    else
+      StatusMessage = static_cast<std::string>(js["StatusMessage"]);
   }
 };
 
@@ -70,8 +100,14 @@ struct SignIn : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
-    Email = static_cast<std::string>(js["Email"]);
-    Password = static_cast<std::string>(js["Password"]);
+    if (js.isNull())
+      Email = std::string();
+    else
+      Email = static_cast<std::string>(js["Email"]);
+    if (js.isNull())
+      Password = std::string();
+    else
+      Password = static_cast<std::string>(js["Password"]);
   }
 };
 
@@ -94,12 +130,30 @@ struct SignUp : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
-    Name = static_cast<std::string>(js["Name"]);
-    NickName = static_cast<std::string>(js["NickName"]);
-    Email = static_cast<std::string>(js["Email"]);
-    Password = static_cast<std::string>(js["Password"]);
-    ConfirmedPassword = static_cast<std::string>(js["ConfirmedPassword"]);
-    Photo = static_cast<std::string>(js["Photo"]);
+    if (js.isNull())
+      Name = std::string();
+    else
+      Name = static_cast<std::string>(js["Name"]);
+    if (js.isNull())
+      NickName = std::string();
+    else
+      NickName = static_cast<std::string>(js["NickName"]);
+    if (js.isNull())
+      Email = std::string();
+    else
+      Email = static_cast<std::string>(js["Email"]);
+    if (js.isNull())
+      Password = std::string();
+    else
+      Password = static_cast<std::string>(js["Password"]);
+    if (js.isNull())
+      ConfirmedPassword = std::string();
+    else
+      ConfirmedPassword = static_cast<std::string>(js["ConfirmedPassword"]);
+    if (js.isNull())
+      Photo = std::string();
+    else
+      Photo = static_cast<std::string>(js["Photo"]);
   }
 };
 
@@ -113,13 +167,13 @@ public:
     Common::MessageData _message;
     _message.Payload = json::array({data});
     _message.Endpoint = "UserService.SignIn";
-    return Request(_message).GetData<Response>();
+    return Request<Response>(_message);
   }
   Response SignUp(SignUp data) {
     Common::MessageData _message;
     _message.Payload = json::array({data});
     _message.Endpoint = "UserService.SignUp";
-    return Request(_message).GetData<Response>();
+    return Request<Response>(_message);
   }
 
 private:

@@ -36,7 +36,7 @@ public:
 
     friend std::ostream& operator <<(std::ostream & os, const String& i)
     {
-        os << i.m_value;
+        os << "\"" << i.m_value << "\"";
         return os;
     }
 

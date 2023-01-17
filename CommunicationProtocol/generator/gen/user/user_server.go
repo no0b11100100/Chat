@@ -179,7 +179,7 @@ func (s *UserServiceServer) processConnection(conn net.Conn) {
 
 		if err != nil {
 			fmt.Println("processConnection error", err)
-			continue
+			break
 		}
 
 		fmt.Println("processConnection message", data)

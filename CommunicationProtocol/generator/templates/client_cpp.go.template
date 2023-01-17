@@ -35,7 +35,8 @@ struct {{struct.name}} : public Types::ClassParser
     virtual void fromJson(json js) override
     {
         {% for field in struct.fields %}
-        {{field.cap_name}} = static_cast<{{field.cpp_type}}>(js["{{field.cap_name}}"]);
+        if(js.isNull()) {{field.cap_name}} = {{field.cpp_type}}();
+        else {{field.cap_name}} = static_cast<{{field.cpp_type}}>(js["{{field.cap_name}}"]);
         {% endfor -%}
     }
 };
@@ -73,7 +74,7 @@ public:
         Common::MessageData _message;
         _message.Payload = json::array({ {%- for parameter in operation.parameters -%}{{parameter.name}},{%- endfor -%} });
         _message.Endpoint = "{{interface}}.{{operation.cap_name}}";
-        return Request(_message).GetData<{{operation.cpp_type}}>();
+        return Request<{{operation.cpp_type}}>(_message);
     }
     {% endfor %}
 

@@ -47,13 +47,14 @@ private:
     // TODO: investigate delay
     std::string signUpAction(user::SignUp data) {
         auto result = m_Client.userService().signUp(data);
+        qDebug() << "signUpAction Get response from server";
         auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
             m_userID = userID;
-            std::thread([this, result](){
-                std::this_thread::sleep_for(std::chrono::seconds(2));
-                emit activateBaseScreen(result);
-            }).detach();
+            // std::thread([this, result](){
+            //     std::this_thread::sleep_for(std::chrono::seconds(2));
+            //     emit activateBaseScreen(result);
+            // }).detach();
         }
         return result.StatusMessage;
     }

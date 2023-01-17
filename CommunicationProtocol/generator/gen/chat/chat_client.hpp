@@ -22,9 +22,18 @@ struct Message : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
-    MessageJSON = static_cast<std::string>(js["MessageJSON"]);
-    ChatID = static_cast<std::string>(js["ChatID"]);
-    SenderID = static_cast<std::string>(js["SenderID"]);
+    if (js.isNull())
+      MessageJSON = std::string();
+    else
+      MessageJSON = static_cast<std::string>(js["MessageJSON"]);
+    if (js.isNull())
+      ChatID = std::string();
+    else
+      ChatID = static_cast<std::string>(js["ChatID"]);
+    if (js.isNull())
+      SenderID = std::string();
+    else
+      SenderID = static_cast<std::string>(js["SenderID"]);
   }
 };
 
@@ -51,14 +60,38 @@ struct Chat : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
-    ChatID = static_cast<std::string>(js["ChatID"]);
-    Title = static_cast<std::string>(js["Title"]);
-    SecondLine = static_cast<std::string>(js["SecondLine"]);
-    LastMessage = static_cast<std::string>(js["LastMessage"]);
-    UnreadedCount = static_cast<int>(js["UnreadedCount"]);
-    Cover = static_cast<std::string>(js["Cover"]);
-    Participants = static_cast<std::vector<std::string>>(js["Participants"]);
-    Messages = static_cast<std::vector<Message>>(js["Messages"]);
+    if (js.isNull())
+      ChatID = std::string();
+    else
+      ChatID = static_cast<std::string>(js["ChatID"]);
+    if (js.isNull())
+      Title = std::string();
+    else
+      Title = static_cast<std::string>(js["Title"]);
+    if (js.isNull())
+      SecondLine = std::string();
+    else
+      SecondLine = static_cast<std::string>(js["SecondLine"]);
+    if (js.isNull())
+      LastMessage = std::string();
+    else
+      LastMessage = static_cast<std::string>(js["LastMessage"]);
+    if (js.isNull())
+      UnreadedCount = int();
+    else
+      UnreadedCount = static_cast<int>(js["UnreadedCount"]);
+    if (js.isNull())
+      Cover = std::string();
+    else
+      Cover = static_cast<std::string>(js["Cover"]);
+    if (js.isNull())
+      Participants = std::vector<std::string>();
+    else
+      Participants = static_cast<std::vector<std::string>>(js["Participants"]);
+    if (js.isNull())
+      Messages = std::vector<Message>();
+    else
+      Messages = static_cast<std::vector<Message>>(js["Messages"]);
   }
 };
 
@@ -83,19 +116,19 @@ public:
     Common::MessageData _message;
     _message.Payload = json::array({message});
     _message.Endpoint = "ChatService.SendMessage";
-    return Request(_message).GetData<ResponseStatus>();
+    return Request<ResponseStatus>(_message);
   }
   std::vector<Chat> GetUserChats(std::string userID) {
     Common::MessageData _message;
     _message.Payload = json::array({userID});
     _message.Endpoint = "ChatService.GetUserChats";
-    return Request(_message).GetData<std::vector<Chat>>();
+    return Request<std::vector<Chat>>(_message);
   }
   std::vector<Message> GetChatMessages(std::string chatID) {
     Common::MessageData _message;
     _message.Payload = json::array({chatID});
     _message.Endpoint = "ChatService.GetChatMessages";
-    return Request(_message).GetData<std::vector<Message>>();
+    return Request<std::vector<Message>>(_message);
   }
 
 private:

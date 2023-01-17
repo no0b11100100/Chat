@@ -29,7 +29,7 @@ func (s *UserService) SignIn(_ api.ServerContext, userData api.SignIn) api.Respo
 }
 func (s *UserService) SignUp(_ api.ServerContext, userData api.SignUp) api.Response {
 	log.Info.Printf("SignUp %+v\n", userData)
-	response := api.Response{Info: api.UserInfo{}}
+	response := api.Response{Info: api.UserInfo{Chats: make([]string, 0)}}
 	if userData.Password != userData.ConfirmedPassword {
 		response.Status = api.OK
 		response.StatusMessage = "Passwords not match"

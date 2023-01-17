@@ -43,12 +43,14 @@ class Parser
     TokenValue tokenValue = TokenValue::Key;
     short quotesCount{0};
     bool isStringValueReading{false};
+    bool isStringValueRead{false};
     char prevSeparator = 0;
 //    bool isRoot{false};
     SlashStatus slashStatus{SlashStatus::Start};
 
     Types::Value setCorrectType(const std::string& value)
     {
+        if(isStringValueRead) return Types::Value(value);
         static std::array<char, 10> numbers{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
         if(value == "true")
             return Types::Value(true);
@@ -169,6 +171,7 @@ class Parser
         ++quotesCount;
         if(quotesCount > 2) std::cout << "bad\n";
         isStringValueReading = tokenValue == TokenValue::Value && quotesCount == 1;
+        isStringValueRead = tokenValue == TokenValue::Value && quotesCount == 2;
     }
 
     // ,

@@ -18,9 +18,12 @@ class Dumper
 
     void normilize()
     {
-        auto index = m_data.find_last_of(",");
-        if(index < m_data.size())
-            m_data = m_data.substr(0, index);
+        // auto index = m_data.find_last_of(",");
+        // if(index < m_data.size())
+        //     m_data = m_data.substr(0, index);
+        // std::cout << "normilize " << !m_data.empty() << " " <<  m_data.back() << " " <<  (m_data.back() == ',') << std::endl;
+        if (!m_data.empty() && m_data.back() == ',')
+            m_data.pop_back();
     }
 
     void normilizeEmpty()
@@ -174,14 +177,18 @@ public:
         }
         else if (data.isVector())
         {
+            // std::cout << "dump vector" << std::endl;
             m_data += "[";
+            // std::cout << "vector data " << m_data << std::endl;
             for(auto it = data.begin(); it != data.end(); ++it)
             {
                 dump(it.value());
                 m_data += ",";
             }
+            // std::cout << "defore normilize vector data " << m_data << std::endl;
             normilize();
             m_data += "]";
+            // std::cout << "after normilize vector data " << m_data << std::endl;
         }
         else if(data.isMap())
         {
@@ -190,9 +197,11 @@ public:
             for(auto it = data.begin(); it != data.end(); ++it)
             {
                 std::string key = it.key();
+                // std::cout << "key " << key << std::endl;
                 m_data += "\"" + key + "\":";
                 dump(it.value());
                 m_data += ",";
+                // std::cout << "data " << m_data << std::endl;
             }
             normilize();
             m_data += "}";

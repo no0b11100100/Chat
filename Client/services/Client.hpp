@@ -4,8 +4,8 @@
 #include "ChatService.hpp"
 #include <iostream>
 
-constexpr const char* USER_SERVICE_ADDRESS = "localhost:8080";
-constexpr const char* CHAT_SERVICE_ADDRESS = "localhost:8080";
+constexpr const char* USER_SERVICE_ADDRESS = "localhost:1234";
+constexpr const char* CHAT_SERVICE_ADDRESS = "localhost:1235";
 
 class Client final {
 public:

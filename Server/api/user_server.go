@@ -166,7 +166,7 @@ func (s *UserServiceServer) Serve() {
 }
 
 func (s *UserServiceServer) processConnection(conn net.Conn) {
-	fmt.Println("Accept connection:", conn.RemoteAddr().String())
+	fmt.Println("UserServiceServer Accept connection:", conn.RemoteAddr().String())
 	s.emitNewConnectionEvent(conn)
 	defer conn.Close()
 	defer func() { s.emitDisconnectionEvent(conn) }()
@@ -179,7 +179,7 @@ func (s *UserServiceServer) processConnection(conn net.Conn) {
 
 		if err != nil {
 			fmt.Println("processConnection error", err)
-			continue
+			break
 		}
 
 		fmt.Println("processConnection message", data)

@@ -96,7 +96,7 @@ public:
         if(isNull()) m_data.reset(new MapType());
         if(isMap()) return static_cast<MapType*>(m_data.get())->at(key);
 
-        throw std::runtime_error("operator[](StringValue key)");
+        throw std::runtime_error("operator[](StringValue key)" + std::string(key));
     }
 
     template<class T>
