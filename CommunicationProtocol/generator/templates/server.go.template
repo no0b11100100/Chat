@@ -131,7 +131,7 @@ func (s *{{interface}}Server) Serve() {
 }
 
 func (s *{{interface}}Server) processConnection(conn net.Conn) {
-	fmt.Println("Accept connection:", conn.RemoteAddr().String())
+	fmt.Println("Accept connection in {{interface}}Server:", conn.RemoteAddr().String())
 	s.emitNewConnectionEvent(conn)
 	defer conn.Close()
 	defer func() { s.emitDisconnectionEvent(conn) }()

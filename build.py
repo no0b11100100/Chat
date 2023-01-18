@@ -77,7 +77,7 @@ def copy_client_communication():
 def build_server():
     print("Build Server")
     # generate_communication()
-    # copy_server_communication()
+    copy_server_communication()
     current_path = os.path.dirname(os.path.abspath(__file__))
     remote_server_path = os.path.join(current_path, 'Server')
     os.chdir(remote_server_path)

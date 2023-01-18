@@ -1,6 +1,9 @@
 package api
 
-import "encoding/json"
+import (
+	"context"
+	"encoding/json"
+)
 
 type ServerContext struct {
 	ConnectionAddress string
@@ -30,6 +33,7 @@ type ServerImpl interface {
 
 type Server struct {
 	servers []ServerImpl
+	cancel  context.CancelFunc
 }
 
 func NewServer() *Server {
@@ -41,9 +45,17 @@ func (s *Server) AddServer(server ServerImpl) {
 }
 
 func (s *Server) Serve() {
+	var ctx context.Context
+	ctx, s.cancel = context.WithCancel(context.Background())
 	for _, server := range s.servers {
-		server.Serve()
+		go func(serv ServerImpl) {
+			serv.Serve()
+		}(server)
 	}
+
+	<-ctx.Done()
 }
 
-func (s *Server) Stop() {}
+func (s *Server) Stop() {
+	s.cancel()
+}

@@ -143,7 +143,7 @@ func (s *ChatServiceServer) Serve() {
 }
 
 func (s *ChatServiceServer) processConnection(conn net.Conn) {
-	fmt.Println("Accept connection:", conn.RemoteAddr().String())
+	fmt.Println("Accept connection in ChatServiceServer:", conn.RemoteAddr().String())
 	s.emitNewConnectionEvent(conn)
 	defer conn.Close()
 	defer func() { s.emitDisconnectionEvent(conn) }()
