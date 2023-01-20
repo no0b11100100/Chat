@@ -73,11 +73,13 @@ public slots:
         //TODO: add message properly
         //TODO: move logic for Message to ChatModel
         // chat::Message msg;
-        std::string message_json = "{\"message\":\"" + message.toStdString() + "\"}";
+        chat::TextMessage message_json;
+        message_json.Text = message.toStdString();
+        // std::string message_json = "{\"message\":\"" + message.toStdString() + "\"}";
         // mfg.MessageJSON = message_json;
         // msg.set_message_json(message_json);
         qDebug() << "Before SendMessage";
-        m_client->chatService().sendMessage(chatID.toStdString(), message_json);
+        m_client->chatService().sendMessage(chatID.toStdString(), message_json.toJson());
     }
 
 private:
@@ -90,10 +92,12 @@ private:
     {
         qDebug() << "handleMessage";
         m_chatModel->AddMessage(message);
-        auto s = message.MessageJSON;
-        QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
-        QJsonObject message_json = object.object();
-        std::string text = message_json["message"].toString().toStdString();
-        m_chatList->SetLastMessage(QString::fromStdString(message.ChatID), QString::fromStdString(text));
+        json js = message.MessageJSON;
+        chat::TextMessage textMessage;
+        textMessage = js;
+        // QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
+        // QJsonObject message_json = object.object();
+        // std::string text = message_json["message"].toString().toStdString();
+        m_chatList->SetLastMessage(QString::fromStdString(message.ChatID), QString::fromStdString(textMessage.Text));
     }
 };

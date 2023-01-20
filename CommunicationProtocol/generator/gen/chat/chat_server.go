@@ -13,9 +13,9 @@ import (
 
 // structs
 type Message struct {
-	MessageJSON string `json:"MessageJSON",omitempty bson:"messagejson"`
-	ChatID      string `json:"ChatID",omitempty bson:"chatid"`
-	SenderID    string `json:"SenderID",omitempty bson:"senderid"`
+	MessageJSON json.RawMessage `json:"messagejson",omitempty bson:"messagejson"`
+	ChatID      string          `json:"chatid",omitempty bson:"chatid"`
+	SenderID    string          `json:"senderid",omitempty bson:"senderid"`
 }
 
 type MessageTagger struct {
@@ -33,14 +33,14 @@ func MessageTags() MessageTagger {
 }
 
 type Chat struct {
-	ChatID        string    `json:"ChatID",omitempty bson:"chatid"`
-	Title         string    `json:"Title",omitempty bson:"title"`
-	SecondLine    string    `json:"SecondLine",omitempty bson:"secondline"`
-	LastMessage   string    `json:"LastMessage",omitempty bson:"lastmessage"`
-	UnreadedCount int       `json:"UnreadedCount",omitempty bson:"unreadedcount"`
-	Cover         string    `json:"Cover",omitempty bson:"cover"`
-	Participants  []string  `json:"Participants",omitempty bson:"participants"`
-	Messages      []Message `json:"Messages",omitempty bson:"messages"`
+	ChatID        string    `json:"chatid",omitempty bson:"chatid"`
+	Title         string    `json:"title",omitempty bson:"title"`
+	SecondLine    string    `json:"secondline",omitempty bson:"secondline"`
+	LastMessage   string    `json:"lastmessage",omitempty bson:"lastmessage"`
+	UnreadedCount int       `json:"unreadedcount",omitempty bson:"unreadedcount"`
+	Cover         string    `json:"cover",omitempty bson:"cover"`
+	Participants  []string  `json:"participants",omitempty bson:"participants"`
+	Messages      []Message `json:"messages",omitempty bson:"messages"`
 }
 
 type ChatTagger struct {
@@ -64,6 +64,20 @@ func ChatTags() ChatTagger {
 		Cover:         "cover",
 		Participants:  "participants",
 		Messages:      "messages",
+	}
+}
+
+type TextMessage struct {
+	Text string `json:"text",omitempty bson:"text"`
+}
+
+type TextMessageTagger struct {
+	Text string
+}
+
+func TextMessageTags() TextMessageTagger {
+	return TextMessageTagger{
+		Text: "text",
 	}
 }
 

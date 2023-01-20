@@ -25,7 +25,7 @@ const (
 {% for struct in module.structs: %}
 type {{struct.name}} struct {
 {% for field in struct.fields %}
-    {{field.cap_name}} {{field.go_type}} `json:"{{field.cap_name}}"`
+    {{field.cap_name}} {{field.go_type}} `json:"{{field.cap_name.lower()}}"`
 {% endfor -%}
 }
 {% endfor %}

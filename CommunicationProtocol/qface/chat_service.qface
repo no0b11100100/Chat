@@ -3,7 +3,7 @@ module chat 1.0;
 import types 1.0;
 
 struct Message {
-    string messageJSON
+    json messageJSON
     string chatID
     string senderID
 }
@@ -17,6 +17,10 @@ struct Chat {
     string cover
     list<string> participants
     list<Message> messages
+}
+
+struct TextMessage {
+    string text
 }
 
 interface ChatService {

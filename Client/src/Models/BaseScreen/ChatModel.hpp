@@ -66,11 +66,13 @@ public:
         for(const auto& message : messages)
         {
             //TODO: use own json
-            auto s = message.MessageJSON;
-            QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
-            QJsonObject message_json = object.object();
-            std::string text = message_json["message"].toString().toStdString();
-            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(text), false));
+            json s = message.MessageJSON;
+            chat::TextMessage textMessage;
+            textMessage = s;
+//            QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
+//            QJsonObject message_json = object.object();
+//            std::string text = message_json["message"].toString().toStdString();
+            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), false));
         }
 
         emit endResetModel();
@@ -89,12 +91,15 @@ public:
         if(m_currentChatID != "" && QString::fromStdString(message.ChatID) == m_currentChatID)
         {
             // auto msg = message.message();
-            auto s = message.MessageJSON;
-            QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
-            QJsonObject message_json = object.object();
-            std::string text = message_json["message"].toString().toStdString();
+//            auto s = message.MessageJSON;
+//            QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
+//            QJsonObject message_json = object.object();
+//            std::string text = message_json["message"].toString().toStdString();
+            json s = message.MessageJSON;
+            chat::TextMessage textMessage;
+            textMessage = s;
             emit beginResetModel();
-            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(text), false));
+            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), false));
             emit endResetModel();
         }
         else

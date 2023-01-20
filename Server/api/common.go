@@ -20,10 +20,10 @@ const (
 
 // structs
 type MessageData struct {
-	Endpoint string          `json:"Endpoint"`
-	Topic    string          `json:"Topic"`
-	Payload  json.RawMessage `json:"Payload"`
-	Type     MessageType     `json:"Type"`
+	Endpoint string          `json:"endpoint"`
+	Topic    string          `json:"topic"`
+	Payload  json.RawMessage `json:"payload"`
+	Type     MessageType     `json:"type"`
 }
 
 type ServerImpl interface {

@@ -10,30 +10,30 @@ namespace chat {
 
 // structs
 struct Message : public Types::ClassParser {
-  std::string MessageJSON;
+  json MessageJSON;
   std::string ChatID;
   std::string SenderID;
   virtual json toJson() const override {
     json js({});
-    js["MessageJSON"] = MessageJSON;
-    js["ChatID"] = ChatID;
-    js["SenderID"] = SenderID;
+    js["messagejson"] = MessageJSON;
+    js["chatid"] = ChatID;
+    js["senderid"] = SenderID;
     return js;
   }
 
   virtual void fromJson(json js) override {
     if (js.isNull())
-      MessageJSON = std::string();
+      MessageJSON = json();
     else
-      MessageJSON = static_cast<std::string>(js["MessageJSON"]);
+      MessageJSON = static_cast<json>(js["messagejson"]);
     if (js.isNull())
       ChatID = std::string();
     else
-      ChatID = static_cast<std::string>(js["ChatID"]);
+      ChatID = static_cast<std::string>(js["chatid"]);
     if (js.isNull())
       SenderID = std::string();
     else
-      SenderID = static_cast<std::string>(js["SenderID"]);
+      SenderID = static_cast<std::string>(js["senderid"]);
   }
 };
 
@@ -48,14 +48,14 @@ struct Chat : public Types::ClassParser {
   std::vector<Message> Messages;
   virtual json toJson() const override {
     json js({});
-    js["ChatID"] = ChatID;
-    js["Title"] = Title;
-    js["SecondLine"] = SecondLine;
-    js["LastMessage"] = LastMessage;
-    js["UnreadedCount"] = UnreadedCount;
-    js["Cover"] = Cover;
-    js["Participants"] = Participants;
-    js["Messages"] = Messages;
+    js["chatid"] = ChatID;
+    js["title"] = Title;
+    js["secondline"] = SecondLine;
+    js["lastmessage"] = LastMessage;
+    js["unreadedcount"] = UnreadedCount;
+    js["cover"] = Cover;
+    js["participants"] = Participants;
+    js["messages"] = Messages;
     return js;
   }
 
@@ -63,35 +63,51 @@ struct Chat : public Types::ClassParser {
     if (js.isNull())
       ChatID = std::string();
     else
-      ChatID = static_cast<std::string>(js["ChatID"]);
+      ChatID = static_cast<std::string>(js["chatid"]);
     if (js.isNull())
       Title = std::string();
     else
-      Title = static_cast<std::string>(js["Title"]);
+      Title = static_cast<std::string>(js["title"]);
     if (js.isNull())
       SecondLine = std::string();
     else
-      SecondLine = static_cast<std::string>(js["SecondLine"]);
+      SecondLine = static_cast<std::string>(js["secondline"]);
     if (js.isNull())
       LastMessage = std::string();
     else
-      LastMessage = static_cast<std::string>(js["LastMessage"]);
+      LastMessage = static_cast<std::string>(js["lastmessage"]);
     if (js.isNull())
       UnreadedCount = int();
     else
-      UnreadedCount = static_cast<int>(js["UnreadedCount"]);
+      UnreadedCount = static_cast<int>(js["unreadedcount"]);
     if (js.isNull())
       Cover = std::string();
     else
-      Cover = static_cast<std::string>(js["Cover"]);
+      Cover = static_cast<std::string>(js["cover"]);
     if (js.isNull())
       Participants = std::vector<std::string>();
     else
-      Participants = static_cast<std::vector<std::string>>(js["Participants"]);
+      Participants = static_cast<std::vector<std::string>>(js["participants"]);
     if (js.isNull())
       Messages = std::vector<Message>();
     else
-      Messages = static_cast<std::vector<Message>>(js["Messages"]);
+      Messages = static_cast<std::vector<Message>>(js["messages"]);
+  }
+};
+
+struct TextMessage : public Types::ClassParser {
+  std::string Text;
+  virtual json toJson() const override {
+    json js({});
+    js["text"] = Text;
+    return js;
+  }
+
+  virtual void fromJson(json js) override {
+    if (js.isNull())
+      Text = std::string();
+    else
+      Text = static_cast<std::string>(js["text"]);
   }
 };
 

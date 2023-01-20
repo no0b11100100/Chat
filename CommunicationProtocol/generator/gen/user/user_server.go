@@ -13,13 +13,13 @@ import (
 
 // structs
 type UserInfo struct {
-	UserID   string   `json:"UserID",omitempty bson:"userid"`
-	Name     string   `json:"Name",omitempty bson:"name"`
-	NickName string   `json:"NickName",omitempty bson:"nickname"`
-	Photo    string   `json:"Photo",omitempty bson:"photo"`
-	Chats    []string `json:"Chats",omitempty bson:"chats"`
-	Email    string   `json:"Email",omitempty bson:"email"`
-	Password string   `json:"Password",omitempty bson:"password"`
+	UserID   string   `json:"userid",omitempty bson:"userid"`
+	Name     string   `json:"name",omitempty bson:"name"`
+	NickName string   `json:"nickname",omitempty bson:"nickname"`
+	Photo    string   `json:"photo",omitempty bson:"photo"`
+	Chats    []string `json:"chats",omitempty bson:"chats"`
+	Email    string   `json:"email",omitempty bson:"email"`
+	Password string   `json:"password",omitempty bson:"password"`
 }
 
 type UserInfoTagger struct {
@@ -45,9 +45,9 @@ func UserInfoTags() UserInfoTagger {
 }
 
 type Response struct {
-	Info          UserInfo       `json:"Info",omitempty bson:"info"`
-	Status        ResponseStatus `json:"Status",omitempty bson:"status"`
-	StatusMessage string         `json:"StatusMessage",omitempty bson:"statusmessage"`
+	Info          UserInfo       `json:"info",omitempty bson:"info"`
+	Status        ResponseStatus `json:"status",omitempty bson:"status"`
+	StatusMessage string         `json:"statusmessage",omitempty bson:"statusmessage"`
 }
 
 type ResponseTagger struct {
@@ -65,8 +65,8 @@ func ResponseTags() ResponseTagger {
 }
 
 type SignIn struct {
-	Email    string `json:"Email",omitempty bson:"email"`
-	Password string `json:"Password",omitempty bson:"password"`
+	Email    string `json:"email",omitempty bson:"email"`
+	Password string `json:"password",omitempty bson:"password"`
 }
 
 type SignInTagger struct {
@@ -82,12 +82,12 @@ func SignInTags() SignInTagger {
 }
 
 type SignUp struct {
-	Name              string `json:"Name",omitempty bson:"name"`
-	NickName          string `json:"NickName",omitempty bson:"nickname"`
-	Email             string `json:"Email",omitempty bson:"email"`
-	Password          string `json:"Password",omitempty bson:"password"`
-	ConfirmedPassword string `json:"ConfirmedPassword",omitempty bson:"confirmedpassword"`
-	Photo             string `json:"Photo",omitempty bson:"photo"`
+	Name              string `json:"name",omitempty bson:"name"`
+	NickName          string `json:"nickname",omitempty bson:"nickname"`
+	Email             string `json:"email",omitempty bson:"email"`
+	Password          string `json:"password",omitempty bson:"password"`
+	ConfirmedPassword string `json:"confirmedpassword",omitempty bson:"confirmedpassword"`
+	Photo             string `json:"photo",omitempty bson:"photo"`
 }
 
 type SignUpTagger struct {

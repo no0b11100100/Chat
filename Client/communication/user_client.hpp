@@ -19,13 +19,13 @@ struct UserInfo : public Types::ClassParser {
   std::string Password;
   virtual json toJson() const override {
     json js({});
-    js["UserID"] = UserID;
-    js["Name"] = Name;
-    js["NickName"] = NickName;
-    js["Photo"] = Photo;
-    js["Chats"] = Chats;
-    js["Email"] = Email;
-    js["Password"] = Password;
+    js["userid"] = UserID;
+    js["name"] = Name;
+    js["nickname"] = NickName;
+    js["photo"] = Photo;
+    js["chats"] = Chats;
+    js["email"] = Email;
+    js["password"] = Password;
     return js;
   }
 
@@ -33,31 +33,31 @@ struct UserInfo : public Types::ClassParser {
     if (js.isNull())
       UserID = std::string();
     else
-      UserID = static_cast<std::string>(js["UserID"]);
+      UserID = static_cast<std::string>(js["userid"]);
     if (js.isNull())
       Name = std::string();
     else
-      Name = static_cast<std::string>(js["Name"]);
+      Name = static_cast<std::string>(js["name"]);
     if (js.isNull())
       NickName = std::string();
     else
-      NickName = static_cast<std::string>(js["NickName"]);
+      NickName = static_cast<std::string>(js["nickname"]);
     if (js.isNull())
       Photo = std::string();
     else
-      Photo = static_cast<std::string>(js["Photo"]);
+      Photo = static_cast<std::string>(js["photo"]);
     if (js.isNull())
       Chats = std::vector<std::string>();
     else
-      Chats = static_cast<std::vector<std::string>>(js["Chats"]);
+      Chats = static_cast<std::vector<std::string>>(js["chats"]);
     if (js.isNull())
       Email = std::string();
     else
-      Email = static_cast<std::string>(js["Email"]);
+      Email = static_cast<std::string>(js["email"]);
     if (js.isNull())
       Password = std::string();
     else
-      Password = static_cast<std::string>(js["Password"]);
+      Password = static_cast<std::string>(js["password"]);
   }
 };
 
@@ -67,9 +67,9 @@ struct Response : public Types::ClassParser {
   std::string StatusMessage;
   virtual json toJson() const override {
     json js({});
-    js["Info"] = Info;
-    js["Status"] = Status;
-    js["StatusMessage"] = StatusMessage;
+    js["info"] = Info;
+    js["status"] = Status;
+    js["statusmessage"] = StatusMessage;
     return js;
   }
 
@@ -77,15 +77,15 @@ struct Response : public Types::ClassParser {
     if (js.isNull())
       Info = UserInfo();
     else
-      Info = static_cast<UserInfo>(js["Info"]);
+      Info = static_cast<UserInfo>(js["info"]);
     if (js.isNull())
       Status = ResponseStatus();
     else
-      Status = static_cast<ResponseStatus>(js["Status"]);
+      Status = static_cast<ResponseStatus>(js["status"]);
     if (js.isNull())
       StatusMessage = std::string();
     else
-      StatusMessage = static_cast<std::string>(js["StatusMessage"]);
+      StatusMessage = static_cast<std::string>(js["statusmessage"]);
   }
 };
 
@@ -94,8 +94,8 @@ struct SignIn : public Types::ClassParser {
   std::string Password;
   virtual json toJson() const override {
     json js({});
-    js["Email"] = Email;
-    js["Password"] = Password;
+    js["email"] = Email;
+    js["password"] = Password;
     return js;
   }
 
@@ -103,11 +103,11 @@ struct SignIn : public Types::ClassParser {
     if (js.isNull())
       Email = std::string();
     else
-      Email = static_cast<std::string>(js["Email"]);
+      Email = static_cast<std::string>(js["email"]);
     if (js.isNull())
       Password = std::string();
     else
-      Password = static_cast<std::string>(js["Password"]);
+      Password = static_cast<std::string>(js["password"]);
   }
 };
 
@@ -120,12 +120,12 @@ struct SignUp : public Types::ClassParser {
   std::string Photo;
   virtual json toJson() const override {
     json js({});
-    js["Name"] = Name;
-    js["NickName"] = NickName;
-    js["Email"] = Email;
-    js["Password"] = Password;
-    js["ConfirmedPassword"] = ConfirmedPassword;
-    js["Photo"] = Photo;
+    js["name"] = Name;
+    js["nickname"] = NickName;
+    js["email"] = Email;
+    js["password"] = Password;
+    js["confirmedpassword"] = ConfirmedPassword;
+    js["photo"] = Photo;
     return js;
   }
 
@@ -133,27 +133,27 @@ struct SignUp : public Types::ClassParser {
     if (js.isNull())
       Name = std::string();
     else
-      Name = static_cast<std::string>(js["Name"]);
+      Name = static_cast<std::string>(js["name"]);
     if (js.isNull())
       NickName = std::string();
     else
-      NickName = static_cast<std::string>(js["NickName"]);
+      NickName = static_cast<std::string>(js["nickname"]);
     if (js.isNull())
       Email = std::string();
     else
-      Email = static_cast<std::string>(js["Email"]);
+      Email = static_cast<std::string>(js["email"]);
     if (js.isNull())
       Password = std::string();
     else
-      Password = static_cast<std::string>(js["Password"]);
+      Password = static_cast<std::string>(js["password"]);
     if (js.isNull())
       ConfirmedPassword = std::string();
     else
-      ConfirmedPassword = static_cast<std::string>(js["ConfirmedPassword"]);
+      ConfirmedPassword = static_cast<std::string>(js["confirmedpassword"]);
     if (js.isNull())
       Photo = std::string();
     else
-      Photo = static_cast<std::string>(js["Photo"]);
+      Photo = static_cast<std::string>(js["photo"]);
   }
 };
 

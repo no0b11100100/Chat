@@ -27,7 +27,7 @@ struct {{struct.name}} : public Types::ClassParser
     {
         json js({});
         {% for field in struct.fields %}
-        js["{{field.cap_name}}"] = {{field.cap_name}};
+        js["{{field.cap_name.lower()}}"] = {{field.cap_name}};
         {% endfor -%}
         return js;
     }
@@ -36,7 +36,7 @@ struct {{struct.name}} : public Types::ClassParser
     {
         {% for field in struct.fields %}
         if(js.isNull()) {{field.cap_name}} = {{field.cpp_type}}();
-        else {{field.cap_name}} = static_cast<{{field.cpp_type}}>(js["{{field.cap_name}}"]);
+        else {{field.cap_name}} = static_cast<{{field.cpp_type}}>(js["{{field.cap_name.lower()}}"]);
         {% endfor -%}
     }
 };

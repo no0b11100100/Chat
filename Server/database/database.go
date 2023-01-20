@@ -260,7 +260,7 @@ func (db *DB) GetUserChats(userID string) []api.Chat {
 // // If message_from is empty - return all available messages for chat
 // // otherwise - messages from provided message_id
 func (db *DB) GetMessages(chatID string) []api.Message {
-	log.Info.Printf("GetMessages %v < %v >\n", chatID)
+	log.Info.Printf("GetMessages %v\n", chatID)
 	chat := db.getChatInfo(chatID)
 
 	return chat.Messages

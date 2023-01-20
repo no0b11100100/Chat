@@ -26,10 +26,10 @@ struct MessageData : public Types::ClassParser {
   MessageType Type;
   virtual json toJson() const override {
     json js({});
-    js["Endpoint"] = Endpoint;
-    js["Topic"] = Topic;
-    js["Payload"] = Payload;
-    js["Type"] = Type;
+    js["endpoint"] = Endpoint;
+    js["topic"] = Topic;
+    js["payload"] = Payload;
+    js["type"] = Type;
     return js;
   }
 
@@ -37,19 +37,19 @@ struct MessageData : public Types::ClassParser {
     if (js.isNull())
       Endpoint = std::string();
     else
-      Endpoint = static_cast<std::string>(js["Endpoint"]);
+      Endpoint = static_cast<std::string>(js["endpoint"]);
     if (js.isNull())
       Topic = std::string();
     else
-      Topic = static_cast<std::string>(js["Topic"]);
+      Topic = static_cast<std::string>(js["topic"]);
     if (js.isNull())
       Payload = json();
     else
-      Payload = static_cast<json>(js["Payload"]);
+      Payload = static_cast<json>(js["payload"]);
     if (js.isNull())
       Type = MessageType();
     else
-      Type = static_cast<MessageType>(js["Type"]);
+      Type = static_cast<MessageType>(js["type"]);
   }
 };
 
