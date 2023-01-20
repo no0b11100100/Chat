@@ -1,9 +1,12 @@
-build-UI-Desktop_Qt_6_2_0_GCC_64bit-Debug/
+build-Client-Desktop_Qt_6_4_1_GCC_64bit-Release/**
 *.txt.user
 todo.txt
 .vscode
 RemoteServer/data
-Client/UI/build/
+Client/build/
 common/proto/*.txt
 doc/**
 SimulateClient/**
+Server/api/
+Server/data/**
+CommunicationProtocol/generator/gen/

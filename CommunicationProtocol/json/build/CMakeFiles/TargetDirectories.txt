@@ -1,0 +1,3 @@
+/home/wlandos/Folder/Projects/Chat/CommunicationProtocol/json/build/CMakeFiles/ValueSystem.dir
+/home/wlandos/Folder/Projects/Chat/CommunicationProtocol/json/build/CMakeFiles/edit_cache.dir
+/home/wlandos/Folder/Projects/Chat/CommunicationProtocol/json/build/CMakeFiles/rebuild_cache.dir

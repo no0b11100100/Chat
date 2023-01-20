@@ -1,0 +1,132 @@
+#pragma once
+
+#include "json/Value/Value.h"
+#include "defaultClient.hpp"
+
+#include <string>
+#include <vector>
+#include <functional>
+#include <algorithm>
+#include <memory>
+#include <future>
+#include <unordered_map>
+#include <chrono>
+#include <optional>
+#include <iostream>
+
+namespace Common
+{
+//enums
+{% for enum in module.enums: %}
+enum class {{enum.name}}
+{ {% for member in enum.members %}{{member.unique_name}} = {{member.value}},{% endfor %}};
+
+{% endfor %}
+
+//structs
+{% for struct in module.structs: %}
+struct {{struct.name}} : public Types::ClassParser
+{
+{% for field in struct.fields %}
+    {{field.cpp_type}} {{field.cap_name}};
+{% endfor -%}
+
+    virtual json toJson() const override
+    {
+        json js({});
+        {% for field in struct.fields %}
+        js["{{field.cap_name.lower()}}"] = {{field.cap_name}};
+        {% endfor -%}
+        return js;
+    }
+
+    virtual void fromJson(json js) override
+    {
+        {% for field in struct.fields %}
+        if(js.isNull()) {{field.cap_name}} = {{field.cpp_type}}();
+        else {{field.cap_name}} = static_cast<{{field.cpp_type}}>(js["{{field.cap_name.lower()}}"]);
+        {% endfor -%}
+    }
+};
+
+{% endfor %}
+
+
+//client
+class Base
+{
+    std::unique_ptr<DefaultClient::TCPClient> m_connection;
+    std::unordered_map<std::string, std::function<void(json)>> m_signals;
+    std::unordered_map<std::string, std::function<void(json)>> m_waiters;
+public:
+    Base(const std::string& addr)
+     : m_connection{new DefaultClient::TCPClient(addr, [this](const std::string& s){handleServerMessage(s);})}
+    {
+        m_connection->connectToServer();
+    }
+
+    Base() = default;
+
+    template<class T>
+    T Request(MessageData& message)
+    {
+        message.Type = MessageType::Request;
+        message.Topic = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+        m_connection->sendPayload(message.toJson().dump());
+        std::promise<json> response;
+        m_waiters[message.Topic] = [&response](json value){ response.set_value(value); };
+        json response_paylaod = response.get_future().get();
+        T result;
+        result = static_cast<T>(response_paylaod);
+        return result;
+    }
+
+private:
+    auto isSignalHandlable(const std::string& name)
+    {
+        auto it = std::find_if(m_signals.begin(), m_signals.end(), [&name](const std::pair<std::string, std::function<void(json)>>& p)
+        {
+            return p.first == name;
+        });
+        return it != m_signals.end() ? std::optional<std::function<void(json)>>{[this, name](json payload){ handle(name, payload); }} : std::nullopt;
+    }
+
+    void handleServerMessage(const std::string& payload)
+    {
+        json js = json::parse(payload);
+        MessageData data;
+        data = js;
+        if (data.Type == MessageType::Notification) {
+            auto result = isSignalHandlable(data.Endpoint);
+            if(result.has_value())
+            {
+                auto handler = result.value();
+                handler(data.Payload);
+            }
+        }
+        else
+        {
+            if(m_waiters.contains(data.Topic))
+            {
+                std::cout << "Process topic " << data.Topic << std::endl;
+                m_waiters[data.Topic](data.Payload);
+                m_waiters.erase(data.Topic);
+            }
+        }
+
+    }
+
+    void handle(const std::string& name, json payload)
+    {
+        m_signals.at(name)(payload);
+    }
+
+protected:
+    void addSignalHandler(std::string name, std::function<void(json)> handler)
+    {
+        m_signals.emplace(name, handler);
+    }
+};
+
+
+};

@@ -1,0 +1,33 @@
+module chat 1.0;
+
+import types 1.0;
+
+struct Message {
+    json messageJSON
+    string chatID
+    string senderID
+}
+
+struct Chat {
+    string chatID
+    string title
+    string secondLine
+    string lastMessage
+    int unreadedCount
+    string cover
+    list<string> participants
+    list<Message> messages
+}
+
+struct TextMessage {
+    string text
+}
+
+interface ChatService {
+    ResponseStatus sendMessage(Message message);
+    list<Chat> getUserChats(string userID);
+    list<Message> getChatMessages(string chatID);
+
+    signal recieveMessage(Message message);
+
+};

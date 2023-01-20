@@ -1,0 +1,65 @@
+package api
+
+import (
+    "encoding/json"
+    "context"
+)
+
+type ServerContext struct {
+	ConnectionAddress string
+}
+type disconnectionCallback = func(string)
+
+//enums
+{% for enum in module.enums: %}
+type {{enum.name}} int
+
+const (
+{% for member in enum.members %}
+{{member.unique_name}} = {{member.value}}
+{% endfor %}
+)
+{% endfor %}
+
+//structs
+{% for struct in module.structs: %}
+type {{struct.name}} struct {
+{% for field in struct.fields %}
+    {{field.cap_name}} {{field.go_type}} `json:"{{field.cap_name.lower()}}"`
+{% endfor -%}
+}
+{% endfor %}
+
+type ServerImpl interface {
+    Serve()
+    Stop()
+}
+
+type Server struct {
+    servers []ServerImpl
+    cancel  context.CancelFunc
+}
+
+func NewServer() *Server {
+    return &Server{servers:make([]ServerImpl, 0)}
+}
+
+func(s *Server) AddServer(server ServerImpl) {
+    s.servers = append(s.servers, server)
+}
+
+func(s *Server) Serve() {
+    var ctx context.Context
+	ctx, s.cancel = context.WithCancel(context.Background())
+	for _, server := range s.servers {
+		go func(serv ServerImpl) {
+			serv.Serve()
+		}(server)
+	}
+
+	<-ctx.Done()
+}
+
+func(s *Server) Stop() {
+    s.cancel()
+}

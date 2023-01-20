@@ -1,0 +1,13 @@
+module common 1.0;
+
+struct MessageData {
+    string endpoint
+    string topic
+    json payload
+    MessageType type
+}
+
+enum MessageType {
+    Request,
+    Notification
+}

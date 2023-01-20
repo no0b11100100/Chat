@@ -1,0 +1,6 @@
+module types 1.0;
+
+enum ResponseStatus {
+    OK,
+    Error
+}

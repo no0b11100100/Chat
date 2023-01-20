@@ -1,0 +1,20 @@
+package api
+//enums
+{% for enum in module.enums: %}
+type {{enum.name}} int
+
+const (
+{% for member in enum.members %}
+{{member.unique_name}} = {{member.value}}
+{% endfor %}
+)
+{% endfor %}
+
+//structs
+{% for struct in module.structs: %}
+type {{struct.name}} struct {
+{% for field in struct.fields %}
+    {{field.cap_name}} {{field.go_type}} `json:"{{field.cap_name}}"`
+{% endfor -%}
+}
+{% endfor %}
