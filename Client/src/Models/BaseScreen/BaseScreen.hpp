@@ -8,6 +8,19 @@
 #include <chrono>
 #include <thread>
 
+class UserInfo {
+    user::UserInfo m_info;
+public:
+    UserInfo(user::UserInfo info)
+    : m_info{info}
+    {}
+
+    UserInfo() = default;
+
+    user::UserInfo Info() const { return m_info; }
+
+};
+
 class BaseScreen : public QObject
 {
     Q_OBJECT
@@ -37,10 +50,10 @@ public:
 
     QString name() const { return "BaseScreen"; }
 
-    void SetUser(user::Response userData)
+    void SetUser(user::UserInfo userData)
     {
         // std::this_thread::sleep_for(std::chrono::seconds(20));
-        auto chats = m_client->chatService().getUserChats(userData.Info.UserID);
+        auto chats = m_client->chatService().getUserChats(userData.UserID);
         m_chatList->SetChats(chats);
     }
 

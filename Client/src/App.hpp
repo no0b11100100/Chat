@@ -53,7 +53,7 @@ private:
             m_userID = userID;
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
-                emit activateBaseScreen(result);
+                emit activateBaseScreen(UserInfo(result.Info));
             }).detach();
         }
         return result.StatusMessage;
@@ -66,24 +66,24 @@ private:
             m_userID = userID;
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
-                emit activateBaseScreen(result);
+                emit activateBaseScreen(UserInfo(result.Info));
             }).detach();
         }
         return result.StatusMessage;
     }
 
 public slots:
-    void changeToBaseScreen(user::Response userData)
+    void changeToBaseScreen(UserInfo userData)
     {
         m_currentModel = m_models[BASE_SCREEN_MODEL];
         BaseScreen* baseScreen = static_cast<BaseScreen*>(m_currentModel.get());
-        baseScreen->SetUser(userData);
+        baseScreen->SetUser(userData.Info());
         emit modelChanged();
     }
 
 signals:
     void modelChanged();
-    void activateBaseScreen(user::Response);
+    void activateBaseScreen(UserInfo);
 
 private:
     Client m_Client;

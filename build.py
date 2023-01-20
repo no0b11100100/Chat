@@ -77,7 +77,7 @@ def copy_client_communication():
 def build_server():
     print("Build Server")
     # generate_communication()
-    # copy_server_communication()
+    copy_server_communication()
     current_path = os.path.dirname(os.path.abspath(__file__))
     remote_server_path = os.path.join(current_path, 'Server')
     os.chdir(remote_server_path)
@@ -89,15 +89,15 @@ def build_ui():
     print("Build UI")
     # generate_communication()
     copy_client_communication()
-    current_path = os.path.dirname(os.path.abspath(__file__))
-    ui_path = os.path.join(current_path, 'Client')
-    ui_build_folder_path = os.path.join(ui_path, 'build')
-    shutil.rmtree(ui_build_folder_path, ignore_errors=True)
-    os.mkdir(ui_build_folder_path)
-    os.chdir(ui_build_folder_path)
+    # current_path = os.path.dirname(os.path.abspath(__file__))
+    # ui_path = os.path.join(current_path, 'Client')
+    # ui_build_folder_path = os.path.join(ui_path, 'build')
+    # shutil.rmtree(ui_build_folder_path, ignore_errors=True)
+    # os.mkdir(ui_build_folder_path)
+    # os.chdir(ui_build_folder_path)
 
-    if os.system(f'cmake .. && make -j7') != 0:
-        os._exit(1)
+    # if os.system(f'cmake .. && make -j7') != 0:
+    #     os._exit(1)
     # remove_copied_folders_in_ui()
 
 
