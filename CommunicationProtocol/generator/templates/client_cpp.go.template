@@ -57,7 +57,7 @@ public:
         : Common::Base(addr)
     {
         {% for signal in interface.signals %}
-        addSignalHandler("{{interface}}.{{signal.cap_name}}", [this](std::string payload){ on{{signal.cap_name}}(payload); });
+        addSignalHandler("{{interface}}.{{signal.cap_name}}", [this](json payload){ on{{signal.cap_name}}(payload); });
         {% endfor %}
     }
 
@@ -80,9 +80,8 @@ public:
 
 private:
     {% for signal in interface.signals %}
-    void on{{signal.cap_name}}(const std::string& payload)
+    void on{{signal.cap_name}}(json response)
     {
-        json response = json::parse(payload);
         int i = 0;
         {% for parameter in signal.parameters %}
         {{parameter.cpp_type}} {{parameter.name}} = response[i];

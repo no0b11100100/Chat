@@ -105,7 +105,7 @@ public:
     {
         if(isVector()) return static_cast<VectorType*>(m_data.get())->at(index);
 
-        throw std::runtime_error("operator[](IntegerValue key)");
+        throw std::runtime_error("operator[](IntegerValue key)" + std::to_string((int)m_data->type()));
     }
 
     operator const char*() const = delete;

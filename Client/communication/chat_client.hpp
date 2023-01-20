@@ -102,9 +102,8 @@ public:
   ChatServiceStub() = default;
 
   ChatServiceStub(const std::string &addr) : Common::Base(addr) {
-    addSignalHandler("ChatService.RecieveMessage", [this](std::string payload) {
-      onRecieveMessage(payload);
-    });
+    addSignalHandler("ChatService.RecieveMessage",
+                     [this](json payload) { onRecieveMessage(payload); });
   }
 
   void SubscribeToRecieveMessageEvent(
@@ -132,8 +131,7 @@ public:
   }
 
 private:
-  void onRecieveMessage(const std::string &payload) {
-    json response = json::parse(payload);
+  void onRecieveMessage(json response) {
     int i = 0;
     Message message = response[i];
     ++i;

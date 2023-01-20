@@ -12,6 +12,8 @@ public:
 
     ResponseStatus sendMessage(std::string chatID, std::string message) {
         chat::Message msg;
+        msg.MessageJSON = message;
+        msg.ChatID = chatID;
         return m_stub->SendMessage(msg);
     }
 

@@ -7,7 +7,6 @@ import (
     "net/textproto"
     "bufio"
     "fmt"
-    "strings"
 )
 
 
@@ -39,7 +38,7 @@ type {{struct.name}}Tagger struct {
 func {{struct.name}}Tags() {{struct.name}}Tagger {
     return {{struct.name}}Tagger {
     {% for field in struct.fields %}
-    {{field.cap_name}}: strings.ToLower("{{field.cap_name}}"),
+    {{field.cap_name}}: "{{field.cap_name.lower()}}",
     {% endfor -%}
     }
 }

@@ -98,21 +98,21 @@ func (db *DB) Connect() {
 
 	// db.createTestChat() //Just for test
 
-	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-	_, _ = db.tables["Chats"].InsertOne(ctx, api.Chat{
-		Messages: []api.Message{
-			{
-				MessageJSON: string([]byte(`{"message":"test message"}`)),
-			},
-		},
-		ChatID:       "-1",
-		Title:        "Test chat",
-		LastMessage:  "test message",
-		Participants: []string{},
-	})
-	if err != nil {
-		log.Warning.Println(err)
-	}
+	// ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+	// _, _ = db.tables["Chats"].InsertOne(ctx, api.Chat{
+	// 	Messages: []api.Message{
+	// 		{
+	// 			MessageJSON: string([]byte(`{"message":"test message"}`)),
+	// 		},
+	// 	},
+	// 	ChatID:       "-1",
+	// 	Title:        "Test chat",
+	// 	LastMessage:  "test message",
+	// 	Participants: []string{},
+	// })
+	// if err != nil {
+	// 	log.Warning.Println(err)
+	// }
 
 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
 	if err != nil {
@@ -134,7 +134,7 @@ func (db *DB) Close() {
 func (db *DB) IsEmailUnique(email string) bool {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	var result bson.M
-	var userTagger api.UserInfoTagger
+	userTagger := api.UserInfoTags()
 	err := db.tables["Users"].FindOne(ctx, bson.M{userTagger.Email: email}).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -148,7 +148,7 @@ func (db *DB) ValidateUser(email, password string) (bool, string) {
 	log.Info.Println("Validate user", email, password)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	var record bson.M
-	var userTagger api.UserInfoTagger
+	userTagger := api.UserInfoTags()
 	if err := db.tables["Users"].FindOne(ctx, bson.M{userTagger.Email: email, userTagger.Password: password}).Decode(&record); err != nil {
 		log.Warning.Println(err)
 		return false, ""
@@ -186,7 +186,8 @@ func (db *DB) RegisterUser(data api.SignUp) (bool, string) {
 
 func (db *DB) AddUserToChat(userID string, chatID string) {
 	var chat api.Chat
-	var chatTagger api.ChatTagger
+	chatTagger := api.ChatTags()
+	fmt.Println("AddUserToChat tag", chatTagger.ChatID)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	err := db.tables["Chats"].FindOne(ctx, bson.M{chatTagger.ChatID: chatID}).Decode(&chat)
 	if err != nil {
@@ -204,7 +205,7 @@ func (db *DB) AddUserToChat(userID string, chatID string) {
 	}
 
 	var user api.UserInfo
-	var userTagger api.UserInfoTagger
+	userTagger := api.UserInfoTags()
 	if err := db.tables["Users"].FindOne(ctx, bson.M{userTagger.UserID: userID}).Decode(&user); err != nil {
 		log.Warning.Println(err)
 		return
@@ -224,7 +225,7 @@ func (db *DB) getChatInfo(chatID string) api.Chat {
 	log.Info.Println(chatID)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	var chat api.Chat
-	var chatTagger api.ChatTagger
+	chatTagger := api.ChatTags()
 	err := db.tables["Chats"].FindOne(ctx, bson.M{chatTagger.ChatID: chatID}).Decode(&chat)
 	if err != nil {
 		log.Warning.Println("DB error:", err)
@@ -239,7 +240,7 @@ func (db *DB) GetUserChats(userID string) []api.Chat {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
 	var user api.UserInfo
-	var userTagger api.UserInfoTagger
+	userTagger := api.UserInfoTags()
 
 	err := db.tables["Users"].FindOne(ctx, bson.M{userTagger.UserID: userID}).Decode(&user)
 	if err != nil {

@@ -76,7 +76,10 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     qmlRegisterType<App, 1>("Models", 1, 0, "Backend");
+    //TODO: add custom type for user::Response
     qRegisterMetaType<user::Response>("user::Response");
+    qRegisterMetaType<user::UserInfo>("user::UserInfo");
+    qRegisterMetaType<ResponseStatus>("ResponseStatus");
 
     // used for qml logs
     qSetMessagePattern("%{time HH:mm:ss }%{file}:%{line}: %{message}");

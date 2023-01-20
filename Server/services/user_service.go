@@ -16,7 +16,7 @@ func NewUserService(database interfaces.UserServiceDatabase) *UserService {
 
 func (s *UserService) SignIn(_ api.ServerContext, userData api.SignIn) api.Response {
 	log.Info.Printf("SignIn %+v\n", userData)
-	response := api.Response{Info: api.UserInfo{}}
+	response := api.Response{Info: api.UserInfo{Chats: make([]string, 0)}}
 	status, userID := s.database.ValidateUser(userData.Email, userData.Password)
 	if !status {
 		response.Status = api.OK

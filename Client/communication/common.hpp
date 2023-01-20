@@ -56,7 +56,7 @@ struct MessageData : public Types::ClassParser {
 // client
 class Base {
   std::unique_ptr<DefaultClient::TCPClient> m_connection;
-  std::unordered_map<std::string, std::function<void(std::string)>> m_signals;
+  std::unordered_map<std::string, std::function<void(json)>> m_signals;
   std::unordered_map<std::string, std::function<void(json)>> m_waiters;
 
 public:
@@ -89,13 +89,12 @@ private:
   auto isSignalHandlable(const std::string &name) {
     auto it = std::find_if(
         m_signals.begin(), m_signals.end(),
-        [&name](
-            const std::pair<std::string, std::function<void(std::string)>> &p) {
+        [&name](const std::pair<std::string, std::function<void(json)>> &p) {
           return p.first == name;
         });
     return it != m_signals.end()
-               ? std::optional<std::function<void(
-                     std::string)>>{[this, name](const std::string &payload) {
+               ? std::optional<std::function<void(json)>>{[this,
+                                                           name](json payload) {
                    handle(name, payload);
                  }}
                : std::nullopt;
@@ -120,13 +119,12 @@ private:
     }
   }
 
-  void handle(const std::string &name, const std::string &payload) {
+  void handle(const std::string &name, json payload) {
     m_signals.at(name)(payload);
   }
 
 protected:
-  void addSignalHandler(std::string name,
-                        std::function<void(std::string)> handler) {
+  void addSignalHandler(std::string name, std::function<void(json)> handler) {
     m_signals.emplace(name, handler);
   }
 };

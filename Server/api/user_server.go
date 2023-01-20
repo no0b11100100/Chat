@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net"
 	"net/textproto"
-	"strings"
 )
 
 //enums
@@ -35,13 +34,13 @@ type UserInfoTagger struct {
 
 func UserInfoTags() UserInfoTagger {
 	return UserInfoTagger{
-		UserID:   strings.ToLower("UserID"),
-		Name:     strings.ToLower("Name"),
-		NickName: strings.ToLower("NickName"),
-		Photo:    strings.ToLower("Photo"),
-		Chats:    strings.ToLower("Chats"),
-		Email:    strings.ToLower("Email"),
-		Password: strings.ToLower("Password"),
+		UserID:   "userid",
+		Name:     "name",
+		NickName: "nickname",
+		Photo:    "photo",
+		Chats:    "chats",
+		Email:    "email",
+		Password: "password",
 	}
 }
 
@@ -59,9 +58,9 @@ type ResponseTagger struct {
 
 func ResponseTags() ResponseTagger {
 	return ResponseTagger{
-		Info:          strings.ToLower("Info"),
-		Status:        strings.ToLower("Status"),
-		StatusMessage: strings.ToLower("StatusMessage"),
+		Info:          "info",
+		Status:        "status",
+		StatusMessage: "statusmessage",
 	}
 }
 
@@ -77,8 +76,8 @@ type SignInTagger struct {
 
 func SignInTags() SignInTagger {
 	return SignInTagger{
-		Email:    strings.ToLower("Email"),
-		Password: strings.ToLower("Password"),
+		Email:    "email",
+		Password: "password",
 	}
 }
 
@@ -102,12 +101,12 @@ type SignUpTagger struct {
 
 func SignUpTags() SignUpTagger {
 	return SignUpTagger{
-		Name:              strings.ToLower("Name"),
-		NickName:          strings.ToLower("NickName"),
-		Email:             strings.ToLower("Email"),
-		Password:          strings.ToLower("Password"),
-		ConfirmedPassword: strings.ToLower("ConfirmedPassword"),
-		Photo:             strings.ToLower("Photo"),
+		Name:              "name",
+		NickName:          "nickname",
+		Email:             "email",
+		Password:          "password",
+		ConfirmedPassword: "confirmedpassword",
+		Photo:             "photo",
 	}
 }
 

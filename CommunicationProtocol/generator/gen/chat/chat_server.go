@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net"
 	"net/textproto"
-	"strings"
 )
 
 //enums
@@ -27,9 +26,9 @@ type MessageTagger struct {
 
 func MessageTags() MessageTagger {
 	return MessageTagger{
-		MessageJSON: strings.ToLower("MessageJSON"),
-		ChatID:      strings.ToLower("ChatID"),
-		SenderID:    strings.ToLower("SenderID"),
+		MessageJSON: "messagejson",
+		ChatID:      "chatid",
+		SenderID:    "senderid",
 	}
 }
 
@@ -57,14 +56,14 @@ type ChatTagger struct {
 
 func ChatTags() ChatTagger {
 	return ChatTagger{
-		ChatID:        strings.ToLower("ChatID"),
-		Title:         strings.ToLower("Title"),
-		SecondLine:    strings.ToLower("SecondLine"),
-		LastMessage:   strings.ToLower("LastMessage"),
-		UnreadedCount: strings.ToLower("UnreadedCount"),
-		Cover:         strings.ToLower("Cover"),
-		Participants:  strings.ToLower("Participants"),
-		Messages:      strings.ToLower("Messages"),
+		ChatID:        "chatid",
+		Title:         "title",
+		SecondLine:    "secondline",
+		LastMessage:   "lastmessage",
+		UnreadedCount: "unreadedcount",
+		Cover:         "cover",
+		Participants:  "participants",
+		Messages:      "messages",
 	}
 }
 
