@@ -85,6 +85,10 @@ public:
     return result;
   }
 
+  void Request(MessageData &message) {
+    m_connection->sendPayload(message.toJson().dump());
+  }
+
 private:
   auto isSignalHandlable(const std::string &name) {
     auto it = std::find_if(

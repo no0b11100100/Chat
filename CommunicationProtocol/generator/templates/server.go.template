@@ -168,12 +168,16 @@ func (s *{{interface}}Server) handleCommand(payload string, conn net.Conn) {
 
             {% endfor %}
             serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+            {% if operation.has_return_value %}
             response := s.impl.{{operation.cap_name}}(serverContex, {%- for parameter in operation.parameters -%} {{parameter.name}},{%- endfor -%})
             bytes, _ := json.Marshal(response)
             messageToSend := recievedMessage
             messageToSend.Payload = json.RawMessage(bytes)
             responseData, _ := json.Marshal(messageToSend)
             conn.Write(responseData)
+            {% else %}
+            s.impl.{{operation.cap_name}}(serverContex, {%- for parameter in operation.parameters -%} {{parameter.name}},{%- endfor -%})
+            {% endif %}
         {% endfor %}
     }
 }

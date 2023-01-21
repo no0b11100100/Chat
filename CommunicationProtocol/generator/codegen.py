@@ -30,7 +30,7 @@ def cpp_type(self: object) -> object:
             return 'std::string'
         return self.type
     elif self.type.is_void:
-        return ""
+        return "void"
     elif self.type.is_list:
         print("###", self.type.nested, cpp_type(self.type.nested))
         return 'std::vector<{0}>'.format(cpp_type(self.type.nested))

@@ -74,7 +74,11 @@ public:
         Common::MessageData _message;
         _message.Payload = json::array({ {%- for parameter in operation.parameters -%}{{parameter.name}},{%- endfor -%} });
         _message.Endpoint = "{{interface}}.{{operation.cap_name}}";
+        {% if operation.has_return_value %}
         return Request<{{operation.cpp_type}}>(_message);
+        {% else %}
+        Request(_message);
+        {%endif%}
     }
     {% endfor %}
 

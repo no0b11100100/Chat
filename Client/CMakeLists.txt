@@ -10,6 +10,10 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+#set(QT_MEDIA_BACKEND "ffmpeg")
+set(QT_ASSUME_STDERR_HAS_CONSOLE 1)
+
 #set (VCPKG_HOME "${CMAKE_SOURCE_DIR}/third-party/vcpkg")
 #set (CMAKE_TOOLCHAIN_FILE "${VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake")
 
@@ -19,7 +23,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Threads REQUIRED)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick Multimedia REQUIRED)
+
 
 set(PROJECT_SOURCES
         main.cpp
@@ -72,6 +77,9 @@ set(PROJECT_SOURCES
         communication/defaultClient.hpp
         communication/user_client.hpp
 
+        src/MultiMedia/Audio/audio.h
+        src/MultiMedia/multimedia.hpp
+
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -100,7 +108,7 @@ endif()
 target_compile_definitions(UI
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(UI
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick) #absl::status gRPC::grpc++ gRPC::grpc++_unsecure gRPC::grpc++_reflection protobuf::libprotobuf)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Multimedia)
 
 set_target_properties(UI PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

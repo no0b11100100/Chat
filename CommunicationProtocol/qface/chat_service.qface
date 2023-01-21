@@ -23,11 +23,26 @@ struct TextMessage {
     string text
 }
 
+struct CallData {
+    string audio
+}
+
+enum CallStatus {
+    Connected,
+    NotConnected,
+    Disconnected
+}
+
 interface ChatService {
     ResponseStatus sendMessage(Message message);
     list<Chat> getUserChats(string userID);
     list<Message> getChatMessages(string chatID);
-
     signal recieveMessage(Message message);
+
+    CallStatus callTo(string chatID, string callerID);
+    void sendCallData(CallData data);
+    void handleCallFrom(CallStatus status);
+    signal notifyCallData(CallData data);
+    signal callFrom();
 
 };
