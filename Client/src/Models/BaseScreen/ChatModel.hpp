@@ -8,7 +8,6 @@
 #include "Message/SimpleMessage.hpp"
 #include "Header.hpp"
 #include "../../../services/ChatService.hpp"
-// #include "../../../json/Types/Value/Value.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -65,13 +64,9 @@ public:
         m_messages.clear();
         for(const auto& message : messages)
         {
-            //TODO: use own json
             json s = message.MessageJSON;
             chat::TextMessage textMessage;
             textMessage = s;
-//            QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
-//            QJsonObject message_json = object.object();
-//            std::string text = message_json["message"].toString().toStdString();
             m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), false));
         }
 
@@ -90,11 +85,6 @@ public:
     {
         if(m_currentChatID != "" && QString::fromStdString(message.ChatID) == m_currentChatID)
         {
-            // auto msg = message.message();
-//            auto s = message.MessageJSON;
-//            QJsonDocument object = QJsonDocument::fromJson(QByteArray(s.data(), int(s.size())));
-//            QJsonObject message_json = object.object();
-//            std::string text = message_json["message"].toString().toStdString();
             json s = message.MessageJSON;
             chat::TextMessage textMessage;
             textMessage = s;
