@@ -29,4 +29,17 @@ public:
     {
         m_stub->SubscribeToRecieveMessageEvent(callback);
     }
+
+    chat::CallStatus CallTo(std::string chatID, std::string callerID) {
+        return chat::CallStatus::Connected; //m_stub->CallTo(chatID, callerID);
+    }
+
+    void SendCallData(chat::CallData data) {
+        m_stub->SendCallData(data);
+    }
+
+    void handleNotifyCallData(std::function<void(chat::CallData)> callback) {
+        m_stub->SubscribeToNotifyCallDataEvent(callback);
+    }
+
 };

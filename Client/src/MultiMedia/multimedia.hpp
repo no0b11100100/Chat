@@ -7,6 +7,6 @@ class Multimedia {
 public:
     Multimedia() = default;
 
-    Audio& audio() { return m_audio; }
+    Audio* audio() { return &m_audio; }
 
 };

@@ -31,7 +31,7 @@ class BaseScreen : public QObject
 public:
     BaseScreen(Client* client, QObject* parent = nullptr)
         : QObject{parent},
-          m_chatModel{new ChatModel(parent)},
+          m_chatModel{new ChatModel(client->chatService(), parent)},
           m_chatList{new ChatListModel(parent)},
           m_notificationModel{new NotificationModel(parent)},
           m_client{client}

@@ -40,3 +40,16 @@ func (chat *ChatService) GetChatMessages(_ api.ServerContext, chatID string) []a
 func (chat *ChatService) HandleNewConnection(address string, notifier api.ChatServiceNotifier) {
 	chat.users[address] = notifier
 }
+
+func (chat *ChatService) CallTo(api.ServerContext, string, string) api.CallStatus {
+	return api.Connected
+}
+
+func (chat *ChatService) SendCallData(_ api.ServerContext, data api.CallData) {
+	for _, notifier := range chat.users {
+		//TODO: check chatID before notify
+		notifier.NotifyCallData(data)
+	}
+}
+
+func (chat *ChatService) HandleCallFrom(api.ServerContext, api.CallStatus) {}

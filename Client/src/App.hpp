@@ -11,7 +11,6 @@
 #include "Models/SignInUpModel.hpp"
 #include "Models/BaseScreen/BaseScreen.hpp"
 #include "../services/Client.hpp"
-#include "src/MultiMedia/multimedia.hpp"
 
 constexpr const char* LOG_IN_MODEL = "logInModel";
 constexpr const char* BASE_SCREEN_MODEL = "baseScreenModel";
@@ -24,8 +23,7 @@ public:
     App(QObject* parent = nullptr)
         : QObject{parent},
         m_currentModel{nullptr},
-        m_userID{""},
-        m_multimedia{new Multimedia()}
+        m_userID{""}
     {
         initModels(parent);
         m_currentModel = m_models[LOG_IN_MODEL];
@@ -92,5 +90,4 @@ private:
     std::unordered_map<std::string, std::shared_ptr<QObject>> m_models;
     std::shared_ptr<QObject> m_currentModel;
     std::string m_userID;
-    std::unique_ptr<Multimedia> m_multimedia;
 };

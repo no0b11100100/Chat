@@ -9,6 +9,8 @@
 #include "Header.hpp"
 #include "../../../services/ChatService.hpp"
 
+#include "src/MultiMedia/multimedia.hpp"
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDebug>
@@ -26,10 +28,12 @@ public:
     QObject* header() { return m_header.get(); }
     bool chatSelected() const { return m_currentChatID != ""; }
 
-    ChatModel(QObject* parent = nullptr)
+    ChatModel(ChatService& client, QObject* parent = nullptr)
         : QAbstractListModel{parent},
         m_header{new Header(parent)},
-        m_currentChatID{""}
+        m_currentChatID{""},
+        m_multimedia{new Multimedia()},
+        m_client{client}
     {}
 
     int rowCount(const QModelIndex& parent) const override
@@ -49,6 +53,27 @@ public:
     void SetHeader(const Header& header)
     {
         m_header->SetTitle(header.title());
+        m_header->SetCallAction([&]()
+        {
+            qDebug() << "Execute call action";
+            auto status = m_client.CallTo(m_currentChatID.toStdString(), "");
+            if (status == chat::CallStatus::Connected)
+            {
+                m_multimedia->audio()->SubscribeOnAudioInput([&](QByteArray data){
+                    chat::CallData callData;
+                    callData.Audio = QString(data).toStdString();
+                    m_client.SendCallData(callData);
+                });
+
+                m_client.handleNotifyCallData([&](chat::CallData data){
+                    connect(this, &ChatModel::sendAudioStream, m_multimedia->audio(), &Audio::receiveStream);
+                    QByteArray audio = QString::fromStdString(data.Audio).toUtf8();
+                    emit sendAudioStream(audio);
+                });
+
+                m_multimedia->audio()->startStream();
+            }
+        }); //TODO
     }
 
     void SaveSelectedChatID(QString chatID)
@@ -101,9 +126,12 @@ public:
 signals:
     void chatSelectedChanged();
     void sendingMessage(QString, QString);
+    void sendAudioStream(QByteArray);
 
 private:
     std::vector<std::unique_ptr<QObject>> m_messages;
     std::unique_ptr<Header> m_header;
     QString m_currentChatID;
+    std::unique_ptr<Multimedia> m_multimedia;
+    ChatService& m_client;
 };

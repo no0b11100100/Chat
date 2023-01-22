@@ -9,7 +9,14 @@ import (
 	"net/textproto"
 )
 
-//enums
+// enums
+type CallStatus int
+
+const (
+	Connected    = 0
+	NotConnected = 1
+	Disconnected = 2
+)
 
 // structs
 type Message struct {
@@ -81,6 +88,20 @@ func TextMessageTags() TextMessageTagger {
 	}
 }
 
+type CallData struct {
+	Audio string `json:"audio",omitempty bson:"audio"`
+}
+
+type CallDataTagger struct {
+	Audio string
+}
+
+func CallDataTags() CallDataTagger {
+	return CallDataTagger{
+		Audio: "audio",
+	}
+}
+
 // server
 type ChatServiceConnectionCallback = func(string, ChatServiceNotifier)
 
@@ -88,10 +109,15 @@ type ChatServiceServerImpl interface {
 	SendMessage(ServerContext, Message) ResponseStatus
 	GetUserChats(ServerContext, string) []Chat
 	GetChatMessages(ServerContext, string) []Message
+	CallTo(ServerContext, string, string) CallStatus
+	SendCallData(ServerContext, CallData)
+	HandleCallFrom(ServerContext, CallStatus)
 }
 
 type ChatServiceNotifier interface {
 	RecieveMessage(Message)
+	NotifyCallData(CallData)
+	CallFrom()
 }
 
 type ChatServiceNotificator struct {
@@ -108,6 +134,38 @@ func (n *ChatServiceNotificator) RecieveMessage(message Message) {
 
 	messageToSend := MessageData{}
 	messageToSend.Endpoint = "ChatService.RecieveMessage"
+	messageToSend.Payload = json.RawMessage(bytes)
+	messageToSend.Type = Notification
+
+	payloadToSend, _ := json.Marshal(messageToSend)
+
+	n.conn.Write(payloadToSend)
+}
+func (n *ChatServiceNotificator) NotifyCallData(data CallData) {
+	args := make([]json.RawMessage, 0)
+	var bytes []byte
+	bytes, _ = json.Marshal(data)
+	args = append(args, json.RawMessage(bytes))
+
+	bytes, _ = json.Marshal(args)
+
+	messageToSend := MessageData{}
+	messageToSend.Endpoint = "ChatService.NotifyCallData"
+	messageToSend.Payload = json.RawMessage(bytes)
+	messageToSend.Type = Notification
+
+	payloadToSend, _ := json.Marshal(messageToSend)
+
+	n.conn.Write(payloadToSend)
+}
+func (n *ChatServiceNotificator) CallFrom() {
+	args := make([]json.RawMessage, 0)
+	var bytes []byte
+
+	bytes, _ = json.Marshal(args)
+
+	messageToSend := MessageData{}
+	messageToSend.Endpoint = "ChatService.CallFrom"
 	messageToSend.Payload = json.RawMessage(bytes)
 	messageToSend.Type = Notification
 
@@ -229,6 +287,48 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
 		conn.Write(responseData)
+	case "ChatService.CallTo":
+		args := make([]json.RawMessage, 0)
+		json.Unmarshal(recievedMessage.Payload, &args)
+		var index int
+
+		var chatID string
+		json.Unmarshal(args[index], &chatID)
+		index++
+
+		var callerID string
+		json.Unmarshal(args[index], &callerID)
+		index++
+
+		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		response := s.impl.CallTo(serverContex, chatID, callerID)
+		bytes, _ := json.Marshal(response)
+		messageToSend := recievedMessage
+		messageToSend.Payload = json.RawMessage(bytes)
+		responseData, _ := json.Marshal(messageToSend)
+		conn.Write(responseData)
+	case "ChatService.SendCallData":
+		args := make([]json.RawMessage, 0)
+		json.Unmarshal(recievedMessage.Payload, &args)
+		var index int
+
+		var data CallData
+		json.Unmarshal(args[index], &data)
+		index++
+
+		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		s.impl.SendCallData(serverContex, data)
+	case "ChatService.HandleCallFrom":
+		args := make([]json.RawMessage, 0)
+		json.Unmarshal(recievedMessage.Payload, &args)
+		var index int
+
+		var status CallStatus
+		json.Unmarshal(args[index], &status)
+		index++
+
+		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		s.impl.HandleCallFrom(serverContex, status)
 	}
 }
 
