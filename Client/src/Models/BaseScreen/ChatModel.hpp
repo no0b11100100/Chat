@@ -62,6 +62,7 @@ public:
                 m_multimedia->audio()->SubscribeOnAudioInput([&](QByteArray data){
                     chat::CallData callData;
                     callData.Audio = QString(data).toStdString();
+                    std::cout << "SubscribeOnAudioInput " << QString(data).toStdString() << std::endl;
                     m_client.SendCallData(callData);
                 });
 

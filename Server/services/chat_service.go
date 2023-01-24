@@ -3,7 +3,6 @@ package services
 import (
 	"Chat/Server/api"
 	interfaces "Chat/Server/interfaces"
-	"time"
 )
 
 type ChatService struct {
@@ -12,20 +11,19 @@ type ChatService struct {
 }
 
 func NewChatService(database interfaces.ChatServiceDatabase) *ChatService {
-	return &ChatService{
+	s := &ChatService{
 		database: database,
 		users:    make(map[string]api.ChatServiceNotifier),
 	}
+
+	return s
 }
 
 func (chat *ChatService) SendMessage(ctx api.ServerContext, message api.Message) api.ResponseStatus {
-	go func() {
-		time.Sleep(time.Second)
-		for _, notifier := range chat.users {
-			//TODO: check chatID before notify
-			notifier.RecieveMessage(message)
-		}
-	}()
+	for _, notifier := range chat.users {
+		//TODO: check chatID before notify
+		notifier.RecieveMessage(message)
+	}
 	return api.OK
 }
 

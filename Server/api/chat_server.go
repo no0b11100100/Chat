@@ -138,7 +138,7 @@ func (n *ChatServiceNotificator) RecieveMessage(message Message) {
 	messageToSend.Type = Notification
 
 	payloadToSend, _ := json.Marshal(messageToSend)
-
+	payloadToSend = append(payloadToSend, '\n')
 	n.conn.Write(payloadToSend)
 }
 func (n *ChatServiceNotificator) NotifyCallData(data CallData) {
@@ -155,7 +155,7 @@ func (n *ChatServiceNotificator) NotifyCallData(data CallData) {
 	messageToSend.Type = Notification
 
 	payloadToSend, _ := json.Marshal(messageToSend)
-
+	payloadToSend = append(payloadToSend, '\n')
 	n.conn.Write(payloadToSend)
 }
 func (n *ChatServiceNotificator) CallFrom() {
@@ -170,7 +170,7 @@ func (n *ChatServiceNotificator) CallFrom() {
 	messageToSend.Type = Notification
 
 	payloadToSend, _ := json.Marshal(messageToSend)
-
+	payloadToSend = append(payloadToSend, '\n')
 	n.conn.Write(payloadToSend)
 }
 
@@ -254,6 +254,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		messageToSend := recievedMessage
 		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
+		responseData = append(responseData, '\n')
 		conn.Write(responseData)
 	case "ChatService.GetUserChats":
 		args := make([]json.RawMessage, 0)
@@ -270,6 +271,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		messageToSend := recievedMessage
 		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
+		responseData = append(responseData, '\n')
 		conn.Write(responseData)
 	case "ChatService.GetChatMessages":
 		args := make([]json.RawMessage, 0)
@@ -286,6 +288,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		messageToSend := recievedMessage
 		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
+		responseData = append(responseData, '\n')
 		conn.Write(responseData)
 	case "ChatService.CallTo":
 		args := make([]json.RawMessage, 0)
@@ -306,6 +309,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		messageToSend := recievedMessage
 		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
+		responseData = append(responseData, '\n')
 		conn.Write(responseData)
 	case "ChatService.SendCallData":
 		args := make([]json.RawMessage, 0)

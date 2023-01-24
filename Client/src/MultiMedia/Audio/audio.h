@@ -21,23 +21,53 @@ public:
     m_inputStream{nullptr},
     m_outputStream{nullptr}
     {
-        QAudioFormat format;
-        // Set up the desired format, for example:
-        format.setSampleRate(8000);
-        format.setChannelCount(1);
-        format.setSampleSize(8);
-        format.setCodec("audio/pcm");
-        format.setByteOrder(QAudioFormat::LittleEndian);
-        format.setSampleType(QAudioFormat::UnSignedInt);
+        // QAudioFormat inputFormat;
+        // // Set up the desired format, for example:
+        // inputFormat.setSampleRate(8000);
+        // inputFormat.setChannelCount(1);
+        // inputFormat.setSampleSize(8);
+        // inputFormat.setCodec("audio/pcm");
+        // inputFormat.setByteOrder(QAudioFormat::LittleEndian);
+        // inputFormat.setSampleType(QAudioFormat::UnSignedInt);
 
-        QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
-        if (!info.isFormatSupported(format)) {
-            qWarning() << "Default format not supported, trying to use the nearest.";
-            format = info.nearestFormat(format);
-        }
+        QAudioDeviceInfo inputInfo = QAudioDeviceInfo::defaultInputDevice();
+        QAudioFormat inputFormat = inputInfo.preferredFormat();
+        // if (!inputInfo.isFormatSupported(inputFormat)) {
+        //     qWarning() << "Default format not supported, trying to use the nearest.";
+        //     inputFormat = inputInfo.nearestFormat(inputFormat);
+        // }
 
-        m_input.reset(new QAudioInput(format, this));
-        m_output.reset(new QAudioOutput(format, this));
+        // QAudioFormat outputFormat;
+        // // Set up the format, eg.
+        // outputFormat.setSampleRate(8000);
+        // outputFormat.setChannelCount(1);
+        // outputFormat.setSampleSize(8);
+        // outputFormat.setCodec("audio/pcm");
+        // outputFormat.setByteOrder(QAudioFormat::LittleEndian);
+        // outputFormat.setSampleType(QAudioFormat::UnSignedInt);
+
+        QAudioDeviceInfo outputInfo(QAudioDeviceInfo::defaultOutputDevice());
+        QAudioFormat outputFormat = outputInfo.preferredFormat();
+
+        // if (!outputInfo.isFormatSupported(outputFormat)) {
+        //     qWarning() << "Raw audio format not supported by backend, cannot play audio.";
+        //     return;
+        // }
+
+        qDebug() << "Output format" << outputFormat.sampleRate() << outputFormat.channelCount();
+        qDebug() << "Input format" << inputFormat.sampleRate() << inputFormat.channelCount();
+
+        qDebug() << "Input device" << inputInfo.deviceName() << "Output device" << outputInfo.deviceName();
+
+        for(auto d : QAudioDeviceInfo::availableDevices(QAudio::AudioInput))
+            qDebug() << "Input" << d.deviceName();
+        for(auto d : QAudioDeviceInfo::availableDevices(QAudio::AudioOutput))
+            qDebug() << "Output" << d.deviceName();
+
+        m_input.reset(new QAudioInput(inputFormat, this));
+        m_input->setBufferSize(4096);
+        m_output.reset(new QAudioOutput(outputFormat, this));
+        m_output->setBufferSize(4096);
         // m_input->setNotifyInterval(3000);
 
         // m_stream = std::move(std::unique_ptr<QIODevice>(m_input->start())); //Works
@@ -64,6 +94,8 @@ public:
         m_inputStream = std::move(std::unique_ptr<QIODevice>(m_input->start()));
         m_outputStream = std::move(std::unique_ptr<QIODevice>(m_output->start()));
         connect(m_inputStream.get(), &QIODevice::readyRead, this, &Audio::readInput);
+
+        // SubscribeOnAudioInput([this](QByteArray data){receiveStream(data); });
     }
 
     void SubscribeOnAudioInput(std::function<void(QByteArray)> callback)
@@ -74,16 +106,18 @@ public:
 public slots:
     void receiveStream(QByteArray data)
     {
-        qDebug() << "Output <" << data << ">";
-        m_outputStream->write(data);
+        qDebug() << "Output <" << data.size() << ">";
+        m_outputStream->write(QByteArray::fromHex(data));
     }
 
     void readInput()
     {
+        // m_inputStream->startTransaction();
         auto data = m_inputStream->readAll();
-        qDebug() << "Input <" << data << ">";
+        // m_inputStream->commitTransaction();
+        qDebug() << "Input <" << data.toHex(0).size() << ">";
         for(auto callback : m_inputObservers)
-            callback(data);
+            callback(data.toHex(0));
     }
 
     // void handleNotify()

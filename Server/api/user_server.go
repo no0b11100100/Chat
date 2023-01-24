@@ -205,6 +205,7 @@ func (s *UserServiceServer) handleCommand(payload string, conn net.Conn) {
 		messageToSend := recievedMessage
 		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
+		responseData = append(responseData, '\n')
 		conn.Write(responseData)
 	case "UserService.SignUp":
 		args := make([]json.RawMessage, 0)
@@ -221,6 +222,7 @@ func (s *UserServiceServer) handleCommand(payload string, conn net.Conn) {
 		messageToSend := recievedMessage
 		messageToSend.Payload = json.RawMessage(bytes)
 		responseData, _ := json.Marshal(messageToSend)
+		responseData = append(responseData, '\n')
 		conn.Write(responseData)
 	}
 }
