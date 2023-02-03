@@ -84,7 +84,7 @@ func(n *{{interface}}Notificator) {{signal.cap_name}}({%- for parameter in signa
     messageToSend.Type = Notification
 
     payloadToSend, _ := json.Marshal(messageToSend)
-
+    payloadToSend = append(payloadToSend, '\n')
     n.conn.Write(payloadToSend)
 }
 {% endfor %}
@@ -168,12 +168,17 @@ func (s *{{interface}}Server) handleCommand(payload string, conn net.Conn) {
 
             {% endfor %}
             serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+            {% if operation.has_return_value %}
             response := s.impl.{{operation.cap_name}}(serverContex, {%- for parameter in operation.parameters -%} {{parameter.name}},{%- endfor -%})
             bytes, _ := json.Marshal(response)
             messageToSend := recievedMessage
             messageToSend.Payload = json.RawMessage(bytes)
             responseData, _ := json.Marshal(messageToSend)
+            responseData = append(responseData, '\n')
             conn.Write(responseData)
+            {% else %}
+            s.impl.{{operation.cap_name}}(serverContex, {%- for parameter in operation.parameters -%} {{parameter.name}},{%- endfor -%})
+            {% endif %}
         {% endfor %}
     }
 }

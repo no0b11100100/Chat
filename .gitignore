@@ -7,6 +7,6 @@ Client/build/
 common/proto/*.txt
 doc/**
 SimulateClient/**
-Server/api/
+Server/api/**
 Server/data/**
-CommunicationProtocol/generator/gen/
+CommunicationProtocol/generator/gen/**

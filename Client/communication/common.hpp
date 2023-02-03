@@ -85,6 +85,15 @@ public:
     return result;
   }
 
+  void Request(MessageData &message) {
+    message.Type = MessageType::Request;
+    message.Topic =
+        std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                           std::chrono::system_clock::now().time_since_epoch())
+                           .count());
+    m_connection->sendPayload(message.toJson().dump());
+  }
+
 private:
   auto isSignalHandlable(const std::string &name) {
     auto it = std::find_if(
@@ -107,6 +116,7 @@ private:
     if (data.Type == MessageType::Notification) {
       auto result = isSignalHandlable(data.Endpoint);
       if (result.has_value()) {
+        std::cout << "Process notification topic " << data.Topic << std::endl;
         auto handler = result.value();
         handler(data.Payload);
       }

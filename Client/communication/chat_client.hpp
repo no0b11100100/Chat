@@ -7,6 +7,7 @@
 namespace chat {
 
 // enums
+enum class CallStatus { Connected = 0, NotConnected = 1, Disconnected = 2 };
 
 // structs
 struct Message : public Types::ClassParser {
@@ -111,8 +112,26 @@ struct TextMessage : public Types::ClassParser {
   }
 };
 
+struct CallData : public Types::ClassParser {
+  std::string Audio;
+  virtual json toJson() const override {
+    json js({});
+    js["audio"] = Audio;
+    return js;
+  }
+
+  virtual void fromJson(json js) override {
+    if (js.isNull())
+      Audio = std::string();
+    else
+      Audio = static_cast<std::string>(js["audio"]);
+  }
+};
+
 class ChatServiceStub : public Common::Base {
   std::vector<std::function<void(Message)>> m_RecieveMessageCallbacks;
+  std::vector<std::function<void(CallData)>> m_NotifyCallDataCallbacks;
+  std::vector<std::function<void()>> m_CallFromCallbacks;
 
 public:
   ChatServiceStub() = default;
@@ -120,11 +139,22 @@ public:
   ChatServiceStub(const std::string &addr) : Common::Base(addr) {
     addSignalHandler("ChatService.RecieveMessage",
                      [this](json payload) { onRecieveMessage(payload); });
+    addSignalHandler("ChatService.NotifyCallData",
+                     [this](json payload) { onNotifyCallData(payload); });
+    addSignalHandler("ChatService.CallFrom",
+                     [this](json payload) { onCallFrom(payload); });
   }
 
   void SubscribeToRecieveMessageEvent(
       std::function<void(Message message)> callback) {
     m_RecieveMessageCallbacks.push_back(callback);
+  }
+  void
+  SubscribeToNotifyCallDataEvent(std::function<void(CallData data)> callback) {
+    m_NotifyCallDataCallbacks.push_back(callback);
+  }
+  void SubscribeToCallFromEvent(std::function<void()> callback) {
+    m_CallFromCallbacks.push_back(callback);
   }
 
   ResponseStatus SendMessage(Message message) {
@@ -145,6 +175,24 @@ public:
     _message.Endpoint = "ChatService.GetChatMessages";
     return Request<std::vector<Message>>(_message);
   }
+  CallStatus CallTo(std::string chatID, std::string callerID) {
+    Common::MessageData _message;
+    _message.Payload = json::array({chatID, callerID});
+    _message.Endpoint = "ChatService.CallTo";
+    return Request<CallStatus>(_message);
+  }
+  void SendCallData(CallData data) {
+    Common::MessageData _message;
+    _message.Payload = json::array({data});
+    _message.Endpoint = "ChatService.SendCallData";
+    Request(_message);
+  }
+  void HandleCallFrom(CallStatus status) {
+    Common::MessageData _message;
+    _message.Payload = json::array({status});
+    _message.Endpoint = "ChatService.HandleCallFrom";
+    Request(_message);
+  }
 
 private:
   void onRecieveMessage(json response) {
@@ -154,6 +202,22 @@ private:
 
     for (const auto &call : m_RecieveMessageCallbacks) {
       call(message);
+    }
+  }
+  void onNotifyCallData(json response) {
+    int i = 0;
+    CallData data = response[i];
+    ++i;
+
+    for (const auto &call : m_NotifyCallDataCallbacks) {
+      call(data);
+    }
+  }
+  void onCallFrom(json response) {
+    int i = 0;
+
+    for (const auto &call : m_CallFromCallbacks) {
+      call();
     }
   }
 };
