@@ -15,6 +15,8 @@ Rectangle {
         delegate: Rectangle{
             implicitWidth: 102
             height: 40
+            implicitHeight: 40
+            color: "green"
             Column {
                 // width: 102
                 anchors.fill: parent

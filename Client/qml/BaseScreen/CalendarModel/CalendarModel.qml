@@ -1,18 +1,15 @@
-import QtQuick 2.0
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
- Rectangle {
+Rectangle {
     id: root
     property var model
 
-    // Column {
-        // spacing: 2
+    Column {
         Date {
             id: date
             width: root.width
-            // anchors.right: root.right
-            anchors.leftMargin: time.width
-            anchors.left: root.left
-            height: 40
+            height: 50
             model: [
                 {"date":"1 december", "day":"Monday"},
                 {"date":"2 december", "day":"Tuesaday"},
@@ -24,74 +21,48 @@ import QtQuick 2.0
             ]
         }
 
-
-        // Row {
-            Time{
-                id: time
-                height: root.height - date.height
-                anchors.right: main.left
-                anchors.bottom: root.bottom
-                width: 50
-                model: [
-                    {"time":"7:00"},
-                    {"time":""},
-                    {"time":""},
-                    {"time":""},
-                    {"time":""},
-                    {"time":"8:00"},
-                    {"time":""},
-                    {"time":""},
-                    {"time":""},
-                    {"time":""},
-                    {"time":"9:00"},
-                    {"time":""},
-                    {"time":""},
-                    {"time":""},
-                    {"time":""},
-                    {"time":"10:00"},
-                ]
-            }
-
-            ListView {
-                id: main
-                anchors.top: date.bottom
-                // anchors.fill: parent
-                width: root.width - time.width
-                height: root.height - date.height
-                anchors.right: root.right
-                model: root.model
-                spacing: 2
-                orientation: ListView.Horizontal
-                delegate: Rectangle{
-                    id: _delegate
-                    width: 100
-                    height: root.height - date.height
-
-                    border.color: "black"
-                    border.width: 1
-
-                    ListView{
-                        id: meets
-                        model: 15//[1,2,3,4,5,6,7,8,9]
-                        anchors.fill: parent
-                        spacing: 2
-                        delegate: Rectangle{
-                            width: meets.width
-                            height: 40
-                            border.color: "black"
-                            border.width: 1
-                            color: index % 2 === 0 ? "lightgrey": "lightblue"
-                        }
+        HorizontalHeaderView {
+            width: root.width
+            height: root.height - date.height
+            interactive: false
+            implicitWidth: 102
+            implicitHeight: root.height - date.height
+            model: 7
+            columnSpacing: 2
+            ScrollBar.vertical: ScrollBar { active: true; visible: true}
+            delegate: Rectangle {
+                id: _delegate
+                width: 100
+                implicitWidth: 102
+                height: root.height
+                implicitHeight: root.height
+                ListView {
+                    interactive: false
+                    anchors.fill: parent
+                    model: 12
+                    spacing: 2
+                    delegate: Rectangle {
+                        width: 100
+                        height: 50
+                        color: "red"
                     }
+                }
 
-                    Meetings {
-                        model: [1,2]
-                        coordinates: {"x":meets.x, "y":meets.y}
+                Repeater {
+                    model: 2
+                    Rectangle {
+                        color: "purple"
+                        width: 90
+                        height: 30
+                        x: 0
+                        y: index === 0 ? 20 : 60
                     }
-
+                    Component.onCompleted: {
+                        console.log(_delegate.x, _delegate.y)
+                    }
                 }
             }
-        // }
-    // }
+        }
+    }
 
  }
