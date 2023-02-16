@@ -1,9 +1,51 @@
 package api
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
+	"net"
+	"net/textproto"
 )
+
+type BaseServer struct {
+	ln net.Listener
+}
+
+func (b *BaseServer) Serve() {
+	b.ln, _ = net.Listen("tcp", "localhost:1230")
+	fmt.Println("Start base service server")
+	for {
+		conn, _ := b.ln.Accept()
+		go func() {
+			defer func() {
+				fmt.Println("Disconnect from base service")
+				conn.Close()
+			}()
+
+			reader := bufio.NewReader(conn)
+			tp := textproto.NewReader(reader)
+
+			data, err := tp.ReadLine()
+
+			if err != nil {
+				fmt.Println("processConnection error", err)
+				return
+			}
+
+			fmt.Println("processConnection message", data)
+			// gen id
+			connectionID := "1"
+			fmt.Println("Generated connection id", connectionID)
+			conn.Write([]byte(connectionID))
+		}()
+	}
+}
+
+func (b *BaseServer) Stop() {
+	b.ln.Close()
+}
 
 type ServerContext struct {
 	ConnectionAddress string
@@ -37,7 +79,9 @@ type Server struct {
 }
 
 func NewServer() *Server {
-	return &Server{servers: make([]ServerImpl, 0)}
+	s := &Server{servers: make([]ServerImpl, 0)}
+	s.AddServer(&BaseServer{})
+	return s
 }
 
 func (s *Server) AddServer(server ServerImpl) {

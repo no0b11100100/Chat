@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <thread>
 #include <QEventLoop>
+#include <future>
 
 namespace DefaultClient {
 //https://stackoverflow.com/questions/2698145/how-do-i-execute-qtcpsocket-in-a-different-thread
@@ -26,6 +27,36 @@ public:
         : m_reciverCallback{callback},
         m_addr{addr}
     {}
+
+    std::string init(std::string baseServiceAddr)
+    {
+        // std::promise<std::string> promise;
+        std::string data = "";
+
+        std::thread([&]
+        {
+            QTcpSocket* socket = new QTcpSocket();
+            QString addr = QString::fromStdString(baseServiceAddr);
+            auto parts = addr.split(":");
+            qDebug() << "Start server" << parts.at(0) << parts.at(1).toInt();
+            socket->connectToHost(parts.at(0), parts.at(1).toInt());
+
+            qDebug() << "before write";
+            socket->write("\n");
+            socket->waitForBytesWritten(1000);
+            qDebug() << "afer write";
+            socket->waitForReadyRead(-1);
+            QByteArray byteData = socket->readAll();
+            socket->disconnectFromHost();
+            QString strData(byteData);
+            data = strData.toStdString();
+
+            delete socket;
+        }).join();
+
+        // std::string data = promise.get_future().get();
+        return data;
+    }
 
     void connectToServer()
     {
@@ -65,16 +96,6 @@ public:
                         if(!message.isEmpty())
                             handleMessage(message);
                 }
-                // QByteArray data;
-                // data = socket->readAll();
-                // QString str(data);
-                // int index = str.indexOf("\n");
-                // QString message = str.mid(0, index);
-                // qDebug() << "Data from server" << message << "other" << str.mid(index+1, str.size());
-                // // QString str(data);
-                // handleMessage(message);
-                // if (index != str.size() && str.mid(index+1, str.size()).back() == '\n')
-                //     handleMessage(str.mid(index+1, str.size()-1));
             });
 
             // Quit the loop (and thread) if the socket it disconnected. You could also try

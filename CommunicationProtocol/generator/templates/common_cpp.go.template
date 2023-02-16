@@ -58,10 +58,20 @@ class Base
     std::unique_ptr<DefaultClient::TCPClient> m_connection;
     std::unordered_map<std::string, std::function<void(json)>> m_signals;
     std::unordered_map<std::string, std::function<void(json)>> m_waiters;
+
+    inline static std::string CONNECTION_ID = "";
+    static constexpr std::string_view BASE_SERVICE_ADDR = "localhost:1230";
+
 public:
     Base(const std::string& addr)
      : m_connection{new DefaultClient::TCPClient(addr, [this](const std::string& s){handleServerMessage(s);})}
     {
+        if(Base::CONNECTION_ID.empty())
+        {
+            qDebug() << "Init client" << QString::fromStdString(std::string(BASE_SERVICE_ADDR.data()));
+            Base::CONNECTION_ID = m_connection->init(std::string(BASE_SERVICE_ADDR.data()));
+            qDebug() << "CONNECTION_ID=" << QString::fromStdString(Base::CONNECTION_ID);
+        }
         m_connection->connectToServer();
     }
 
