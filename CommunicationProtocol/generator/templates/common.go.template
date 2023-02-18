@@ -45,6 +45,7 @@ func (b *BaseServer) Stop() {
 }
 
 type ServerContext struct {
+	ConnectionID string
 	ConnectionAddress string
 }
 type disconnectionCallback = func(string)

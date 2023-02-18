@@ -19,10 +19,7 @@ func (b *BaseServer) Serve() {
 	for {
 		conn, _ := b.ln.Accept()
 		go func() {
-			defer func() {
-				fmt.Println("Disconnect from base service")
-				conn.Close()
-			}()
+			defer conn.Close()
 
 			reader := bufio.NewReader(conn)
 			tp := textproto.NewReader(reader)
@@ -48,6 +45,7 @@ func (b *BaseServer) Stop() {
 }
 
 type ServerContext struct {
+	ConnectionID      string
 	ConnectionAddress string
 }
 type disconnectionCallback = func(string)
@@ -62,10 +60,11 @@ const (
 
 // structs
 type MessageData struct {
-	Endpoint string          `json:"endpoint"`
-	Topic    string          `json:"topic"`
-	Payload  json.RawMessage `json:"payload"`
-	Type     MessageType     `json:"type"`
+	ConnectionID string          `json:"connectionid"`
+	Endpoint     string          `json:"endpoint"`
+	Topic        string          `json:"topic"`
+	Payload      json.RawMessage `json:"payload"`
+	Type         MessageType     `json:"type"`
 }
 
 type ServerImpl interface {

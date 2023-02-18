@@ -1,0 +1,15 @@
+module calendar 1.0;
+
+import types 1.0;
+
+struct Meeting {
+    string title;
+    list<string> participants;
+}
+
+interface CalendarService {
+    ResponseStatus createMeeting(string name, list<string> participants)
+    list<Meeting> getMeetings(string userID)
+
+    signal recieveMeeting(Meeting meeting)
+}

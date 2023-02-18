@@ -8,13 +8,16 @@ import (
 
 type UserService struct {
 	database interfaces.UserServiceDatabase
+	users    map[string]string
 }
 
-func NewUserService(database interfaces.UserServiceDatabase) *UserService {
-	return &UserService{database: database}
+func NewUserService(serviceConnection *ServiceConnection, database interfaces.UserServiceDatabase) *UserService {
+	s := &UserService{database: database, users: make(map[string]string)}
+	serviceConnection.ConnectionIDByUserEmail.Provide(s.connectionIDByUserID)
+	return s
 }
 
-func (s *UserService) SignIn(_ api.ServerContext, userData api.SignIn) api.Response {
+func (s *UserService) SignIn(ctx api.ServerContext, userData api.SignIn) api.Response {
 	log.Info.Printf("SignIn %+v\n", userData)
 	response := api.Response{Info: api.UserInfo{Chats: make([]string, 0)}}
 	status, userID := s.database.ValidateUser(userData.Email, userData.Password)
@@ -24,10 +27,12 @@ func (s *UserService) SignIn(_ api.ServerContext, userData api.SignIn) api.Respo
 	}
 
 	response.Info.UserID = userID
+	s.saveUser(userData.Email, ctx.ConnectionID)
 
 	return response
 }
-func (s *UserService) SignUp(_ api.ServerContext, userData api.SignUp) api.Response {
+
+func (s *UserService) SignUp(ctx api.ServerContext, userData api.SignUp) api.Response {
 	log.Info.Printf("SignUp %+v\n", userData)
 	response := api.Response{Info: api.UserInfo{Chats: make([]string, 0)}}
 	if userData.Password != userData.ConfirmedPassword {
@@ -46,6 +51,24 @@ func (s *UserService) SignUp(_ api.ServerContext, userData api.SignUp) api.Respo
 	s.database.AddUserToChat(userID, "-1") //Just for test: "-1" is a test chat
 
 	response.Info.UserID = userID
+	s.saveUser(userData.Email, ctx.ConnectionID)
 
 	return response
+}
+
+func (s *UserService) saveUser(email, connectionID string) {
+	s.users[email] = connectionID
+}
+
+func (s *UserService) connectionIDByUserID(userID string) string {
+	return s.users[userID]
+}
+
+func (s *UserService) HandleDisconnect(connectionID string) {
+	for key, value := range s.users {
+		if value == connectionID {
+			delete(s.users, key)
+			return
+		}
+	}
 }

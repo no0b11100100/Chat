@@ -95,6 +95,7 @@ type {{interface}}Server struct {
 	impl                  {{interface}}ServerImpl
 	notifierObservers     []{{interface}}ConnectionCallback
 	disconectionObservers []disconnectionCallback
+    connections           map[string]string
 }
 
 func New{{interface}}Server(addr string) *{{interface}}Server {
@@ -103,6 +104,7 @@ func New{{interface}}Server(addr string) *{{interface}}Server {
 		listener: ln,
         notifierObservers: make([]{{interface}}ConnectionCallback, 0),
         disconectionObservers: make([]disconnectionCallback, 0),
+        connections:           make(map[string]string),
 	}
 
 	return server
@@ -129,17 +131,27 @@ func (s *{{interface}}Server) Serve() {
 	}
 }
 
+func (s *{{interface}}Server) processNewConnection(conn net.Conn, payload string) {
+	if _, ok := s.connections[conn.RemoteAddr().String()]; ok {
+		return
+	}
+    recievedMessage := MessageData{}
+	json.Unmarshal([]byte(payload), &recievedMessage)
+	s.connections[conn.RemoteAddr().String()] = recievedMessage.ConnectionID
+	s.emitNewConnectionEvent(conn, recievedMessage.ConnectionID)
+}
+
 func (s *{{interface}}Server) processConnection(conn net.Conn) {
 	fmt.Println("Accept connection in {{interface}}Server:", conn.RemoteAddr().String())
-	s.emitNewConnectionEvent(conn)
 	defer conn.Close()
-	defer func() { s.emitDisconnectionEvent(conn) }()
+	defer func() { s.emitDisconnectionEvent(conn, s.connections[conn.RemoteAddr().String()]) }()
 
 	for {
 		reader := bufio.NewReader(conn)
 		tp := textproto.NewReader(reader)
 
 		data, err := tp.ReadLine()
+        s.processNewConnection(conn, data)
 
 		if err != nil {
 			fmt.Println("processConnection error", err)
@@ -167,7 +179,7 @@ func (s *{{interface}}Server) handleCommand(payload string, conn net.Conn) {
             index++
 
             {% endfor %}
-            serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+            serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
             {% if operation.has_return_value %}
             response := s.impl.{{operation.cap_name}}(serverContex, {%- for parameter in operation.parameters -%} {{parameter.name}},{%- endfor -%})
             bytes, _ := json.Marshal(response)
@@ -192,17 +204,17 @@ func (s *{{interface}}Server) SubscribeToDisconnectionEvent(observer disconnecti
 	s.disconectionObservers = append(s.disconectionObservers, observer)
 }
 
-func (s *{{interface}}Server) emitNewConnectionEvent(conn net.Conn) {
+func (s *{{interface}}Server) emitNewConnectionEvent(conn net.Conn, connectionID string) {
 	notificator := &{{interface}}Notificator{conn: conn}
 
 	for _, callback := range s.notifierObservers {
-		callback(conn.RemoteAddr().String(), notificator)
+		callback(connectionID, notificator)
 	}
 }
 
-func (s *{{interface}}Server) emitDisconnectionEvent(conn net.Conn) {
+func (s *{{interface}}Server) emitDisconnectionEvent(conn net.Conn, connectionID string) {
 	for _, callback := range s.disconectionObservers {
-		callback(conn.RemoteAddr().String())
+		callback(connectionID)
 	}
 }
 

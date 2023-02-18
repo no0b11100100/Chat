@@ -130,6 +130,7 @@ type UserServiceServer struct {
 	impl                  UserServiceServerImpl
 	notifierObservers     []UserServiceConnectionCallback
 	disconectionObservers []disconnectionCallback
+	connections           map[string]string
 }
 
 func NewUserServiceServer(addr string) *UserServiceServer {
@@ -138,6 +139,7 @@ func NewUserServiceServer(addr string) *UserServiceServer {
 		listener:              ln,
 		notifierObservers:     make([]UserServiceConnectionCallback, 0),
 		disconectionObservers: make([]disconnectionCallback, 0),
+		connections:           make(map[string]string),
 	}
 
 	return server
@@ -164,17 +166,27 @@ func (s *UserServiceServer) Serve() {
 	}
 }
 
+func (s *UserServiceServer) processNewConnection(conn net.Conn, payload string) {
+	if _, ok := s.connections[conn.RemoteAddr().String()]; ok {
+		return
+	}
+	recievedMessage := MessageData{}
+	json.Unmarshal([]byte(payload), &recievedMessage)
+	s.connections[conn.RemoteAddr().String()] = recievedMessage.ConnectionID
+	s.emitNewConnectionEvent(conn, recievedMessage.ConnectionID)
+}
+
 func (s *UserServiceServer) processConnection(conn net.Conn) {
 	fmt.Println("Accept connection in UserServiceServer:", conn.RemoteAddr().String())
-	s.emitNewConnectionEvent(conn)
 	defer conn.Close()
-	defer func() { s.emitDisconnectionEvent(conn) }()
+	defer func() { s.emitDisconnectionEvent(conn, s.connections[conn.RemoteAddr().String()]) }()
 
 	for {
 		reader := bufio.NewReader(conn)
 		tp := textproto.NewReader(reader)
 
 		data, err := tp.ReadLine()
+		s.processNewConnection(conn, data)
 
 		if err != nil {
 			fmt.Println("processConnection error", err)
@@ -199,7 +211,7 @@ func (s *UserServiceServer) handleCommand(payload string, conn net.Conn) {
 		json.Unmarshal(args[index], &data)
 		index++
 
-		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.SignIn(serverContex, data)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
@@ -216,7 +228,7 @@ func (s *UserServiceServer) handleCommand(payload string, conn net.Conn) {
 		json.Unmarshal(args[index], &data)
 		index++
 
-		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.SignUp(serverContex, data)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
@@ -236,16 +248,16 @@ func (s *UserServiceServer) SubscribeToDisconnectionEvent(observer disconnection
 	s.disconectionObservers = append(s.disconectionObservers, observer)
 }
 
-func (s *UserServiceServer) emitNewConnectionEvent(conn net.Conn) {
+func (s *UserServiceServer) emitNewConnectionEvent(conn net.Conn, connectionID string) {
 	notificator := &UserServiceNotificator{conn: conn}
 
 	for _, callback := range s.notifierObservers {
-		callback(conn.RemoteAddr().String(), notificator)
+		callback(connectionID, notificator)
 	}
 }
 
-func (s *UserServiceServer) emitDisconnectionEvent(conn net.Conn) {
+func (s *UserServiceServer) emitDisconnectionEvent(conn net.Conn, connectionID string) {
 	for _, callback := range s.disconectionObservers {
-		callback(conn.RemoteAddr().String())
+		callback(connectionID)
 	}
 }

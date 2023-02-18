@@ -21,6 +21,7 @@
         <file>BaseScreen/CalendarModel/Date.qml</file>
         <file>BaseScreen/CalendarModel/Meetings.qml</file>
         <file>BaseScreen/CalendarModel/Time.qml</file>
+        <file>BaseScreen/CalendarModel/NewMeeting.qml</file>
 
         <file>BaseScreen/ChatModel/Message/SimpleMessage.qml</file>
 

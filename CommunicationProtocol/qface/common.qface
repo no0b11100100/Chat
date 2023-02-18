@@ -1,6 +1,7 @@
 module common 1.0;
 
 struct MessageData {
+    string connectionID
     string endpoint
     string topic
     json payload

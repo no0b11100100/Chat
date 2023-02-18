@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
     // qRegisterMetaType<ResponseStatus>("ResponseStatus");
     qRegisterMetaType<UserInfo>("UserInfo");
     qRegisterMetaType<chat::Message>("chat::Message");
+    qRegisterMetaType<calendar::Meeting>("calendar::Meeting");
 
     // used for qml logs
     qSetMessagePattern("%{time HH:mm:ss }%{file}:%{line}: %{message}");

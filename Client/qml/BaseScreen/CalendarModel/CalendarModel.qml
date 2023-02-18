@@ -6,6 +6,16 @@ Rectangle {
     property var model
 
     Column {
+        Button{
+            text: "New Meeting"
+            onClicked: {
+                console.log("Press create new meeting")
+                var component = Qt.createComponent("qrc:/qml/BaseScreen/CalendarModel/NewMeeting.qml")
+                var window    = component.createObject()
+                window.createMeeting = root.model.createMeeting
+                window.show()
+            }
+        }
         Date {
             id: date
             width: root.width

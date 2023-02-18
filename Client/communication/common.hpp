@@ -20,12 +20,14 @@ enum class MessageType { Request = 0, Notification = 1 };
 
 // structs
 struct MessageData : public Types::ClassParser {
+  std::string ConnectionID;
   std::string Endpoint;
   std::string Topic;
   json Payload;
   MessageType Type;
   virtual json toJson() const override {
     json js({});
+    js["connectionid"] = ConnectionID;
     js["endpoint"] = Endpoint;
     js["topic"] = Topic;
     js["payload"] = Payload;
@@ -34,6 +36,10 @@ struct MessageData : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
+    if (js.isNull())
+      ConnectionID = std::string();
+    else
+      ConnectionID = static_cast<std::string>(js["connectionid"]);
     if (js.isNull())
       Endpoint = std::string();
     else
@@ -80,12 +86,7 @@ public:
   Base() = default;
 
   template <class T> T Request(MessageData &message) {
-    message.Type = MessageType::Request;
-    message.Topic =
-        std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                           std::chrono::system_clock::now().time_since_epoch())
-                           .count());
-    m_connection->sendPayload(message.toJson().dump());
+    Request(message);
     std::promise<json> response;
     m_waiters[message.Topic] = [&response](json value) {
       response.set_value(value);
@@ -98,6 +99,7 @@ public:
 
   void Request(MessageData &message) {
     message.Type = MessageType::Request;
+    message.ConnectionID = Base::CONNECTION_ID;
     message.Topic =
         std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
                            std::chrono::system_clock::now().time_since_epoch())
