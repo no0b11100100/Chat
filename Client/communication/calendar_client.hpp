@@ -11,10 +11,14 @@ namespace calendar {
 // structs
 struct Meeting : public Types::ClassParser {
   std::string Title;
+  std::string StartTime;
+  std::string EndTime;
   std::vector<std::string> Participants;
   virtual json toJson() const override {
     json js({});
     js["title"] = Title;
+    js["starttime"] = StartTime;
+    js["endtime"] = EndTime;
     js["participants"] = Participants;
     return js;
   }
@@ -24,6 +28,14 @@ struct Meeting : public Types::ClassParser {
       Title = std::string();
     else
       Title = static_cast<std::string>(js["title"]);
+    if (js.isNull())
+      StartTime = std::string();
+    else
+      StartTime = static_cast<std::string>(js["starttime"]);
+    if (js.isNull())
+      EndTime = std::string();
+    else
+      EndTime = static_cast<std::string>(js["endtime"]);
     if (js.isNull())
       Participants = std::vector<std::string>();
     else
@@ -47,10 +59,9 @@ public:
     m_RecieveMeetingCallbacks.push_back(callback);
   }
 
-  ResponseStatus CreateMeeting(std::string name,
-                               std::vector<std::string> participants) {
+  ResponseStatus CreateMeeting(Meeting meeting) {
     Common::MessageData _message;
-    _message.Payload = json::array({name, participants});
+    _message.Payload = json::array({meeting});
     _message.Endpoint = "CalendarService.CreateMeeting";
     return Request<ResponseStatus>(_message);
   }

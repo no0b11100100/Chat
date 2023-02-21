@@ -47,6 +47,7 @@ set(PROJECT_SOURCES
         src/Models/BaseScreen/NotificationModel/Notification.hpp
 
         src/Models/BaseScreen/CalendarModel/CalendarModel.hpp
+        src/Models/BaseScreen/CalendarModel/Meeting.hpp
 
         src/App.hpp
         Logger/Logger.hpp

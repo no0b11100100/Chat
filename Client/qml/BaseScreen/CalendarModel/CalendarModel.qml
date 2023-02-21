@@ -47,25 +47,50 @@ Rectangle {
                 height: root.height
                 implicitHeight: root.height
                 ListView {
+                    id: dayList
                     interactive: false
                     anchors.fill: parent
-                    model: 12
+                    model: 24
                     spacing: 2
                     delegate: Rectangle {
                         width: 100
-                        height: 50
+                        height: 30
                         color: "red"
                     }
                 }
 
                 Repeater {
-                    model: 2
+                    model: root.model.meetings
                     Rectangle {
                         color: "purple"
                         width: 90
-                        height: 30
+                        height: {
+                            const startTimeParts = modelData.startTime.split(":");
+                            const startTimeHour = startTimeParts[0]
+                            const startTimeMinutes = startTimeParts[1]
+
+                            const endTimeParts = modelData.endTime.split(":");
+                            const endTimeHour = endTimeParts[0]
+                            const endTimeMinutes = endTimeParts[1]
+
+                            const hoursDiff = parseInt(endTimeHour) - parseInt(startTimeHour)
+                            const minuteHeight = 30 / 30 //dayList.delegate.height
+                            const hourHeight = 30 * 2
+                            const finalHeight = hoursDiff * hourHeight + Math.abs(startTimeMinutes - endTimeMinutes) * minuteHeight
+                            console.log("Calculate height", finalHeight)
+                            return finalHeight
+                        }
                         x: 0
-                        y: index === 0 ? 20 : 60
+                        y: {
+                            const parts = modelData.startTime.split(":");
+                            const hour = parts[0]
+                            const minutes = parts[1]
+                            const minuteHeight = 30 / 30
+                            const hourHeight = 30 * 2
+                            const finalY = parseInt(hour) * hourHeight + parseInt(minutes) * minuteHeight + parseInt(hour) * 4 //4 is 2 spacing + 2 half of hour
+                            console.log("Calculate y", finalY)
+                            return finalY
+                        }
                     }
                     Component.onCompleted: {
                         console.log(_delegate.x, _delegate.y)

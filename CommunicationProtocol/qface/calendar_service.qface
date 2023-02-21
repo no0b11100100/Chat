@@ -4,11 +4,13 @@ import types 1.0;
 
 struct Meeting {
     string title;
+    string startTime;
+    string endTime;
     list<string> participants;
 }
 
 interface CalendarService {
-    ResponseStatus createMeeting(string name, list<string> participants)
+    ResponseStatus createMeeting(Meeting meeting)
     list<Meeting> getMeetings(string userID)
 
     signal recieveMeeting(Meeting meeting)

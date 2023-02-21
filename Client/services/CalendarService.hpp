@@ -10,8 +10,8 @@ public:
     : m_stub{new calendar::CalendarServiceStub(addr)}
     {}
 
-    ResponseStatus CreateMeeting(std::string name, std::vector<std::string> participants) {
-        return m_stub->CreateMeeting(name, participants);
+    ResponseStatus CreateMeeting(calendar::Meeting meeting) {
+        return m_stub->CreateMeeting(meeting);
     }
 
     std::vector<calendar::Meeting> GetMeetings(std::string userID) {

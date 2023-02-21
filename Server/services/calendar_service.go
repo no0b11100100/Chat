@@ -21,10 +21,10 @@ func NewCalendarService(serviceConnection *ServiceConnection, database interface
 	return s
 }
 
-func (calendar *CalendarService) CreateMeeting(_ api.ServerContext, title string, participants []string) api.ResponseStatus {
-	for _, participant := range participants {
+func (calendar *CalendarService) CreateMeeting(_ api.ServerContext, m api.Meeting) api.ResponseStatus {
+	for _, participant := range m.Participants {
 		participantConnectID := calendar.serviceConnection.ConnectionIDByUserEmail.Request(participant)
-		calendar.notifiers[participantConnectID].RecieveMeeting(api.Meeting{Title: title, Participants: participants})
+		calendar.notifiers[participantConnectID].RecieveMeeting(m)
 	}
 	return api.OK
 }
