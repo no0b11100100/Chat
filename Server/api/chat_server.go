@@ -179,6 +179,7 @@ type ChatServiceServer struct {
 	impl                  ChatServiceServerImpl
 	notifierObservers     []ChatServiceConnectionCallback
 	disconectionObservers []disconnectionCallback
+	connections           map[string]string
 }
 
 func NewChatServiceServer(addr string) *ChatServiceServer {
@@ -187,6 +188,7 @@ func NewChatServiceServer(addr string) *ChatServiceServer {
 		listener:              ln,
 		notifierObservers:     make([]ChatServiceConnectionCallback, 0),
 		disconectionObservers: make([]disconnectionCallback, 0),
+		connections:           make(map[string]string),
 	}
 
 	return server
@@ -213,17 +215,27 @@ func (s *ChatServiceServer) Serve() {
 	}
 }
 
+func (s *ChatServiceServer) processNewConnection(conn net.Conn, payload string) {
+	if _, ok := s.connections[conn.RemoteAddr().String()]; ok {
+		return
+	}
+	recievedMessage := MessageData{}
+	json.Unmarshal([]byte(payload), &recievedMessage)
+	s.connections[conn.RemoteAddr().String()] = recievedMessage.ConnectionID
+	s.emitNewConnectionEvent(conn, recievedMessage.ConnectionID)
+}
+
 func (s *ChatServiceServer) processConnection(conn net.Conn) {
 	fmt.Println("Accept connection in ChatServiceServer:", conn.RemoteAddr().String())
-	s.emitNewConnectionEvent(conn)
 	defer conn.Close()
-	defer func() { s.emitDisconnectionEvent(conn) }()
+	defer func() { s.emitDisconnectionEvent(conn, s.connections[conn.RemoteAddr().String()]) }()
 
 	for {
 		reader := bufio.NewReader(conn)
 		tp := textproto.NewReader(reader)
 
 		data, err := tp.ReadLine()
+		s.processNewConnection(conn, data)
 
 		if err != nil {
 			fmt.Println("processConnection error", err)
@@ -248,7 +260,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		json.Unmarshal(args[index], &message)
 		index++
 
-		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.SendMessage(serverContex, message)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
@@ -265,7 +277,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		json.Unmarshal(args[index], &userID)
 		index++
 
-		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.GetUserChats(serverContex, userID)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
@@ -282,7 +294,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		json.Unmarshal(args[index], &chatID)
 		index++
 
-		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.GetChatMessages(serverContex, chatID)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
@@ -303,7 +315,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		json.Unmarshal(args[index], &callerID)
 		index++
 
-		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
 		response := s.impl.CallTo(serverContex, chatID, callerID)
 		bytes, _ := json.Marshal(response)
 		messageToSend := recievedMessage
@@ -320,7 +332,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		json.Unmarshal(args[index], &data)
 		index++
 
-		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
 		s.impl.SendCallData(serverContex, data)
 	case "ChatService.HandleCallFrom":
 		args := make([]json.RawMessage, 0)
@@ -331,7 +343,7 @@ func (s *ChatServiceServer) handleCommand(payload string, conn net.Conn) {
 		json.Unmarshal(args[index], &status)
 		index++
 
-		serverContex := ServerContext{ConnectionAddress: conn.RemoteAddr().String()}
+		serverContex := ServerContext{ConnectionID: recievedMessage.ConnectionID, ConnectionAddress: conn.RemoteAddr().String()}
 		s.impl.HandleCallFrom(serverContex, status)
 	}
 }
@@ -345,16 +357,16 @@ func (s *ChatServiceServer) SubscribeToDisconnectionEvent(observer disconnection
 	s.disconectionObservers = append(s.disconectionObservers, observer)
 }
 
-func (s *ChatServiceServer) emitNewConnectionEvent(conn net.Conn) {
+func (s *ChatServiceServer) emitNewConnectionEvent(conn net.Conn, connectionID string) {
 	notificator := &ChatServiceNotificator{conn: conn}
 
 	for _, callback := range s.notifierObservers {
-		callback(conn.RemoteAddr().String(), notificator)
+		callback(connectionID, notificator)
 	}
 }
 
-func (s *ChatServiceServer) emitDisconnectionEvent(conn net.Conn) {
+func (s *ChatServiceServer) emitDisconnectionEvent(conn net.Conn, connectionID string) {
 	for _, callback := range s.disconectionObservers {
-		callback(conn.RemoteAddr().String())
+		callback(connectionID)
 	}
 }

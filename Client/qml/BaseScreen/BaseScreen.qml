@@ -77,7 +77,7 @@ Rectangle {
             CalendarModel {
                 height: root.height
                 width: chats.width - sidebar.width
-                model: [1,2,3,4,5,6,7]
+                model: root.model.calendarModel //[1,2,3,4,5,6,7]
                 // visible: row.isNotificationsOpened
                 Component.onCompleted: {
                     console.log("Create CalendarModel")//, root.model.notificationListModel === undefined, _notification.model.name)

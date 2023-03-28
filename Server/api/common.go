@@ -1,11 +1,51 @@
 package api
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
+	"net"
+	"net/textproto"
 )
 
+type BaseServer struct {
+	ln net.Listener
+}
+
+func (b *BaseServer) Serve() {
+	b.ln, _ = net.Listen("tcp", "localhost:1230")
+	fmt.Println("Start base service server")
+	for {
+		conn, _ := b.ln.Accept()
+		go func() {
+			defer conn.Close()
+
+			reader := bufio.NewReader(conn)
+			tp := textproto.NewReader(reader)
+
+			data, err := tp.ReadLine()
+
+			if err != nil {
+				fmt.Println("processConnection error", err)
+				return
+			}
+
+			fmt.Println("processConnection message", data)
+			// gen id
+			connectionID := "1"
+			fmt.Println("Generated connection id", connectionID)
+			conn.Write([]byte(connectionID))
+		}()
+	}
+}
+
+func (b *BaseServer) Stop() {
+	b.ln.Close()
+}
+
 type ServerContext struct {
+	ConnectionID      string
 	ConnectionAddress string
 }
 type disconnectionCallback = func(string)
@@ -20,10 +60,11 @@ const (
 
 // structs
 type MessageData struct {
-	Endpoint string          `json:"endpoint"`
-	Topic    string          `json:"topic"`
-	Payload  json.RawMessage `json:"payload"`
-	Type     MessageType     `json:"type"`
+	ConnectionID string          `json:"connectionid"`
+	Endpoint     string          `json:"endpoint"`
+	Topic        string          `json:"topic"`
+	Payload      json.RawMessage `json:"payload"`
+	Type         MessageType     `json:"type"`
 }
 
 type ServerImpl interface {
@@ -37,7 +78,9 @@ type Server struct {
 }
 
 func NewServer() *Server {
-	return &Server{servers: make([]ServerImpl, 0)}
+	s := &Server{servers: make([]ServerImpl, 0)}
+	s.AddServer(&BaseServer{})
+	return s
 }
 
 func (s *Server) AddServer(server ServerImpl) {

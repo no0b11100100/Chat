@@ -32,7 +32,6 @@ def cpp_type(self: object) -> object:
     elif self.type.is_void:
         return "void"
     elif self.type.is_list:
-        print("###", self.type.nested, cpp_type(self.type.nested))
         return 'std::vector<{0}>'.format(cpp_type(self.type.nested))
     elif self.type.is_map:
         return 'map<std::string,{0}>'.format(cpp_type(self.type.nested))

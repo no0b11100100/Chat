@@ -32,6 +32,7 @@ set(PROJECT_SOURCES
 
         services/UserService.hpp
         services/ChatService.hpp
+        services/CalendarService.hpp
         services/Client.hpp
 
         src/Models/SignInUpModel.hpp
@@ -44,6 +45,9 @@ set(PROJECT_SOURCES
 
         src/Models/BaseScreen/NotificationModel/NotificationModel.hpp
         src/Models/BaseScreen/NotificationModel/Notification.hpp
+
+        src/Models/BaseScreen/CalendarModel/CalendarModel.hpp
+        src/Models/BaseScreen/CalendarModel/Meeting.hpp
 
         src/App.hpp
         Logger/Logger.hpp
@@ -76,6 +80,7 @@ set(PROJECT_SOURCES
         communication/common.hpp
         communication/defaultClient.hpp
         communication/user_client.hpp
+        communication/calendar_client.hpp
 
         src/MultiMedia/Audio/audio.h
         src/MultiMedia/multimedia.hpp
