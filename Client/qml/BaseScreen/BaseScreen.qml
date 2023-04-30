@@ -4,6 +4,7 @@ import "ChatListModel"
 import "ChatModel"
 import "NotificationModel"
 import "CalendarModel"
+import "TODOList"
 
 Rectangle {
     id: root
@@ -34,6 +35,11 @@ Rectangle {
                 {
                     pageLoader.sourceComponent = calendar
                     pageLoader.width = root.width - sidebar.width
+                }
+                if(id === "todoIDButton")
+                {
+                    pageLoader.sourceComponent = todoList
+                    pageLoader.width = root.width
                 }
             }
         }
@@ -81,6 +87,18 @@ Rectangle {
                 // visible: row.isNotificationsOpened
                 Component.onCompleted: {
                     console.log("Create CalendarModel")//, root.model.notificationListModel === undefined, _notification.model.name)
+                }
+            }
+        }
+
+        Component {
+            id: todoList
+            TodoListModel {
+                height: root.height
+                width: root.width
+                model: {"lists": [{"name": "all"}], "tasks": [1, 2]}// root.model.todoListModel
+                Component.onCompleted: {
+                    console.log("Create TodoListModel")
                 }
             }
         }

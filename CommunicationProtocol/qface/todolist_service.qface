@@ -1,0 +1,12 @@
+module todolist 1.0;
+
+import types 1.0;
+
+struct Task {
+    string description
+}
+
+interface TodoListService {
+    ResponseStatus addTask(string listID, Task task);
+    list<Task> getTasks(string listID);
+}

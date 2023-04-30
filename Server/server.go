@@ -40,6 +40,10 @@ func (s *Server) initServices() {
 	calendarServiceImpl := services.NewCalendarService(serviceConnection, s.database)
 	calendarService.SetServerImpl(calendarServiceImpl)
 
+	todoListService := api.NewTodoListServiceServer("localhost:1237")
+	todoListServiceImpl := services.NewTodoListService()
+	todoListService.SetServerImpl(todoListServiceImpl)
+
 	chatService.SubscribeToNewConnectionEvent(chatServiceImpl.HandleNewConnection)
 	calendarService.SubscribeToNewConnectionEvent(calendarServiceImpl.HandleNewConnection)
 	userService.SubscribeToDisconnectionEvent(userServiceImpl.HandleDisconnect)
@@ -47,6 +51,7 @@ func (s *Server) initServices() {
 	s.server.AddServer(userService)
 	s.server.AddServer(chatService)
 	s.server.AddServer(calendarService)
+	s.server.AddServer(todoListService)
 }
 
 func (s *Server) Serve() {

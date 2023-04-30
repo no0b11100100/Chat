@@ -23,6 +23,10 @@
         <file>BaseScreen/CalendarModel/Time.qml</file>
         <file>BaseScreen/CalendarModel/NewMeeting.qml</file>
 
+        <file>BaseScreen/TODOList/TodoListModel.qml</file>
+        <file>BaseScreen/TODOList/Task.qml</file>
+        <file>BaseScreen/TODOList/Lists.qml</file>
+
         <file>BaseScreen/ChatModel/Message/SimpleMessage.qml</file>
 
         <file>BaseScreen/ChatListModel/ChatListModel.qml</file>

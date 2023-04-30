@@ -33,6 +33,7 @@ set(PROJECT_SOURCES
         services/UserService.hpp
         services/ChatService.hpp
         services/CalendarService.hpp
+        services/TodoListService.hpp
         services/Client.hpp
 
         src/Models/SignInUpModel.hpp
@@ -48,6 +49,10 @@ set(PROJECT_SOURCES
 
         src/Models/BaseScreen/CalendarModel/CalendarModel.hpp
         src/Models/BaseScreen/CalendarModel/Meeting.hpp
+
+        src/Models/BaseScreen/TodoListModel/TodoListModel.hpp
+        src/Models/BaseScreen/TodoListModel/ListsModel.hpp
+        src/Models/BaseScreen/TodoListModel/TasksModel.hpp
 
         src/App.hpp
         Logger/Logger.hpp
@@ -81,6 +86,7 @@ set(PROJECT_SOURCES
         communication/defaultClient.hpp
         communication/user_client.hpp
         communication/calendar_client.hpp
+        communication/todolist_client.hpp
 
         src/MultiMedia/Audio/audio.h
         src/MultiMedia/multimedia.hpp

@@ -4,6 +4,7 @@
 #include "ChatListModel.hpp"
 #include "NotificationModel/NotificationModel.hpp"
 #include "CalendarModel/CalendarModel.hpp"
+#include "TodoListModel/TodoListModel.hpp"
 #include "../../../services/Client.hpp"
 
 #include <chrono>
@@ -29,6 +30,7 @@ class BaseScreen : public QObject
     Q_PROPERTY(QObject* chatListModel READ chatList CONSTANT)
     Q_PROPERTY(QObject* notificationListModel READ notificationListModel CONSTANT)
     Q_PROPERTY(QObject* calendarModel READ calendarModel CONSTANT)
+    Q_PROPERTY(QObject* todoListModel READ todoListModel CONSTANT)
     Q_PROPERTY(QString name READ name CONSTANT)
 public:
     BaseScreen(Client* client, QObject* parent = nullptr)
@@ -37,6 +39,7 @@ public:
           m_chatList{new ChatListModel(parent)},
           m_notificationModel{new NotificationModel(parent)},
           m_calendarModel{new CalendarModel(client->calendarService(), parent)},
+          m_todoListModel{new TodoListModel(client->todoListService(), parent)},
           m_client{client}
     {
         QObject::connect(m_chatList.get(), &ChatListModel::chatSelected, this, &BaseScreen::setChat);
@@ -49,6 +52,7 @@ public:
     QObject* chatList() { return m_chatList.get(); }
     QObject* notificationListModel() { return m_notificationModel.get(); }
     QObject* calendarModel() { return m_calendarModel.get(); }
+    QObject* todoListModel() { return m_todoListModel.get(); }
 
     QString name() const { return "BaseScreen"; }
 
@@ -97,5 +101,6 @@ private:
     std::unique_ptr<ChatListModel> m_chatList;
     std::unique_ptr<NotificationModel> m_notificationModel;
     std::unique_ptr<CalendarModel> m_calendarModel;
+    std::unique_ptr<TodoListModel> m_todoListModel;
     Client* m_client;
 };
