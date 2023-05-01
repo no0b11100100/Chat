@@ -37,12 +37,14 @@ set(PROJECT_SOURCES
         services/Client.hpp
 
         src/Models/SignInUpModel.hpp
-        src/Models/BaseScreen/ChatModel.hpp
         src/Models/BaseScreen/BaseScreen.hpp
-        src/Models/BaseScreen/ChatListModel.hpp
-        src/Models/BaseScreen/Chat.hpp
-        src/Models/BaseScreen/Header.hpp
-        src/Models/BaseScreen/Message/SimpleMessage.hpp
+
+        src/Models/BaseScreen/ChatModel/ChatModel.hpp
+        src/Models/BaseScreen/ChatModel/Header.hpp
+        src/Models/BaseScreen/ChatModel/Message/SimpleMessage.hpp
+
+        src/Models/BaseScreen/ChatListModel/ChatListModel.hpp
+        src/Models/BaseScreen/ChatListModel/Chat.hpp
 
         src/Models/BaseScreen/NotificationModel/NotificationModel.hpp
         src/Models/BaseScreen/NotificationModel/Notification.hpp

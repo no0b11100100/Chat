@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -16,21 +17,6 @@ import (
 	interfaces "Chat/Server/interfaces"
 	log "Chat/Server/logger"
 )
-
-// import (
-// 	api "Chat/Server/api"
-// 	interfaces "Chat/Server/interfaces"
-// 	log "Chat/Server/logger"
-// 	"context"
-// 	"fmt"
-// 	"sync"
-// 	"time"
-
-// 	"github.com/google/uuid"
-// 	"go.mongodb.org/mongo-driver/bson"
-// 	"go.mongodb.org/mongo-driver/mongo"
-// 	"go.mongodb.org/mongo-driver/mongo/options"
-// )
 
 // //https://www.mongodb.com/blog/post/mongodb-go-driver-tutorial
 
@@ -52,21 +38,7 @@ type Database interface {
 	interfaces.ChatServiceDatabase
 	Connect()
 	Close()
-	// AddUserToChat(userID string, chatID string)
 }
-
-// func (db *DB) createTestChat() {
-// 	var chat ChatInfo
-// 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-// 	err := db.tables["Chats"].FindOne(ctx, bson.M{"chatid": "-1"}).Decode(&chat)
-// 	// if err != nil {
-// 	// 	if err == mongo.ErrNoDocuments {
-// 	_, err = db.tables["Chats"].InsertOne(ctx, ChatInfo{Messages: []api.Message{{MessageJSON: string([]byte(`{"message":"test message"}`))}},
-// 		ChatID: "-1", Title: "Test chat", LastMessage: "test message", Participants: []string{}})
-// 	if err != nil {
-// 		log.Error.Println("createTestChat error:", err)
-// 	}
-// }
 
 func (db *DB) Connect() {
 	fmt.Println("Connect database")
@@ -96,13 +68,11 @@ func (db *DB) Connect() {
 	db.tables["Users"] = users
 	db.tables["Chats"] = chats
 
-	// db.createTestChat() //Just for test
-
 	// ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	// _, _ = db.tables["Chats"].InsertOne(ctx, api.Chat{
 	// 	Messages: []api.Message{
 	// 		{
-	// 			MessageJSON: string([]byte(`{"message":"test message"}`)),
+	// 			MessageJSON: []byte(`{"text":"test message"}`),
 	// 		},
 	// 	},
 	// 	ChatID:       "-1",
@@ -280,10 +250,17 @@ func (db *DB) AddMessage(msg api.Message) error {
 		return err
 	}
 
+	text := struct {
+		Text string `json:"text"`
+	}{}
+
+	json.Unmarshal(msg.MessageJSON, &text)
+
 	chat.Messages = append(chat.Messages, msg)
+	chat.LastMessage = text.Text
 
 	filter := bson.D{{chatTagger.ChatID, chatID}}
-	update := bson.D{{"$set", bson.D{{chatTagger.Messages, chat.Messages}}}}
+	update := bson.D{{"$set", bson.D{{chatTagger.Messages, chat.Messages}, {chatTagger.LastMessage, chat.LastMessage}}}}
 	_, err = db.tables["Chats"].UpdateOne(ctx, filter, update)
 	if err != nil {
 		log.Warning.Println("DB error:", err)
