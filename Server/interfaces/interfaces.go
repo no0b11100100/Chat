@@ -14,5 +14,6 @@ type UserServiceDatabase interface {
 type ChatServiceDatabase interface {
 	GetUserChats(string) []api.Chat
 	GetMessages(string) []api.Message
+	AddMessage(msg api.Message) error
 	// GetChatParticipants(string) []string
 }

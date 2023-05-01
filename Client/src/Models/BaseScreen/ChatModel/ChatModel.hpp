@@ -7,7 +7,7 @@
 
 #include "Message/SimpleMessage.hpp"
 #include "Header.hpp"
-#include "../../../services/ChatService.hpp"
+#include "../../../../services/ChatService.hpp"
 
 #include "src/MultiMedia/multimedia.hpp"
 
@@ -34,7 +34,10 @@ public:
         m_currentChatID{""},
         m_multimedia{new Multimedia()},
         m_client{client}
-    {}
+    {
+        m_client.messageUpdate([this](chat::Message msg){emit receiveMessage(msg);});
+        QObject::connect(this, &ChatModel::receiveMessage, this, &ChatModel::handleMessageNotification);
+    }
 
     int rowCount(const QModelIndex& parent) const override
     {
@@ -50,7 +53,46 @@ public:
         return QVariant::fromValue( (m_messages.at(index.row()).get()) );
     }
 
-    void SetHeader(const Header& header)
+    Q_INVOKABLE void sendMessage(QString message)
+    {
+        chat::TextMessage message_json;
+        message_json.Text = message.toStdString();
+        qDebug() << "Before SendMessage";
+        m_client.sendMessage(m_currentChatID.toStdString(), m_userID, message_json.toJson());
+
+        emit beginResetModel();
+        m_messages.emplace_back(new SimpleMessage(message, true));
+        emit endResetModel();
+        emit sendingMessage(m_currentChatID, message);
+    }
+
+    void SetUserID(const std::string& userID) { m_userID = userID; }
+
+public slots:
+    void setChat(const Header& header, QString chatID)
+    {
+        saveSelectedChatID(chatID);
+        setHeader(header);
+        auto messages = m_client.getChatMessages(chatID.toStdString());//, "", chat::Direction::Forward);
+        setMessages(messages);
+    }
+
+signals:
+    void chatSelectedChanged();
+    void sendingMessage(QString, QString);
+    void sendAudioStream(QByteArray);
+    void receiveMessage(chat::Message);
+
+private:
+    std::vector<std::unique_ptr<QObject>> m_messages;
+    std::unique_ptr<Header> m_header;
+    QString m_currentChatID;
+    std::unique_ptr<Multimedia> m_multimedia;
+    ChatService& m_client;
+    std::string m_userID;
+
+
+    void setHeader(const Header& header)
     {
         m_header->SetTitle(header.title());
         m_header->SetCallAction([&]()
@@ -77,14 +119,14 @@ public:
         }); //TODO
     }
 
-    void SaveSelectedChatID(QString chatID)
+    void saveSelectedChatID(QString chatID)
     {
         qDebug() << "Select chat" << chatID;
         m_currentChatID = chatID;
         emit chatSelectedChanged();
     }
 
-    void SetMessages(const std::vector<chat::Message>& messages)
+    void setMessages(const std::vector<chat::Message>& messages)
     {
         emit beginResetModel();
         m_messages.clear();
@@ -93,21 +135,14 @@ public:
             json s = message.MessageJSON;
             chat::TextMessage textMessage;
             textMessage = s;
-            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), false));
+            bool isAuth = message.SenderID == m_userID;
+            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), isAuth));
         }
 
         emit endResetModel();
     }
 
-    Q_INVOKABLE void sendMessage(QString message)
-    {
-        emit beginResetModel();
-        m_messages.emplace_back(new SimpleMessage(message, true));
-        emit endResetModel();
-        emit sendingMessage(m_currentChatID, message);
-    }
-
-    void AddMessage(chat::Message message)
+    void addMessage(chat::Message message)
     {
         if(m_currentChatID != "" && QString::fromStdString(message.ChatID) == m_currentChatID)
         {
@@ -124,15 +159,14 @@ public:
         }
     }
 
-signals:
-    void chatSelectedChanged();
-    void sendingMessage(QString, QString);
-    void sendAudioStream(QByteArray);
+    void handleMessageNotification(chat::Message message)
+    {
+        qDebug() << "handleMessage";
+        addMessage(message);
+        json js = message.MessageJSON;
+        chat::TextMessage textMessage;
+        textMessage = js;
+        emit sendingMessage(QString::fromStdString(message.ChatID), QString::fromStdString(textMessage.Text));
+    }
 
-private:
-    std::vector<std::unique_ptr<QObject>> m_messages;
-    std::unique_ptr<Header> m_header;
-    QString m_currentChatID;
-    std::unique_ptr<Multimedia> m_multimedia;
-    ChatService& m_client;
 };

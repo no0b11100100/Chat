@@ -6,8 +6,8 @@
 #include <memory>
 
 #include "Chat.hpp"
-#include "Header.hpp"
-#include "../../../services/ChatService.hpp"
+#include "../ChatModel/Header.hpp"
+#include "../../../../services/ChatService.hpp"
 
 #include <QDebug>
 
@@ -19,8 +19,9 @@ public:
 
     QString name() const { return "ChatListModel"; }
 
-    ChatListModel(QObject* parent = nullptr)
-        : QAbstractListModel{parent}
+    ChatListModel(ChatService& client, QObject* parent = nullptr)
+        : QAbstractListModel{parent},
+        m_client{client}
     {}
 
     int rowCount(const QModelIndex& parent) const override
@@ -45,15 +46,17 @@ public:
         emit chatSelected(header, chatID);
     }
 
-    void SetChats(const std::vector<chat::Chat>& chats)
+    void SetChats(std::string userID)
     {
+        auto chats = m_client.getUserChats(userID);
         for(const auto& chat : chats)
         {
             m_chats.emplace_back(std::make_shared<ChatInformation>(QString::fromStdString(chat.ChatID), QString::fromStdString(chat.Title), QString::fromStdString(chat.LastMessage)));
         }
     }
 
-    void SetLastMessage(QString chatID, QString message)
+public slots:
+    void updateLastMessage(QString chatID, QString message)
     {
         auto chat = findChatByID(chatID);
         chat->UpdateLastMessage(message);
@@ -64,6 +67,7 @@ signals:
 
 private:
     std::vector<std::shared_ptr<ChatInformation>> m_chats;
+    ChatService& m_client;
 
     std::shared_ptr<ChatInformation> findChatByID(QString id)
     {
