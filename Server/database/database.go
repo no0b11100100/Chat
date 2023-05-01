@@ -265,3 +265,30 @@ func (db *DB) GetMessages(chatID string) []api.Message {
 
 	return chat.Messages
 }
+
+func (db *DB) AddMessage(msg api.Message) error {
+	chatID := msg.ChatID
+
+	fmt.Println("AddMessage", chatID)
+	var chat api.Chat
+	chatTagger := api.ChatTags()
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err := db.tables["Chats"].FindOne(ctx, bson.M{chatTagger.ChatID: chatID}).Decode(&chat)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+		return err
+	}
+
+	chat.Messages = append(chat.Messages, msg)
+
+	filter := bson.D{{chatTagger.ChatID, chatID}}
+	update := bson.D{{"$set", bson.D{{chatTagger.Messages, chat.Messages}}}}
+	_, err = db.tables["Chats"].UpdateOne(ctx, filter, update)
+	if err != nil {
+		log.Warning.Println("DB error:", err)
+		return err
+	}
+
+	return nil
+}
