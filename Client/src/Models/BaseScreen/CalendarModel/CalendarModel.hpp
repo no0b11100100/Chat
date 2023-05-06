@@ -57,6 +57,19 @@ public:
         return QVariant();
     }
 
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
+    {
+        static int day = 1; //TODO: use real date info
+        qDebug() << section << orientation;
+        if(orientation == Qt::Orientation::Horizontal)
+            return QString("%1\n%2").arg(day++).arg("May");
+        if(orientation == Qt::Orientation::Vertical)
+        {
+            return QString("%1:%2").arg(section / 2).arg(section % 2 == 0 ? 0 : 30);
+        }
+        return QVariant();
+    }
+
     QHash<int, QByteArray> roleNames() const override
     {
         return {{Qt::DisplayRole, "display"}};
