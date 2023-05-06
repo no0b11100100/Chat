@@ -6,6 +6,7 @@ struct Meeting {
     string title;
     string startTime;
     string endTime;
+    string date;
     list<string> participants;
 }
 
