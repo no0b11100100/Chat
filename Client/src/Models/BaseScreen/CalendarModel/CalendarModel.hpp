@@ -59,10 +59,12 @@ public:
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
     {
-        static int day = 1; //TODO: use real date info
         qDebug() << section << orientation;
         if(orientation == Qt::Orientation::Horizontal)
-            return QString("%1\n%2").arg(day++).arg("May");
+        {
+            QString data = getHeaderDataBySection(section);
+            return data;
+        }
         if(orientation == Qt::Orientation::Vertical)
         {
             return QString("%1:%2").arg(section / 2).arg(section % 2 == 0 ? 0 : 30);
@@ -87,7 +89,7 @@ public:
         m.EndTime = endTime.toStdString();
         m.Participants = v;
         m.Date = QDate::currentDate().toString("dd.MM.yyyy").toStdString();
-        // m_client.CreateMeeting(m);
+        m_client.CreateMeeting(m);
         handleMeetingNotification(m);
     }
 
@@ -111,5 +113,40 @@ void handleMeetingNotification(calendar::Meeting meeting)
 private:
     CalendarService& m_client;
     std::vector<std::vector<std::unique_ptr<Meeting>>> m_meetings;
+
+    QString getHeaderDataBySection(int section) const
+    {
+        auto currentDate = QDate::currentDate();
+        int currentDay = currentDate.day();
+        int currentMonth = currentDate.month();
+        int positionInWeek = currentDate.dayOfWeek()-1;
+        int daysInMonth = currentDate.daysInMonth();
+
+        qDebug() << currentDate;
+
+        std::array<QString, 12> months = {"January","February","March","April","May","June","July","August","September","October","November","December"};
+        std::array<QString, 7> days = {"Monday", "Tuesaday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
+        int day = 1;
+        if(currentDay == 1 && positionInWeek != 0 && positionInWeek > section)
+        {
+            QDate prevMonth = QDate(currentDate.year(), currentMonth-1, 1);
+            day = prevMonth.daysInMonth() - positionInWeek + 1 + section;
+            currentMonth = prevMonth.month();
+        }
+        else if(positionInWeek < section && currentDay + section > daysInMonth+1) // +1 to avoid skip the last day of month
+        {
+            QDate nextMonth = QDate(currentDate.year(), currentMonth+1, (currentDay + section - positionInWeek) - daysInMonth);
+            currentMonth = nextMonth.month();
+            day = nextMonth.day();
+        }
+        else
+        {
+            day = currentDay - positionInWeek + section;
+        }
+
+        return QString("%1 %2\n%3").arg(day).arg(months.at(currentMonth-1)).arg(days.at(section));
+
+    }
 
 };

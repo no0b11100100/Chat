@@ -33,7 +33,6 @@ Rectangle {
         }
     }
 
-    // Column {
     Button{
         id: newMeetingButton
         anchors.bottom: horizontalHeader.top
@@ -100,6 +99,5 @@ Rectangle {
             }
         }
     }
-    // }
 
- }
+}
