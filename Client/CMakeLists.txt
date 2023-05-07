@@ -55,6 +55,8 @@ set(PROJECT_SOURCES
         src/Models/BaseScreen/TodoListModel/TodoListModel.hpp
         src/Models/BaseScreen/TodoListModel/ListsModel.hpp
         src/Models/BaseScreen/TodoListModel/TasksModel.hpp
+        src/Models/BaseScreen/TodoListModel/List.hpp
+        src/Models/BaseScreen/TodoListModel/Task.hpp
 
         src/App.hpp
         Logger/Logger.hpp

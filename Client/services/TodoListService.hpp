@@ -18,4 +18,8 @@ public:
     std::vector<todolist::Task> GetTasks(std::string listID) {
         return m_stub->GetTasks(listID);
     }
+
+    std::vector<todolist::List> GetLists(std::string userID) {
+        return m_stub->GetLists(userID);
+    }
 };

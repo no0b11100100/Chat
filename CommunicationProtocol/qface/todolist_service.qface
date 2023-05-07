@@ -6,7 +6,13 @@ struct Task {
     string description
 }
 
+struct List {
+    string id;
+    string title;
+}
+
 interface TodoListService {
     ResponseStatus addTask(string listID, Task task);
     list<Task> getTasks(string listID);
+    list<List> getLists(string userID);
 }
