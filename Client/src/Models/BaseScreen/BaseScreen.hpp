@@ -39,8 +39,7 @@ public:
           m_chatList{new ChatListModel(client->chatService(), parent)},
           m_notificationModel{new NotificationModel(parent)},
           m_calendarModel{new CalendarModel(client->calendarService(), parent)},
-          m_todoListModel{new TodoListModel(client->todoListService(), parent)},
-          m_client{client}
+          m_todoListModel{new TodoListModel(client->todoListService(), parent)}
     {
         QObject::connect(m_chatList.get(), &ChatListModel::chatSelected, m_chatModel.get(), &ChatModel::setChat);
         QObject::connect(m_chatModel.get(), &ChatModel::sendingMessage, m_chatList.get(), &ChatListModel::updateLastMessage);
@@ -60,6 +59,7 @@ public:
         qDebug() << "SetUser" << QString::fromStdString(userData.UserID);
         m_chatList->SetChats(userData.UserID);
         m_chatModel->SetUserID(userData.UserID);
+        m_todoListModel->SetLists(userData.UserID);
     }
 
 private:
@@ -68,5 +68,4 @@ private:
     std::unique_ptr<NotificationModel> m_notificationModel;
     std::unique_ptr<CalendarModel> m_calendarModel;
     std::unique_ptr<TodoListModel> m_todoListModel;
-    Client* m_client;
 };

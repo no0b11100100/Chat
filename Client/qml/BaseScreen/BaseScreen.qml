@@ -96,13 +96,12 @@ Rectangle {
             TodoListModel {
                 height: root.height
                 width: root.width
-                model: {"lists": [{"name": "all"}], "tasks": [1, 2]}// root.model.todoListModel
+                model: root.model.todoListModel // {"lists": [{"name": "all"}], "tasks": [1, 2]}
                 Component.onCompleted: {
                     console.log("Create TodoListModel")
                 }
             }
         }
-
 
         ChatModel {
             id: chatMessages

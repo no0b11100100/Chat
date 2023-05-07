@@ -15,3 +15,7 @@ func (todo *TodoListService) AddTask(api.ServerContext, string, api.Task) api.Re
 func (todo *TodoListService) GetTasks(api.ServerContext, string) []api.Task {
 	return make([]api.Task, 0)
 }
+
+func (todo *TodoListService) GetLists(api.ServerContext, string) []api.List {
+	return make([]api.List, 0)
+}
