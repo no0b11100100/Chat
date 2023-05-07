@@ -13,12 +13,14 @@ struct Meeting : public Types::ClassParser {
   std::string Title;
   std::string StartTime;
   std::string EndTime;
+  std::string Date;
   std::vector<std::string> Participants;
   virtual json toJson() const override {
     json js({});
     js["title"] = Title;
     js["starttime"] = StartTime;
     js["endtime"] = EndTime;
+    js["date"] = Date;
     js["participants"] = Participants;
     return js;
   }
@@ -36,6 +38,10 @@ struct Meeting : public Types::ClassParser {
       EndTime = std::string();
     else
       EndTime = static_cast<std::string>(js["endtime"]);
+    if (js.isNull())
+      Date = std::string();
+    else
+      Date = static_cast<std::string>(js["date"]);
     if (js.isNull())
       Participants = std::vector<std::string>();
     else
