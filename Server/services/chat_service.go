@@ -24,6 +24,8 @@ func (chat *ChatService) SendMessage(ctx api.ServerContext, message api.Message)
 		//TODO: check chatID before notify
 		notifier.RecieveMessage(message)
 	}
+
+	chat.database.AddMessage(message)
 	return api.OK
 }
 
