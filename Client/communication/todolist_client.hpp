@@ -59,9 +59,9 @@ public:
     _message.Endpoint = "TodoListService.AddTask";
     return Request<ResponseStatus>(_message);
   }
-  std::vector<Task> GetTasks(std::string listID) {
+  std::vector<Task> GetTasks(std::string userID, std::string listID) {
     Common::MessageData _message;
-    _message.Payload = json::array({listID});
+    _message.Payload = json::array({userID, listID});
     _message.Endpoint = "TodoListService.GetTasks";
     return Request<std::vector<Task>>(_message);
   }
@@ -70,6 +70,12 @@ public:
     _message.Payload = json::array({userID});
     _message.Endpoint = "TodoListService.GetLists";
     return Request<std::vector<List>>(_message);
+  }
+  ResponseStatus AddList(std::string userID, std::string listName) {
+    Common::MessageData _message;
+    _message.Payload = json::array({userID, listName});
+    _message.Endpoint = "TodoListService.AddList";
+    return Request<ResponseStatus>(_message);
   }
 
 private:

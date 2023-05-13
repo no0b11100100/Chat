@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QAbstractListModel>
+#include <QDebug>
 
 #include <vector>
 #include <memory>
@@ -32,11 +33,32 @@ public:
         return QVariant::fromValue(m_tasks.at(index.row()).get());
     }
 
+    Q_INVOKABLE void addTask(QString title)
+    {
+        qDebug() << "Add task" << title;
+        emit beginResetModel();
+        m_tasks.emplace_back(std::make_unique<Task>(title));
+        emit endResetModel();
+        todolist::Task task;
+        task.Description = title.toStdString();
+        emit addedTask(task);
+    }
+
+signals:
+    void addedTask(todolist::Task);
+
 public slots:
-    void setListTasks(QString listID)
+    void setListTasks(QString userID, QString listID)
     {
         qDebug() << "Request tasks for list" << listID;
-        auto listTasks = m_client.GetTasks(listID.toStdString());
+        auto listTasks = m_client.GetTasks(userID.toStdString(), listID.toStdString());
+        m_tasks.clear();
+        emit beginResetModel();
+        for(const auto& task : listTasks)
+        {
+            m_tasks.emplace_back(std::make_unique<Task>(QString::fromStdString(task.Description)));
+        }
+        emit endResetModel();
     }
 
 private:

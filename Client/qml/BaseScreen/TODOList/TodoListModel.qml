@@ -7,36 +7,84 @@ Rectangle {
     property var model
 
     Row {
-        ListView {
-            id: lists
-            height: root.height
-            width: 100
-            model: root.model.listsModel
-            delegate: Rectangle {
-                width: 98
-                height: 30
-                radius: 2
-                border.color: "black"
-                border.width: 1
-                Text {
-                    text: display.title
-                    anchors.centerIn: parent
-                }
+        Column {
+            ListView {
+                id: lists
+                height: root.height - newListButton.height
+                width: 200
+                model: root.model.listsModel
+                delegate: Rectangle {
+                    width: parent.width
+                    height: 30
+                    radius: 2
+                    border.color: "black"
+                    border.width: 1
+                    Text {
+                        text: display.title
+                        anchors.centerIn: parent
+                    }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: { root.model.listsModel.selectList(display.id) }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: { root.model.listsModel.selectList(display.id) }
+                    }
                 }
             }
+
+            TextField {
+                id: newListButton
+                width: lists.width
+                height: 30
+                placeholderText: "Add list"
+                placeholderTextColor: "black"
+
+                Keys.onReturnPressed: {
+                    root.model.listsModel.addList(newListButton.text)
+                    newListButton.text = ""
+                }
+                Keys.onEnterPressed: {
+                    root.model.listsModel.addList(newListButton.text)
+                    newListButton.text = ""
+                }
+            }
+
         }
 
-        ListView {
-            id: tasks
-            height: root.height
-            width: root.width - lists.width
-            model: root.model.tasksModel
+        Column {
+            ListView {
+                id: tasks
+                height: root.height - newListTask.height
+                width: root.width - lists.width
+                model: root.model.tasksModel
 
-            delegate: Rectangle {}
+                delegate: Rectangle {
+                    width: parent.width - 10
+                    height: 30
+                    border.color: "black"
+                    border.width: 1
+                    radius: 5
+                    Text {
+                        text: display.title
+                    }
+                }
+            }
+
+            TextField {
+                id: newListTask
+                width: tasks.width
+                height: 30
+                placeholderText: "Add task"
+                placeholderTextColor: "black"
+
+                Keys.onReturnPressed: {
+                    root.model.tasksModel.addTask(newListTask.text)
+                    newListTask.text = ""
+                }
+                Keys.onEnterPressed: {
+                    root.model.tasksModel.addTask(newListTask.text)
+                    newListTask.text = ""
+                }
+            }
         }
     }
 }
