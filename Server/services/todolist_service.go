@@ -12,10 +12,14 @@ func (todo *TodoListService) AddTask(api.ServerContext, string, api.Task) api.Re
 	return api.OK
 }
 
-func (todo *TodoListService) GetTasks(api.ServerContext, string) []api.Task {
+func (todo *TodoListService) GetTasks(api.ServerContext, string, string) []api.Task {
 	return make([]api.Task, 0)
 }
 
 func (todo *TodoListService) GetLists(api.ServerContext, string) []api.List {
 	return make([]api.List, 0)
+}
+
+func (todo *TodoListService) AddList(api.ServerContext, string, string) api.ResponseStatus {
+	return api.OK
 }

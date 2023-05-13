@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<chat::Message>("chat::Message");
     qRegisterMetaType<calendar::Meeting>("calendar::Meeting");
     qRegisterMetaType<todolist::List>("todolist::List");
+    qRegisterMetaType<todolist::Task>("todolist::Task");
 
     // used for qml logs
     qSetMessagePattern("%{time HH:mm:ss }%{file}:%{line}: %{message}");
