@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QObject>
+#include "../../../communication/chat_client.hpp"
+#include "../utils/utils.hpp"
 
 class ChatInformation : public QObject
 {
@@ -12,7 +14,7 @@ class ChatInformation : public QObject
 
 
 public:
-    ChatInformation(const QString& id, const QString& title, const QString& lastMessage, QObject* parent = nullptr)
+    ChatInformation(const QString& id, const QString& title, const chat::LastChatMessage& lastMessage, QObject* parent = nullptr)
         : QObject{parent},
         m_title{title},
         m_id{id},
@@ -21,13 +23,12 @@ public:
 
     QString title() const { return m_title; }
     QString id() const { return m_id; }
-    QString lastMessage() const { return m_lastMessage; }
-    QString lastMessageTime() const { return m_lastMessageTime; }
+    QString lastMessage() const { return QString::fromStdString(m_lastMessage.Message); }
+    QString lastMessageTime() const { return convertTime(m_lastMessage.Date.Time); }
 
-    void UpdateLastMessage(QString message, QString time)
+    void UpdateLastMessage(chat::LastChatMessage message)
     {
         m_lastMessage = message;
-        m_lastMessageTime = time;
         emit lastMessageChanged();
     }
 
@@ -37,6 +38,5 @@ signals:
 private:
     QString m_title;
     QString m_id;
-    QString m_lastMessage;
-    QString m_lastMessageTime;
+    chat::LastChatMessage m_lastMessage;
 };

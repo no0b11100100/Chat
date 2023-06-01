@@ -14,11 +14,16 @@ struct Message {
     Timestamp date
 }
 
+struct LastChatMessage {
+    string message
+    Timestamp date
+}
+
 struct Chat {
     string chatID
     string title
     string secondLine
-    string lastMessage
+    LastChatMessage lastMessage
     int unreadedCount
     string cover
     list<string> participants

@@ -66,11 +66,33 @@ struct Message : public Types::ClassParser {
   }
 };
 
+struct LastChatMessage : public Types::ClassParser {
+  std::string Message;
+  Timestamp Date;
+  virtual json toJson() const override {
+    json js({});
+    js["message"] = Message;
+    js["date"] = Date;
+    return js;
+  }
+
+  virtual void fromJson(json js) override {
+    if (js.isNull())
+      Message = std::string();
+    else
+      Message = static_cast<std::string>(js["message"]);
+    if (js.isNull())
+      Date = Timestamp();
+    else
+      Date = static_cast<Timestamp>(js["date"]);
+  }
+};
+
 struct Chat : public Types::ClassParser {
   std::string ChatID;
   std::string Title;
   std::string SecondLine;
-  std::string LastMessage;
+  LastChatMessage LastMessage;
   int UnreadedCount;
   std::string Cover;
   std::vector<std::string> Participants;
@@ -102,9 +124,9 @@ struct Chat : public Types::ClassParser {
     else
       SecondLine = static_cast<std::string>(js["secondline"]);
     if (js.isNull())
-      LastMessage = std::string();
+      LastMessage = LastChatMessage();
     else
-      LastMessage = static_cast<std::string>(js["lastmessage"]);
+      LastMessage = static_cast<LastChatMessage>(js["lastmessage"]);
     if (js.isNull())
       UnreadedCount = int();
     else

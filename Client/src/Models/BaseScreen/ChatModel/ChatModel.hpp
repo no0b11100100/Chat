@@ -8,6 +8,7 @@
 #include "Message/SimpleMessage.hpp"
 #include "Header.hpp"
 #include "../../../../services/ChatService.hpp"
+#include "../utils/utils.hpp"
 
 #include "src/MultiMedia/multimedia.hpp"
 
@@ -69,7 +70,11 @@ public:
         emit beginResetModel();
         m_messages.emplace_back(new SimpleMessage(message, true, convertTime(timestamp.Time)));
         emit endResetModel();
-        emit sendingMessage(m_currentChatID, message, convertTime(timestamp.Time));
+        chat::LastChatMessage lastMessage;
+        lastMessage.Message = message.toStdString();
+        lastMessage.Date = timestamp;
+
+        emit sendingMessage(m_currentChatID, lastMessage);
     }
 
     void SetUserID(const std::string& userID) { m_userID = userID; }
@@ -85,7 +90,7 @@ public slots:
 
 signals:
     void chatSelectedChanged();
-    void sendingMessage(QString, QString, QString);
+    void sendingMessage(QString, chat::LastChatMessage);
     void sendAudioStream(QByteArray);
     void receiveMessage(chat::Message);
 
@@ -174,13 +179,12 @@ private:
         json js = message.MessageJSON;
         chat::TextMessage textMessage;
         textMessage = js;
-        emit sendingMessage(QString::fromStdString(message.ChatID), QString::fromStdString(textMessage.Text), convertTime(message.Date.Time));
-    }
 
-    QString convertTime(std::string time)
-    {
-        auto messageTime = QTime::fromString(QString::fromStdString(time), "hh:mm:ss.zzz");
-        return QString("%1:%2").arg(messageTime.hour()).arg(messageTime.minute());
+        chat::LastChatMessage lastMessage;
+        lastMessage.Message = textMessage.Text;
+        lastMessage.Date = message.Date;
+
+        emit sendingMessage(QString::fromStdString(message.ChatID), lastMessage);
     }
 
 };
