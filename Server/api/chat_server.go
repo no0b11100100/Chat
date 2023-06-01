@@ -19,16 +19,35 @@ const (
 )
 
 // structs
+type Timestamp struct {
+	Date string `json:"date",omitempty bson:"date"`
+	Time string `json:"time",omitempty bson:"time"`
+}
+
+type TimestampTagger struct {
+	Date string
+	Time string
+}
+
+func TimestampTags() TimestampTagger {
+	return TimestampTagger{
+		Date: "date",
+		Time: "time",
+	}
+}
+
 type Message struct {
 	MessageJSON json.RawMessage `json:"messagejson",omitempty bson:"messagejson"`
 	ChatID      string          `json:"chatid",omitempty bson:"chatid"`
 	SenderID    string          `json:"senderid",omitempty bson:"senderid"`
+	Date        Timestamp       `json:"date",omitempty bson:"date"`
 }
 
 type MessageTagger struct {
 	MessageJSON string
 	ChatID      string
 	SenderID    string
+	Date        string
 }
 
 func MessageTags() MessageTagger {
@@ -36,18 +55,36 @@ func MessageTags() MessageTagger {
 		MessageJSON: "messagejson",
 		ChatID:      "chatid",
 		SenderID:    "senderid",
+		Date:        "date",
+	}
+}
+
+type LastChatMessage struct {
+	Message string    `json:"message",omitempty bson:"message"`
+	Date    Timestamp `json:"date",omitempty bson:"date"`
+}
+
+type LastChatMessageTagger struct {
+	Message string
+	Date    string
+}
+
+func LastChatMessageTags() LastChatMessageTagger {
+	return LastChatMessageTagger{
+		Message: "message",
+		Date:    "date",
 	}
 }
 
 type Chat struct {
-	ChatID        string    `json:"chatid",omitempty bson:"chatid"`
-	Title         string    `json:"title",omitempty bson:"title"`
-	SecondLine    string    `json:"secondline",omitempty bson:"secondline"`
-	LastMessage   string    `json:"lastmessage",omitempty bson:"lastmessage"`
-	UnreadedCount int       `json:"unreadedcount",omitempty bson:"unreadedcount"`
-	Cover         string    `json:"cover",omitempty bson:"cover"`
-	Participants  []string  `json:"participants",omitempty bson:"participants"`
-	Messages      []Message `json:"messages",omitempty bson:"messages"`
+	ChatID        string          `json:"chatid",omitempty bson:"chatid"`
+	Title         string          `json:"title",omitempty bson:"title"`
+	SecondLine    string          `json:"secondline",omitempty bson:"secondline"`
+	LastMessage   LastChatMessage `json:"lastmessage",omitempty bson:"lastmessage"`
+	UnreadedCount int             `json:"unreadedcount",omitempty bson:"unreadedcount"`
+	Cover         string          `json:"cover",omitempty bson:"cover"`
+	Participants  []string        `json:"participants",omitempty bson:"participants"`
+	Messages      []Message       `json:"messages",omitempty bson:"messages"`
 }
 
 type ChatTagger struct {

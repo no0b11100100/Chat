@@ -12,9 +12,15 @@ Rectangle {
         border.width: 1
 
         Column {
-            Text {
-                text: root.model.title
-                // anchors.centerIn: parent
+            Row {
+                spacing: 40
+                Text {
+                    text: root.model.title
+                    // anchors.centerIn: parent
+                }
+                Text {
+                    text: root.model.lastMessageTime
+                }
             }
             Text {
                 text: root.model.lastMessage

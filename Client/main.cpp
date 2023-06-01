@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<App, 1>("Models", 1, 0, "Backend");
     qRegisterMetaType<UserInfo>("UserInfo");
     qRegisterMetaType<chat::Message>("chat::Message");
+    qRegisterMetaType<chat::LastChatMessage>("chat::LastChatMessage");
     qRegisterMetaType<calendar::Meeting>("calendar::Meeting");
     qRegisterMetaType<todolist::List>("todolist::List");
     qRegisterMetaType<todolist::Task>("todolist::Task");

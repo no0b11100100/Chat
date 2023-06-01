@@ -51,15 +51,15 @@ public:
         auto chats = m_client.getUserChats(userID);
         for(const auto& chat : chats)
         {
-            m_chats.emplace_back(std::make_shared<ChatInformation>(QString::fromStdString(chat.ChatID), QString::fromStdString(chat.Title), QString::fromStdString(chat.LastMessage)));
+            m_chats.emplace_back(std::make_shared<ChatInformation>(QString::fromStdString(chat.ChatID), QString::fromStdString(chat.Title), chat.LastMessage));
         }
     }
 
 public slots:
-    void updateLastMessage(QString chatID, QString message)
+    void updateLastMessage(QString chatID, chat::LastChatMessage lastMessage)
     {
         auto chat = findChatByID(chatID);
-        chat->UpdateLastMessage(message);
+        chat->UpdateLastMessage(lastMessage);
     }
 
 signals:
