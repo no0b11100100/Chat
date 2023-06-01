@@ -10,15 +10,39 @@ namespace chat {
 enum class CallStatus { Connected = 0, NotConnected = 1, Disconnected = 2 };
 
 // structs
+struct Timestamp : public Types::ClassParser {
+  std::string Date;
+  std::string Time;
+  virtual json toJson() const override {
+    json js({});
+    js["date"] = Date;
+    js["time"] = Time;
+    return js;
+  }
+
+  virtual void fromJson(json js) override {
+    if (js.isNull())
+      Date = std::string();
+    else
+      Date = static_cast<std::string>(js["date"]);
+    if (js.isNull())
+      Time = std::string();
+    else
+      Time = static_cast<std::string>(js["time"]);
+  }
+};
+
 struct Message : public Types::ClassParser {
   json MessageJSON;
   std::string ChatID;
   std::string SenderID;
+  Timestamp Date;
   virtual json toJson() const override {
     json js({});
     js["messagejson"] = MessageJSON;
     js["chatid"] = ChatID;
     js["senderid"] = SenderID;
+    js["date"] = Date;
     return js;
   }
 
@@ -35,6 +59,10 @@ struct Message : public Types::ClassParser {
       SenderID = std::string();
     else
       SenderID = static_cast<std::string>(js["senderid"]);
+    if (js.isNull())
+      Date = Timestamp();
+    else
+      Date = static_cast<Timestamp>(js["date"]);
   }
 };
 

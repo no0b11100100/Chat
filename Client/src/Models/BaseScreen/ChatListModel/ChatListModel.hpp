@@ -56,10 +56,10 @@ public:
     }
 
 public slots:
-    void updateLastMessage(QString chatID, QString message)
+    void updateLastMessage(QString chatID, QString message, QString time)
     {
         auto chat = findChatByID(chatID);
-        chat->UpdateLastMessage(message);
+        chat->UpdateLastMessage(message, time);
     }
 
 signals:

@@ -14,6 +14,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDebug>
+#include <QDate>
 
 class ChatModel : public QAbstractListModel
 {
@@ -58,12 +59,17 @@ public:
         chat::TextMessage message_json;
         message_json.Text = message.toStdString();
         qDebug() << "Before SendMessage";
-        m_client.sendMessage(m_currentChatID.toStdString(), m_userID, message_json.toJson());
+
+        chat::Timestamp timestamp;
+        timestamp.Date = QDate::currentDate().toString("dd.MM.yyyy").toStdString();
+        timestamp.Time = QTime::currentTime().toString("hh:mm:ss.zzz").toStdString();
+
+        m_client.sendMessage(m_currentChatID.toStdString(), m_userID, message_json.toJson(), timestamp);
 
         emit beginResetModel();
-        m_messages.emplace_back(new SimpleMessage(message, true));
+        m_messages.emplace_back(new SimpleMessage(message, true, convertTime(timestamp.Time)));
         emit endResetModel();
-        emit sendingMessage(m_currentChatID, message);
+        emit sendingMessage(m_currentChatID, message, convertTime(timestamp.Time));
     }
 
     void SetUserID(const std::string& userID) { m_userID = userID; }
@@ -79,7 +85,7 @@ public slots:
 
 signals:
     void chatSelectedChanged();
-    void sendingMessage(QString, QString);
+    void sendingMessage(QString, QString, QString);
     void sendAudioStream(QByteArray);
     void receiveMessage(chat::Message);
 
@@ -136,7 +142,8 @@ private:
             chat::TextMessage textMessage;
             textMessage = s;
             bool isAuth = message.SenderID == m_userID;
-            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), isAuth));
+            QString messageTime = convertTime(message.Date.Time);
+            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), isAuth, messageTime));
         }
 
         emit endResetModel();
@@ -149,8 +156,9 @@ private:
             json s = message.MessageJSON;
             chat::TextMessage textMessage;
             textMessage = s;
+            QString messageTime = convertTime(message.Date.Time);
             emit beginResetModel();
-            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), false));
+            m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), false, messageTime));
             emit endResetModel();
         }
         else
@@ -166,7 +174,13 @@ private:
         json js = message.MessageJSON;
         chat::TextMessage textMessage;
         textMessage = js;
-        emit sendingMessage(QString::fromStdString(message.ChatID), QString::fromStdString(textMessage.Text));
+        emit sendingMessage(QString::fromStdString(message.ChatID), QString::fromStdString(textMessage.Text), convertTime(message.Date.Time));
+    }
+
+    QString convertTime(std::string time)
+    {
+        auto messageTime = QTime::fromString(QString::fromStdString(time), "hh:mm:ss.zzz");
+        return QString("%1:%2").arg(messageTime.hour()).arg(messageTime.minute());
     }
 
 };
