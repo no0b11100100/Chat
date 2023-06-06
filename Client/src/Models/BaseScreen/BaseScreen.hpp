@@ -60,6 +60,7 @@ public:
         m_chatList->SetChats(userData.UserID);
         m_chatModel->SetUserID(userData.UserID);
         m_todoListModel->SetLists(userData.UserID);
+        m_calendarModel->SetCalendar(userData.UserID);
     }
 
 private:

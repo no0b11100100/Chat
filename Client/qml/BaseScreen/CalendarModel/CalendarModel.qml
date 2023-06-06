@@ -67,6 +67,7 @@ Rectangle {
 
             Rectangle {
                 width: 90
+                z: delegate.z + 10
                 height: {
                     if(display === undefined) return 0
                     const startTimeParts = display.startTime.split(":");

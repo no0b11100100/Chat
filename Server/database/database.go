@@ -18,23 +18,26 @@ import (
 // //https://www.mongodb.com/blog/post/mongodb-go-driver-tutorial
 
 type DB struct {
-	m             sync.RWMutex
-	client        *mongo.Client
-	userDatabase  *UserDatabase
-	chatsDatabase *ChatsDatabase
+	m                sync.RWMutex
+	client           *mongo.Client
+	userDatabase     *UserDatabase
+	chatsDatabase    *ChatsDatabase
+	calendarDatabase *CalendarDatabase
 }
 
 func NewDatabase() *DB {
 	return &DB{
-		m:             sync.RWMutex{},
-		userDatabase:  NewUserDatabase(),
-		chatsDatabase: NewChatsDatabase(),
+		m:                sync.RWMutex{},
+		userDatabase:     NewUserDatabase(),
+		chatsDatabase:    NewChatsDatabase(),
+		calendarDatabase: NewCalendarDatabase(),
 	}
 }
 
 type Database interface {
 	interfaces.UserServiceDatabase
 	interfaces.ChatServiceDatabase
+	interfaces.CalendarServiceDatabase
 	Connect()
 	Close()
 }
@@ -63,6 +66,7 @@ func (db *DB) Connect() {
 
 	db.userDatabase.Connect(db.client, "application")
 	db.chatsDatabase.Connect(db.client, "application")
+	db.calendarDatabase.Connect(db.client, "application")
 
 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
 	if err != nil {
@@ -93,8 +97,8 @@ func (db *DB) RegisterUser(data api.SignUp) (bool, string) {
 	return db.userDatabase.RegisterUser(data)
 }
 
-func (db *DB) AddUserToChat(userID string, chatID string) {
-	db.chatsDatabase.AddUserToChat(userID, chatID)
+func (db *DB) AddUserToChat(userID string, email string, chatID string) {
+	db.chatsDatabase.AddUserToChat(email, chatID)
 	db.userDatabase.UpdateUserChats(userID, chatID)
 }
 
@@ -119,4 +123,13 @@ func (db *DB) GetMessages(chatID string) []api.Message {
 
 func (db *DB) AddMessage(msg api.Message) error {
 	return db.chatsDatabase.AddMessage(msg)
+}
+
+func (db *DB) AddMeeting(userID string, meeting api.Meeting) error {
+	fmt.Println("AddMeeting", userID)
+	return db.calendarDatabase.AddMeeting(userID, meeting)
+}
+
+func (db *DB) GetMeetings(userID string, startDay string, endDay string) []api.Meeting {
+	return db.calendarDatabase.GetMeetings(userID, startDay, endDay)
 }

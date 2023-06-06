@@ -17,3 +17,8 @@ type ChatServiceDatabase interface {
 	AddMessage(msg api.Message) error
 	// GetChatParticipants(string) []string
 }
+
+type CalendarServiceDatabase interface {
+	AddMeeting(userID string, meeting api.Meeting) error
+	GetMeetings(userID string, startDay string, endDay string) []api.Meeting
+}

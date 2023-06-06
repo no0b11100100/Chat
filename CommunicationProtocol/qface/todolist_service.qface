@@ -17,3 +17,10 @@ interface TodoListService {
     list<List> getLists(string userID);
     ResponseStatus addList(string userID, string listName);
 }
+
+//interface TodoListService {
+//    ResponseStatus addTask(string userID, string listID, Task task);
+//    list<Task> getTasks(string userID, string listID);
+//    list<List> getLists(string userID);
+//    ResponseStatus addList(string userID, List list);
+//}

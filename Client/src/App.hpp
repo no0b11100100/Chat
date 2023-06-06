@@ -11,6 +11,7 @@
 #include "Models/SignInUpModel.hpp"
 #include "Models/BaseScreen/BaseScreen.hpp"
 #include "../services/Client.hpp"
+#include "Models/SharedData.hpp"
 
 constexpr const char* LOG_IN_MODEL = "logInModel";
 constexpr const char* BASE_SCREEN_MODEL = "baseScreenModel";
@@ -22,8 +23,7 @@ class App : public QObject {
 public:
     App(QObject* parent = nullptr)
         : QObject{parent},
-        m_currentModel{nullptr},
-        m_userID{""}
+        m_currentModel{nullptr}
     {
         initModels(parent);
         m_currentModel = m_models[LOG_IN_MODEL];
@@ -50,7 +50,7 @@ private:
         qDebug() << "signUpAction Get response from server";
         auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
-            m_userID = userID;
+            SharedData::getConnector().SaveEmailField(userID);
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 emit activateBaseScreen(UserInfo(result.Info));
@@ -63,7 +63,7 @@ private:
         auto result = m_Client.userService().signIn(data);
         auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
-            m_userID = userID;
+            SharedData::getConnector().SaveEmailField(userID);
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 emit activateBaseScreen(UserInfo(result.Info));
@@ -89,5 +89,4 @@ private:
     Client m_Client;
     std::unordered_map<std::string, std::shared_ptr<QObject>> m_models;
     std::shared_ptr<QObject> m_currentModel;
-    std::string m_userID;
 };
