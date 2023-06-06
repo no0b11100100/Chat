@@ -81,7 +81,7 @@ public:
     {
         qDebug() << "Create meeting" << name << "for" << participants << startTime << "-" << endTime;
         std::vector<std::string> v;
-        v.push_back(participants.toStdString()); // TODO: set userID
+        v.push_back(participants.toStdString()); // TODO: set userID(email)
 
         calendar::Meeting m;
         m.Title = name.toStdString();
@@ -121,10 +121,16 @@ void handleMeetingNotification(calendar::Meeting meeting)
 {
     qDebug() << "Recieve meeting" << QString::fromStdString(meeting.Title) << QString::fromStdString(meeting.StartTime) << QString::fromStdString(meeting.EndTime);
     auto date = QDate::fromString(QString::fromStdString(meeting.Date), "dd.MM.yyyy");
+
+    if(date.weekNumber() != QDate::currentDate().weekNumber())
+    {
+        qDebug() << "Receive meeting not for current week, skip update";
+        return
+    }
+
     int dayCount = date.dayOfWeek();
     qDebug() << "Meeting day" << dayCount;
     qDebug() << m_meetings[dayCount-1].size();
-    //TODO check QDate.weekNumber()
     emit beginResetModel();
     m_meetings[dayCount-1].emplace_back(std::make_unique<Meeting>(meeting));
     emit endResetModel();
