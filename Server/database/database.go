@@ -89,16 +89,16 @@ func (db *DB) IsEmailUnique(email string) bool {
 	return db.userDatabase.IsEmailUnique(email)
 }
 
-func (db *DB) ValidateUser(email, password string) (bool, string) {
+func (db *DB) ValidateUser(email, password string) bool {
 	return db.userDatabase.ValidateUser(email, password)
 }
 
-func (db *DB) RegisterUser(data api.SignUp) (bool, string) {
+func (db *DB) RegisterUser(data api.SignUp) bool {
 	return db.userDatabase.RegisterUser(data)
 }
 
-func (db *DB) AddUserToChat(userID string, email string, chatID string) {
-	db.chatsDatabase.AddUserToChat(email, chatID)
+func (db *DB) AddUserToChat(userID string, chatID string) {
+	db.chatsDatabase.AddUserToChat(userID, chatID)
 	db.userDatabase.UpdateUserChats(userID, chatID)
 }
 

@@ -56,11 +56,11 @@ public:
     void SetUser(user::UserInfo userData)
     {
         // std::this_thread::sleep_for(std::chrono::seconds(20));
-        qDebug() << "SetUser" << QString::fromStdString(userData.UserID);
-        m_chatList->SetChats(userData.UserID);
-        m_chatModel->SetUserID(userData.UserID);
-        m_todoListModel->SetLists(userData.UserID);
-        m_calendarModel->SetCalendar(userData.UserID);
+        qDebug() << "SetUser" << QString::fromStdString(userData.Email);
+        m_chatList->SetChats(userData.Email);
+        m_chatModel->SetUserID(userData.Email);
+        m_todoListModel->SetLists(userData.Email);
+        m_calendarModel->SetCalendar(userData.Email);
     }
 
 private:

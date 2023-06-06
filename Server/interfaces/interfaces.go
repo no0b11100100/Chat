@@ -6,8 +6,8 @@ import (
 
 type UserServiceDatabase interface {
 	IsEmailUnique(string) bool
-	ValidateUser(email, password string) (bool, string)
-	RegisterUser(api.SignUp) (bool, string)
+	ValidateUser(email, password string) bool
+	RegisterUser(api.SignUp) bool
 	AddUserToChat(userID string, chatID string)
 }
 

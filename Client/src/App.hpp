@@ -11,7 +11,6 @@
 #include "Models/SignInUpModel.hpp"
 #include "Models/BaseScreen/BaseScreen.hpp"
 #include "../services/Client.hpp"
-#include "Models/SharedData.hpp"
 
 constexpr const char* LOG_IN_MODEL = "logInModel";
 constexpr const char* BASE_SCREEN_MODEL = "baseScreenModel";
@@ -48,9 +47,7 @@ private:
     std::string signUpAction(user::SignUp data) {
         auto result = m_Client.userService().signUp(data);
         qDebug() << "signUpAction Get response from server";
-        auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
-            SharedData::getConnector().SaveEmailField(userID);
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 emit activateBaseScreen(UserInfo(result.Info));
@@ -61,9 +58,7 @@ private:
 
     std::string signInAction(user::SignIn data) {
         auto result = m_Client.userService().signIn(data);
-        auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
-            SharedData::getConnector().SaveEmailField(userID);
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 emit activateBaseScreen(UserInfo(result.Info));

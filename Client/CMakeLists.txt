@@ -37,7 +37,6 @@ set(PROJECT_SOURCES
         services/Client.hpp
 
         src/Models/SignInUpModel.hpp
-        src/Models/SharedData.hpp
         src/Models/BaseScreen/BaseScreen.hpp
 
         src/Models/BaseScreen/ChatModel/ChatModel.hpp
