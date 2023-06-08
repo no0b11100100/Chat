@@ -43,7 +43,7 @@ public:
             int m = index.row() % 2 == 0 ? 0 : 30;
             for(const auto& meeting : m_meetings.at(index.column()))
             {
-                auto timeParts = meeting->startTime().split(":");
+                auto timeParts = meeting->endTime().split(":");
                 int meetingH = timeParts.at(0).toInt();
                 int meetingM = timeParts.at(1).toInt();
                 if(meetingH == h && m <= meetingM)
@@ -125,7 +125,7 @@ void handleMeetingNotification(calendar::Meeting meeting)
     if(date.weekNumber() != QDate::currentDate().weekNumber())
     {
         qDebug() << "Receive meeting not for current week, skip update";
-        return
+        return;
     }
 
     int dayCount = date.dayOfWeek();
