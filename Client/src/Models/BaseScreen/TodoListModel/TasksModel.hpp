@@ -44,8 +44,14 @@ public:
         emit addedTask(task);
     }
 
+    Q_INVOKABLE void setTaskState(QString taskID, bool state) {
+        qDebug() << "changeTaskState" << taskID << state;
+        emit changeTaskState(taskID, state);
+    }
+
 signals:
     void addedTask(todolist::Task);
+    void changeTaskState(QString, bool);
 
 public slots:
     void setListTasks(QString userID, QString listID)
