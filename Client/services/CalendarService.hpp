@@ -14,8 +14,11 @@ public:
         return m_stub->CreateMeeting(meeting);
     }
 
-    std::vector<calendar::Meeting> GetMeetings(std::string userID) {
-        return m_stub->GetMeetings(userID);
+    std::vector<calendar::Meeting> GetMeetings(std::string userID, std::string startWeek, std::string endWeek) {
+        calendar::DaysRange range;
+        range.Start = startWeek;
+        range.End = endWeek;
+        return m_stub->GetMeetings(userID, range);
     }
 
     void meetingUpdate(std::function<void(calendar::Meeting)> callback)

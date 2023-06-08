@@ -58,7 +58,10 @@ func (db *ChatsDatabase) AddMessage(msg api.Message) error {
 	json.Unmarshal(msg.MessageJSON, &text)
 
 	chat.Messages = append(chat.Messages, msg)
-	chat.LastMessage = text.Text
+	chat.LastMessage = api.LastChatMessage{
+		Message: text.Text,
+		Date:    msg.Date,
+	}
 
 	filter := bson.D{{chatTagger.ChatID, chatID}}
 	update := bson.D{{"$set", bson.D{{chatTagger.Messages, chat.Messages}, {chatTagger.LastMessage, chat.LastMessage}}}}

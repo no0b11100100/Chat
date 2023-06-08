@@ -10,7 +10,6 @@ namespace user {
 
 // structs
 struct UserInfo : public Types::ClassParser {
-  std::string UserID;
   std::string Name;
   std::string NickName;
   std::string Photo;
@@ -19,7 +18,6 @@ struct UserInfo : public Types::ClassParser {
   std::string Password;
   virtual json toJson() const override {
     json js({});
-    js["userid"] = UserID;
     js["name"] = Name;
     js["nickname"] = NickName;
     js["photo"] = Photo;
@@ -30,10 +28,6 @@ struct UserInfo : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
-    if (js.isNull())
-      UserID = std::string();
-    else
-      UserID = static_cast<std::string>(js["userid"]);
     if (js.isNull())
       Name = std::string();
     else

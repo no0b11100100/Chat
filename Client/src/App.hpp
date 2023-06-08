@@ -22,8 +22,7 @@ class App : public QObject {
 public:
     App(QObject* parent = nullptr)
         : QObject{parent},
-        m_currentModel{nullptr},
-        m_userID{""}
+        m_currentModel{nullptr}
     {
         initModels(parent);
         m_currentModel = m_models[LOG_IN_MODEL];
@@ -48,9 +47,7 @@ private:
     std::string signUpAction(user::SignUp data) {
         auto result = m_Client.userService().signUp(data);
         qDebug() << "signUpAction Get response from server";
-        auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
-            m_userID = userID;
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 emit activateBaseScreen(UserInfo(result.Info));
@@ -61,9 +58,7 @@ private:
 
     std::string signInAction(user::SignIn data) {
         auto result = m_Client.userService().signIn(data);
-        auto userID = result.Info.UserID;
         if ((int)result.Status == 0) {
-            m_userID = userID;
             std::thread([this, result](){
                 std::this_thread::sleep_for(std::chrono::seconds(2));
                 emit activateBaseScreen(UserInfo(result.Info));
@@ -89,5 +84,4 @@ private:
     Client m_Client;
     std::unordered_map<std::string, std::shared_ptr<QObject>> m_models;
     std::shared_ptr<QObject> m_currentModel;
-    std::string m_userID;
 };

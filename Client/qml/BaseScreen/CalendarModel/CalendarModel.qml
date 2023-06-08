@@ -66,6 +66,7 @@ Rectangle {
             color: "green"
 
             Rectangle {
+                id: meeting
                 width: 90
                 height: {
                     if(display === undefined) return 0
@@ -85,19 +86,29 @@ Rectangle {
                     return finalHeight
                 }
                 color: "purple"
-                anchors.top: delegate.top
-                anchors.topMargin: {
+                anchors.bottom: {
+                    if(display === undefined) return undefined
+                    return delegate.bottom
+                }
+                anchors.bottomMargin: {
                     if(display === undefined) return 0
 
-                    const parts = display.startTime.split(":")
+                    const parts = display.endTime.split(":")
                     const minutes = parts[1]
                     const minuteHeight = delegate.implicitHeight / 30
                     const finalMargin = minuteHeight * Math.abs(minutes - (row % 2 === 0 ? 0 : 30))
                     console.log("Calculate margin", finalMargin)
+                    return finalMargin
                 }
                 visible: display !== undefined && display.title !== ""
+
+                Text {
+                    width: meeting.width
+                    text:  display !== undefined ? display.title : ""
+                }
             }
         }
     }
 
 }
+

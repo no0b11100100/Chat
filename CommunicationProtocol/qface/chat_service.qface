@@ -2,17 +2,28 @@ module chat 1.0;
 
 import types 1.0;
 
+struct Timestamp {
+    string date
+    string time
+}
+
 struct Message {
     json messageJSON
     string chatID
     string senderID
+    Timestamp date
+}
+
+struct LastChatMessage {
+    string message
+    Timestamp date
 }
 
 struct Chat {
     string chatID
     string title
     string secondLine
-    string lastMessage
+    LastChatMessage lastMessage
     int unreadedCount
     string cover
     list<string> participants
