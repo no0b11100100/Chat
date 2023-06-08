@@ -20,13 +20,13 @@ func NewUserService(serviceConnection *ServiceConnection, database interfaces.Us
 func (s *UserService) SignIn(ctx api.ServerContext, userData api.SignIn) api.Response {
 	log.Info.Printf("SignIn %+v\n", userData)
 	response := api.Response{Info: api.UserInfo{Chats: make([]string, 0)}}
-	status, userID := s.database.ValidateUser(userData.Email, userData.Password)
+	status := s.database.ValidateUser(userData.Email, userData.Password)
 	if !status {
 		response.Status = api.OK
 		return response
 	}
 
-	response.Info.UserID = userID
+	response.Info.Email = userData.Email
 	s.saveUser(userData.Email, ctx.ConnectionID)
 
 	return response
@@ -47,10 +47,10 @@ func (s *UserService) SignUp(ctx api.ServerContext, userData api.SignUp) api.Res
 		return response
 	}
 
-	_, userID := s.database.RegisterUser(userData)
-	s.database.AddUserToChat(userID, "-1") //Just for test: "-1" is a test chat
+	_ = s.database.RegisterUser(userData)
+	s.database.AddUserToChat(userData.Email, "-1") //Just for test: "-1" is a test chat
 
-	response.Info.UserID = userID
+	response.Info.Email = userData.Email
 	s.saveUser(userData.Email, ctx.ConnectionID)
 
 	return response

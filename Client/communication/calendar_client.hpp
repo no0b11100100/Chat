@@ -10,6 +10,8 @@ namespace calendar {
 
 // structs
 struct Meeting : public Types::ClassParser {
+  std::string OrganizerID;
+  bool IsSeries;
   std::string Title;
   std::string StartTime;
   std::string EndTime;
@@ -17,6 +19,8 @@ struct Meeting : public Types::ClassParser {
   std::vector<std::string> Participants;
   virtual json toJson() const override {
     json js({});
+    js["organizerid"] = OrganizerID;
+    js["isseries"] = IsSeries;
     js["title"] = Title;
     js["starttime"] = StartTime;
     js["endtime"] = EndTime;
@@ -26,6 +30,14 @@ struct Meeting : public Types::ClassParser {
   }
 
   virtual void fromJson(json js) override {
+    if (js.isNull())
+      OrganizerID = std::string();
+    else
+      OrganizerID = static_cast<std::string>(js["organizerid"]);
+    if (js.isNull())
+      IsSeries = bool();
+    else
+      IsSeries = static_cast<bool>(js["isseries"]);
     if (js.isNull())
       Title = std::string();
     else
@@ -46,6 +58,28 @@ struct Meeting : public Types::ClassParser {
       Participants = std::vector<std::string>();
     else
       Participants = static_cast<std::vector<std::string>>(js["participants"]);
+  }
+};
+
+struct DaysRange : public Types::ClassParser {
+  std::string Start;
+  std::string End;
+  virtual json toJson() const override {
+    json js({});
+    js["start"] = Start;
+    js["end"] = End;
+    return js;
+  }
+
+  virtual void fromJson(json js) override {
+    if (js.isNull())
+      Start = std::string();
+    else
+      Start = static_cast<std::string>(js["start"]);
+    if (js.isNull())
+      End = std::string();
+    else
+      End = static_cast<std::string>(js["end"]);
   }
 };
 
@@ -71,9 +105,9 @@ public:
     _message.Endpoint = "CalendarService.CreateMeeting";
     return Request<ResponseStatus>(_message);
   }
-  std::vector<Meeting> GetMeetings(std::string userID) {
+  std::vector<Meeting> GetMeetings(std::string userID, DaysRange daysRange) {
     Common::MessageData _message;
-    _message.Payload = json::array({userID});
+    _message.Payload = json::array({userID, daysRange});
     _message.Endpoint = "CalendarService.GetMeetings";
     return Request<std::vector<Meeting>>(_message);
   }

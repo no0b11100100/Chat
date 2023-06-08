@@ -3,7 +3,6 @@ module user 1.0;
 import types 1.0;
 
 struct UserInfo {
-    string userID
     string name
     string nickName
     string photo

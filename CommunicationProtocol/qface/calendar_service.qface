@@ -3,6 +3,8 @@ module calendar 1.0;
 import types 1.0;
 
 struct Meeting {
+    string organizerID;
+    bool isSeries;
     string title;
     string startTime;
     string endTime;
@@ -10,9 +12,14 @@ struct Meeting {
     list<string> participants;
 }
 
+struct DaysRange {
+    string start;
+    string end;
+}
+
 interface CalendarService {
     ResponseStatus createMeeting(Meeting meeting)
-    list<Meeting> getMeetings(string userID)
+    list<Meeting> getMeetings(string userID, DaysRange daysRange)
 
     signal recieveMeeting(Meeting meeting)
 }

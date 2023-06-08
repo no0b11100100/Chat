@@ -43,7 +43,7 @@ public:
             int m = index.row() % 2 == 0 ? 0 : 30;
             for(const auto& meeting : m_meetings.at(index.column()))
             {
-                auto timeParts = meeting->startTime().split(":");
+                auto timeParts = meeting->endTime().split(":");
                 int meetingH = timeParts.at(0).toInt();
                 int meetingM = timeParts.at(1).toInt();
                 if(meetingH == h && m <= meetingM)
@@ -81,7 +81,7 @@ public:
     {
         qDebug() << "Create meeting" << name << "for" << participants << startTime << "-" << endTime;
         std::vector<std::string> v;
-        v.push_back(participants.toStdString());
+        v.push_back(participants.toStdString()); // TODO: set userID(email)
 
         calendar::Meeting m;
         m.Title = name.toStdString();
@@ -93,6 +93,26 @@ public:
         handleMeetingNotification(m);
     }
 
+    void SetCalendar(const std::string& userID)
+    {
+        auto currentDate = QDate::currentDate();
+        QDate startWeek = currentDate;
+        QDate endWeek = currentDate.addDays(7);
+        if(currentDate.dayOfWeek() != 1)
+        {
+            startWeek = currentDate.addDays(-(currentDate.dayOfWeek()-1));
+            endWeek = currentDate.addDays(7 - currentDate.dayOfWeek());
+        }
+
+        auto meetings = m_client.GetMeetings(userID, startWeek.toString("dd.MM.yyyy").toStdString(), endWeek.toString("dd.MM.yyyy").toStdString());
+        for(const auto& meeting : meetings)
+        {
+            auto date = QDate::fromString(QString::fromStdString(meeting.Date), "dd.MM.yyyy");
+            int dayCount = date.dayOfWeek();
+            m_meetings[dayCount-1].emplace_back(std::make_unique<Meeting>(meeting));
+        }
+    }
+
 signals:
     void receiveMeeting(calendar::Meeting);
 
@@ -101,6 +121,13 @@ void handleMeetingNotification(calendar::Meeting meeting)
 {
     qDebug() << "Recieve meeting" << QString::fromStdString(meeting.Title) << QString::fromStdString(meeting.StartTime) << QString::fromStdString(meeting.EndTime);
     auto date = QDate::fromString(QString::fromStdString(meeting.Date), "dd.MM.yyyy");
+
+    if(date.weekNumber() != QDate::currentDate().weekNumber())
+    {
+        qDebug() << "Receive meeting not for current week, skip update";
+        return;
+    }
+
     int dayCount = date.dayOfWeek();
     qDebug() << "Meeting day" << dayCount;
     qDebug() << m_meetings[dayCount-1].size();
@@ -118,34 +145,20 @@ private:
     {
         auto currentDate = QDate::currentDate();
         int currentDay = currentDate.day();
-        int currentMonth = currentDate.month();
-        int positionInWeek = currentDate.dayOfWeek()-1;
-        int daysInMonth = currentDate.daysInMonth();
+        int positionInWeek = currentDate.dayOfWeek();
 
         qDebug() << currentDate;
 
         std::array<QString, 12> months = {"January","February","March","April","May","June","July","August","September","October","November","December"};
         std::array<QString, 7> days = {"Monday", "Tuesaday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
-        int day = 1;
-        if(currentDay == 1 && positionInWeek != 0 && positionInWeek > section)
-        {
-            QDate prevMonth = QDate(currentDate.year(), currentMonth-1, 1);
-            day = prevMonth.daysInMonth() - positionInWeek + 1 + section;
-            currentMonth = prevMonth.month();
-        }
-        else if(positionInWeek < section && currentDay + section > daysInMonth+1) // +1 to avoid skip the last day of month
-        {
-            QDate nextMonth = QDate(currentDate.year(), currentMonth+1, (currentDay + section - positionInWeek) - daysInMonth);
-            currentMonth = nextMonth.month();
-            day = nextMonth.day();
-        }
-        else
-        {
-            day = currentDay - positionInWeek + section;
-        }
+        QDate startWeek = currentDate;
 
-        return QString("%1 %2\n%3").arg(day).arg(months.at(currentMonth-1)).arg(days.at(section));
+        if(positionInWeek != 1) startWeek = currentDate.addDays(-(positionInWeek-1));
+
+        startWeek = startWeek.addDays(section);
+
+        return QString("%1 %2\n%3").arg(startWeek.day()).arg(months.at(startWeek.month()-1)).arg(days.at(section));
 
     }
 
