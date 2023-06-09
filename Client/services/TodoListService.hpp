@@ -10,8 +10,8 @@ public:
     : m_stub{new todolist::TodoListServiceStub(addr)}
     {}
 
-    ResponseStatus AddTask(std::string listID, todolist::Task task) {
-        return m_stub->AddTask(listID, task);
+    ResponseStatus AddTask(std::string userID,std::string listID, todolist::Task task) {
+        return m_stub->AddTask(userID, listID, task);
     }
 
     std::vector<todolist::Task> GetTasks(std::string userID, std::string listID) {
@@ -23,6 +23,13 @@ public:
     }
 
     ResponseStatus AddList(std::string userID, std::string listName) {
-        return m_stub->AddList(userID, listName);
+        todolist::List list;
+        list.Title = listName;
+        list.Id = userID + "/" + listName;
+        return m_stub->AddList(userID, list);
+    }
+
+    ResponseStatus SetTaskState(std::string userID, std::string listID, std::string taskID, bool state) {
+        return m_stub->SetTaskState(userID, listID, taskID, state);
     }
 };
