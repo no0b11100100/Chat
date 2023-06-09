@@ -58,13 +58,21 @@ Rectangle {
                 model: root.model.tasksModel
 
                 delegate: Rectangle {
+                    id: delegate
                     width: parent.width - 10
                     height: 30
                     border.color: "black"
                     border.width: 1
                     radius: 5
-                    Text {
-                        text: display.title
+                    CheckBox {
+                        checked: false
+                        text: "|" + display.title + "|"
+                        height: delegate.height - 10
+
+                        onCheckedChanged: {
+                            console.log("Status changed", checked)
+                            root.model.tasksModel.setTaskState("", checked)
+                        }
                     }
                 }
             }

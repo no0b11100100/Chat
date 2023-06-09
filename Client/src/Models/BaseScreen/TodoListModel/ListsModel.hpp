@@ -75,7 +75,7 @@ signals:
 public slots:
     void addNewTask(todolist::Task task)
     {
-        m_client.AddTask(m_currentList.toStdString(), task);
+        m_client.AddTask(m_userID, m_currentList.toStdString(), task);
     }
 
 private:
