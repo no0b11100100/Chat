@@ -23,6 +23,7 @@ type DB struct {
 	userDatabase     *UserDatabase
 	chatsDatabase    *ChatsDatabase
 	calendarDatabase *CalendarDatabase
+	todoListDataBase *TodolistDatabase
 }
 
 func NewDatabase() *DB {
@@ -31,6 +32,7 @@ func NewDatabase() *DB {
 		userDatabase:     NewUserDatabase(),
 		chatsDatabase:    NewChatsDatabase(),
 		calendarDatabase: NewCalendarDatabase(),
+		todoListDataBase: NewTodolistDatabase(),
 	}
 }
 
@@ -38,6 +40,7 @@ type Database interface {
 	interfaces.UserServiceDatabase
 	interfaces.ChatServiceDatabase
 	interfaces.CalendarServiceDatabase
+	interfaces.TodoListServiceDataBase
 	Connect()
 	Close()
 }
@@ -67,6 +70,7 @@ func (db *DB) Connect() {
 	db.userDatabase.Connect(db.client, "application")
 	db.chatsDatabase.Connect(db.client, "application")
 	db.calendarDatabase.Connect(db.client, "application")
+	db.todoListDataBase.Connect(db.client, "application")
 
 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
 	if err != nil {
@@ -132,4 +136,20 @@ func (db *DB) AddMeeting(userID string, meeting api.Meeting) error {
 
 func (db *DB) GetMeetings(userID string, startDay string, endDay string) []api.Meeting {
 	return db.calendarDatabase.GetMeetings(userID, startDay, endDay)
+}
+
+func (db *DB) AddList(userID string, list api.List) {
+	db.todoListDataBase.AddList(userID, list)
+}
+
+func (db *DB) GetLists(userID string) []api.List {
+	return db.todoListDataBase.GetLists(userID)
+}
+
+func (db *DB) AddTask(userID, listID string, task api.Task) {
+	db.todoListDataBase.AddTask(userID, listID, task)
+}
+
+func (db *DB) GetListTasks(userID, listID string) []api.Task {
+	return db.todoListDataBase.GetListTasks(userID, listID)
 }

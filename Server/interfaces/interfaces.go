@@ -22,3 +22,10 @@ type CalendarServiceDatabase interface {
 	AddMeeting(userID string, meeting api.Meeting) error
 	GetMeetings(userID string, startDay string, endDay string) []api.Meeting
 }
+
+type TodoListServiceDataBase interface {
+	AddList(string, api.List)
+	GetLists(string) []api.List
+	AddTask(string, string, api.Task)
+	GetListTasks(string, string) []api.Task
+}

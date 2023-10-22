@@ -11,6 +11,7 @@ struct Task {
 struct List {
     string id;
     string title;
+    list<Task> tasks;
 }
 
 interface TodoListService {

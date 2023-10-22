@@ -40,10 +40,12 @@ struct Task : public Types::ClassParser {
 struct List : public Types::ClassParser {
   std::string Id;
   std::string Title;
+  std::vector<Task> Tasks;
   virtual json toJson() const override {
     json js({});
     js["id"] = Id;
     js["title"] = Title;
+    js["tasks"] = Tasks;
     return js;
   }
 
@@ -56,6 +58,10 @@ struct List : public Types::ClassParser {
       Title = std::string();
     else
       Title = static_cast<std::string>(js["title"]);
+    if (js.isNull())
+      Tasks = std::vector<Task>();
+    else
+      Tasks = static_cast<std::vector<Task>>(js["tasks"]);
   }
 };
 
