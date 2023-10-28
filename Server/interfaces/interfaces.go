@@ -28,4 +28,5 @@ type TodoListServiceDataBase interface {
 	GetLists(string) []api.List
 	AddTask(string, string, api.Task)
 	GetListTasks(string, string) []api.Task
+	SetTaskState(string, string, string, bool)
 }

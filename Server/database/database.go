@@ -153,3 +153,7 @@ func (db *DB) AddTask(userID, listID string, task api.Task) {
 func (db *DB) GetListTasks(userID, listID string) []api.Task {
 	return db.todoListDataBase.GetListTasks(userID, listID)
 }
+
+func (db *DB) SetTaskState(userID, listID, taskID string, state bool) {
+	db.todoListDataBase.SetTaskState(userID, listID, taskID, state)
+}

@@ -17,7 +17,7 @@ public:
     m_listsModel{new ListsModel(client, this)}
     {
         QObject::connect(m_listsModel.get(), &ListsModel::listSelected, m_tasksModel.get(), &TasksModel::setListTasks);
-        QObject::connect(m_tasksModel.get(), &TasksModel::addedTask, m_listsModel.get(), &ListsModel::addNewTask);
+        // QObject::connect(m_tasksModel.get(), &TasksModel::addedTask, m_listsModel.get(), &ListsModel::addNewTask);
     }
 
     QObject* listsModel() { return m_listsModel.get(); }

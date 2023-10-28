@@ -64,14 +64,15 @@ Rectangle {
                     border.color: "black"
                     border.width: 1
                     radius: 5
+                    readonly property var delegeteData: display
                     CheckBox {
                         checked: false
-                        text: "|" + display.title + "|"
+                        text: delegeteData.title
                         height: delegate.height - 10
 
                         onCheckedChanged: {
                             console.log("Status changed", checked)
-                            root.model.tasksModel.setTaskState("", checked)
+                            root.model.tasksModel.setTaskState(delegeteData.id, checked)
                         }
                     }
                 }
