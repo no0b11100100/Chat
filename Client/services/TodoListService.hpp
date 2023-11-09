@@ -10,7 +10,8 @@ public:
     : m_stub{new todolist::TodoListServiceStub(addr)}
     {}
 
-    ResponseStatus AddTask(std::string userID,std::string listID, todolist::Task task) {
+    todolist::TodoListReponse AddTask(std::string userID,std::string listID, todolist::Task task) {
+        task.IsCompleted = false;
         return m_stub->AddTask(userID, listID, task);
     }
 
@@ -22,10 +23,9 @@ public:
         return m_stub->GetLists(userID);
     }
 
-    ResponseStatus AddList(std::string userID, std::string listName) {
+    todolist::TodoListReponse AddList(std::string userID, std::string listName) {
         todolist::List list;
         list.Title = listName;
-        list.Id = userID + "/" + listName;
         return m_stub->AddList(userID, list);
     }
 

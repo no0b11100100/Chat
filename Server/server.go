@@ -41,7 +41,7 @@ func (s *Server) initServices() {
 	calendarService.SetServerImpl(calendarServiceImpl)
 
 	todoListService := api.NewTodoListServiceServer("localhost:1237")
-	todoListServiceImpl := services.NewTodoListService()
+	todoListServiceImpl := services.NewTodoListService(s.database)
 	todoListService.SetServerImpl(todoListServiceImpl)
 
 	chatService.SubscribeToNewConnectionEvent(chatServiceImpl.HandleNewConnection)

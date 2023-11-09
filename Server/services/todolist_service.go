@@ -1,29 +1,47 @@
 package services
 
-import "Chat/Server/api"
+import (
+	"Chat/Server/api"
+	interfaces "Chat/Server/interfaces"
+)
 
-type TodoListService struct{}
-
-func NewTodoListService() *TodoListService {
-	return &TodoListService{}
+type TodoListService struct {
+	database interfaces.TodoListServiceDataBase
 }
 
-func (todo *TodoListService) AddTask(api.ServerContext, string, string, api.Task) api.ResponseStatus {
-	return api.OK
+func NewTodoListService(database interfaces.TodoListServiceDataBase) *TodoListService {
+	return &TodoListService{
+		database: database,
+	}
 }
 
-func (todo *TodoListService) GetTasks(api.ServerContext, string, string) []api.Task {
-	return make([]api.Task, 0)
+func (todo *TodoListService) AddTask(_ api.ServerContext, userID string, listID string, task api.Task) api.TodoListReponse {
+	task.Id = userID + listID + task.Description
+	todo.database.AddTask(userID, listID, task)
+	return api.TodoListReponse{
+		Status: api.OK,
+		Id:     userID + listID + task.Description, //TODO: make id generation
+	}
 }
 
-func (todo *TodoListService) GetLists(api.ServerContext, string) []api.List {
-	return make([]api.List, 0)
+func (todo *TodoListService) GetTasks(_ api.ServerContext, userID, listID string) []api.Task {
+	return todo.database.GetListTasks(userID, listID)
 }
 
-func (todo *TodoListService) AddList(api.ServerContext, string, api.List) api.ResponseStatus {
-	return api.OK
+func (todo *TodoListService) GetLists(_ api.ServerContext, userID string) []api.List {
+	return todo.database.GetLists(userID)
 }
 
-func (todo *TodoListService) SetTaskState(api.ServerContext, string, string, string, bool) api.ResponseStatus {
+func (todo *TodoListService) AddList(_ api.ServerContext, userID string, list api.List) api.TodoListReponse {
+	list.Id = userID + list.Title
+	todo.database.AddList(userID, list)
+	return api.TodoListReponse{
+		Status: api.OK,
+		Id:     userID + list.Title,
+	}
+}
+
+func (todo *TodoListService) SetTaskState(_ api.ServerContext, userID, listID, taskID string, state bool) api.ResponseStatus {
+	todo.database.SetTaskState(userID, listID, taskID, state)
 	return api.OK
 }
