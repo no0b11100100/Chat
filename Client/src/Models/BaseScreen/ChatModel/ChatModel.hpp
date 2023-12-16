@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "Message/SimpleMessage.hpp"
+#include "Message/DateMessage.hpp"
 #include "Header.hpp"
 #include "../../../../services/ChatService.hpp"
 #include "../utils/utils.hpp"
@@ -68,9 +69,15 @@ public:
         m_client.sendMessage(m_currentChatID.toStdString(), m_userID, message_json.toJson(), timestamp);
 
         emit beginResetModel();
+
+        if(lastMessage.Date.Date != timestamp.Date) {
+            auto dateMessage = getDateMessage(timestamp.Date);
+            m_messages.emplace_back(new DateMessage(dateMessage));
+        }
+
         m_messages.emplace_back(new SimpleMessage(message, true, convertTime(timestamp.Time)));
         emit endResetModel();
-        chat::LastChatMessage lastMessage;
+        // chat::LastChatMessage lastMessage;
         lastMessage.Message = message.toStdString();
         lastMessage.Date = timestamp;
 
@@ -101,6 +108,7 @@ private:
     std::unique_ptr<Multimedia> m_multimedia;
     ChatService& m_client;
     std::string m_userID;
+    chat::LastChatMessage lastMessage;
 
 
     void setHeader(const Header& header)
@@ -141,6 +149,7 @@ private:
     {
         emit beginResetModel();
         m_messages.clear();
+        std::vector<QString> dates;
         for(const auto& message : messages)
         {
             json s = message.MessageJSON;
@@ -148,6 +157,13 @@ private:
             textMessage = s;
             bool isAuth = message.SenderID == m_userID;
             QString messageTime = convertTime(message.Date.Time);
+
+            auto dateMessage = getDateMessage(message.Date.Date);
+            if(auto it = std::find(dates.cbegin(), dates.cend(), dateMessage) == dates.cend()) {
+                m_messages.emplace_back(new DateMessage(dateMessage));
+                dates.push_back(dateMessage);
+            }
+
             m_messages.emplace_back(new SimpleMessage(QString::fromStdString(textMessage.Text), isAuth, messageTime));
         }
 
@@ -185,6 +201,21 @@ private:
         lastMessage.Date = message.Date;
 
         emit sendingMessage(QString::fromStdString(message.ChatID), lastMessage);
+    }
+
+    QString getDateMessage(std::string date)
+    {
+        auto currentDate = QDate::currentDate();
+        auto messageDate = QDate::fromString(QString::fromStdString(date), "dd.MM.yyyy");
+
+        QString message = QString::number(messageDate.day()) + " " + monthNumberToMonthName(messageDate.month());
+
+        if(currentDate.year() != messageDate.year())
+        {
+            message += " " + QString::number(messageDate.year());
+        }
+
+        return message;
     }
 
 };

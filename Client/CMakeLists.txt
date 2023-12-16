@@ -42,6 +42,7 @@ set(PROJECT_SOURCES
         src/Models/BaseScreen/ChatModel/ChatModel.hpp
         src/Models/BaseScreen/ChatModel/Header.hpp
         src/Models/BaseScreen/ChatModel/Message/SimpleMessage.hpp
+        src/Models/BaseScreen/ChatModel/Message/DateMessage.hpp
 
         src/Models/BaseScreen/ChatListModel/ChatListModel.hpp
         src/Models/BaseScreen/ChatListModel/Chat.hpp

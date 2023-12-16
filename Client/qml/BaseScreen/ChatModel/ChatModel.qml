@@ -21,9 +21,20 @@ Rectangle {
             height: root.height - header.height - userInput.height
             model: root.model
             spacing: 2
-            delegate: SimpleMessage{
+            delegate: Rectangle{
                 width: root.width
-                model: display
+                height: 50
+                SimpleMessage{
+                    width: root.width
+                    model: display
+                    visible: display.name === "SimpleMessage"
+                }
+
+                DateMessage {
+                    width: root.width
+                    model: display
+                    visible: display.name === "DateMessage"
+                }
             }
 
             visible: root.model == undefined ? true : root.model.isChatSelected

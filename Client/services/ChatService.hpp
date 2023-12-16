@@ -43,5 +43,4 @@ public:
     void handleNotifyCallData(std::function<void(chat::CallData)> callback) {
         m_stub->SubscribeToNotifyCallDataEvent(callback);
     }
-
 };
