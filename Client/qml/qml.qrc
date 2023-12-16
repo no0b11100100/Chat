@@ -25,6 +25,7 @@
         <file>BaseScreen/TODOList/Lists.qml</file>
 
         <file>BaseScreen/ChatModel/Message/SimpleMessage.qml</file>
+        <file>BaseScreen/ChatModel/Message/DateMessage.qml</file>
 
         <file>BaseScreen/ChatListModel/ChatListModel.qml</file>
         <file>BaseScreen/ChatListModel/Chat.qml</file>
