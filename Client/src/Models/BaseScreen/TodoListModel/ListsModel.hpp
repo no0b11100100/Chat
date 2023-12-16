@@ -35,26 +35,25 @@ public:
 
     void SetLists(const std::string& userID)
     {
+        qDebug() << "SetLists" << QString::fromStdString(userID);
         m_userID = userID;
         auto lists = m_client.GetLists(userID);
+        qDebug() << "Lists size" << lists.size();
         for(auto& list : lists)
         {
             m_lists.emplace_back(std::make_unique<List>(list));
         }
 
-        todolist::List list;
-        list.Id = "lists/all";
-        list.Title = "All";
-        m_lists.emplace_back(std::make_unique<List>(list));
-        selectList(QString::fromStdString(list.Id));
+        if (!lists.empty())
+            selectList(QString::fromStdString(lists.at(0).Id));
     }
 
     Q_INVOKABLE void addList(QString name)
     {
         qDebug() << "Add list" << name;
-        m_client.AddList(m_userID, name.toStdString());
+        auto response = m_client.AddList(m_userID, name.toStdString());
         todolist::List list;
-        list.Id = "lists/" + name.toStdString();
+        list.Id = response.Id;
         list.Title = name.toStdString();
         emit beginResetModel();
         m_lists.emplace_back(std::make_unique<List>(list));
@@ -73,10 +72,10 @@ signals:
     void listSelected(QString, QString);
 
 public slots:
-    void addNewTask(todolist::Task task)
-    {
-        m_client.AddTask(m_currentList.toStdString(), task);
-    }
+    // void addNewTask(todolist::Task task)
+    // {
+    //     m_client.AddTask(m_userID, m_currentList.toStdString(), task);
+    // }
 
 private:
     TodoListService& m_client;

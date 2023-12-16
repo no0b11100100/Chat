@@ -3,17 +3,26 @@ module todolist 1.0;
 import types 1.0;
 
 struct Task {
+    string id
     string description
+    bool isCompleted
 }
 
 struct List {
     string id;
     string title;
+    list<Task> tasks;
+}
+
+struct TodoListReponse {
+    string id;
+    ResponseStatus status;
 }
 
 interface TodoListService {
-    ResponseStatus addTask(string listID, Task task);
+    TodoListReponse addTask(string userID, string listID, Task task);
     list<Task> getTasks(string userID, string listID);
     list<List> getLists(string userID);
-    ResponseStatus addList(string userID, string listName);
+    TodoListReponse addList(string userID, List newList);
+    ResponseStatus setTaskState(string userID, string listID, string taskID, bool state);
 }

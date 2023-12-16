@@ -18,23 +18,29 @@ import (
 // //https://www.mongodb.com/blog/post/mongodb-go-driver-tutorial
 
 type DB struct {
-	m             sync.RWMutex
-	client        *mongo.Client
-	userDatabase  *UserDatabase
-	chatsDatabase *ChatsDatabase
+	m                sync.RWMutex
+	client           *mongo.Client
+	userDatabase     *UserDatabase
+	chatsDatabase    *ChatsDatabase
+	calendarDatabase *CalendarDatabase
+	todoListDataBase *TodolistDatabase
 }
 
 func NewDatabase() *DB {
 	return &DB{
-		m:             sync.RWMutex{},
-		userDatabase:  NewUserDatabase(),
-		chatsDatabase: NewChatsDatabase(),
+		m:                sync.RWMutex{},
+		userDatabase:     NewUserDatabase(),
+		chatsDatabase:    NewChatsDatabase(),
+		calendarDatabase: NewCalendarDatabase(),
+		todoListDataBase: NewTodolistDatabase(),
 	}
 }
 
 type Database interface {
 	interfaces.UserServiceDatabase
 	interfaces.ChatServiceDatabase
+	interfaces.CalendarServiceDatabase
+	interfaces.TodoListServiceDataBase
 	Connect()
 	Close()
 }
@@ -63,6 +69,8 @@ func (db *DB) Connect() {
 
 	db.userDatabase.Connect(db.client, "application")
 	db.chatsDatabase.Connect(db.client, "application")
+	db.calendarDatabase.Connect(db.client, "application")
+	db.todoListDataBase.Connect(db.client, "application")
 
 	databases, err := client.ListDatabaseNames(ctx, bson.M{})
 	if err != nil {
@@ -85,11 +93,11 @@ func (db *DB) IsEmailUnique(email string) bool {
 	return db.userDatabase.IsEmailUnique(email)
 }
 
-func (db *DB) ValidateUser(email, password string) (bool, string) {
+func (db *DB) ValidateUser(email, password string) bool {
 	return db.userDatabase.ValidateUser(email, password)
 }
 
-func (db *DB) RegisterUser(data api.SignUp) (bool, string) {
+func (db *DB) RegisterUser(data api.SignUp) bool {
 	return db.userDatabase.RegisterUser(data)
 }
 
@@ -119,4 +127,33 @@ func (db *DB) GetMessages(chatID string) []api.Message {
 
 func (db *DB) AddMessage(msg api.Message) error {
 	return db.chatsDatabase.AddMessage(msg)
+}
+
+func (db *DB) AddMeeting(userID string, meeting api.Meeting) error {
+	fmt.Println("AddMeeting", userID)
+	return db.calendarDatabase.AddMeeting(userID, meeting)
+}
+
+func (db *DB) GetMeetings(userID string, startDay string, endDay string) []api.Meeting {
+	return db.calendarDatabase.GetMeetings(userID, startDay, endDay)
+}
+
+func (db *DB) AddList(userID string, list api.List) {
+	db.todoListDataBase.AddList(userID, list)
+}
+
+func (db *DB) GetLists(userID string) []api.List {
+	return db.todoListDataBase.GetLists(userID)
+}
+
+func (db *DB) AddTask(userID, listID string, task api.Task) {
+	db.todoListDataBase.AddTask(userID, listID, task)
+}
+
+func (db *DB) GetListTasks(userID, listID string) []api.Task {
+	return db.todoListDataBase.GetListTasks(userID, listID)
+}
+
+func (db *DB) SetTaskState(userID, listID, taskID string, state bool) {
+	db.todoListDataBase.SetTaskState(userID, listID, taskID, state)
 }

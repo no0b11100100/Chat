@@ -36,32 +36,50 @@ public:
     Q_INVOKABLE void addTask(QString title)
     {
         qDebug() << "Add task" << title;
-        emit beginResetModel();
-        m_tasks.emplace_back(std::make_unique<Task>(title));
-        emit endResetModel();
         todolist::Task task;
         task.Description = title.toStdString();
-        emit addedTask(task);
+        auto response = m_client.AddTask(m_userID.toStdString(), m_listID.toStdString(), task);
+        emit beginResetModel();
+        m_tasks.emplace_back(std::make_unique<Task>(title, QString::fromStdString(response.Id)));
+        emit endResetModel();
+        // todolist::Task task;
+        // task.Description = title.toStdString();
+        // emit addedTask(task);
     }
 
-signals:
-    void addedTask(todolist::Task);
+    Q_INVOKABLE void setTaskState(QString taskID, bool state) {
+        qDebug() << "changeTaskState" << taskID << state;
+        m_client.SetTaskState(m_userID.toStdString(), m_listID.toStdString(), taskID.toStdString(), state);
+        emit beginResetModel();
+        // emit changeTaskState(taskID, state);
+    }
+
+// signals:
+    // void addedTask(todolist::Task);
+    // void changeTaskState(QString, bool);
 
 public slots:
     void setListTasks(QString userID, QString listID)
     {
+        m_userID = userID;
+        m_listID = listID;
         qDebug() << "Request tasks for list" << listID;
         auto listTasks = m_client.GetTasks(userID.toStdString(), listID.toStdString());
         m_tasks.clear();
         emit beginResetModel();
         for(const auto& task : listTasks)
         {
-            m_tasks.emplace_back(std::make_unique<Task>(QString::fromStdString(task.Description)));
+            m_tasks.emplace_back(std::make_unique<Task>(QString::fromStdString(task.Description), QString::fromStdString(task.Id)));
         }
+
+        qDebug() << "Tasks size" << m_tasks.size() << "for list" << listID;
+
         emit endResetModel();
     }
 
 private:
     TodoListService& m_client;
     std::vector<std::unique_ptr<Task>> m_tasks;
+    QString m_userID;
+    QString m_listID;
 };

@@ -13,7 +13,6 @@ import (
 
 // structs
 type UserInfo struct {
-	UserID   string   `json:"userid",omitempty bson:"userid"`
 	Name     string   `json:"name",omitempty bson:"name"`
 	NickName string   `json:"nickname",omitempty bson:"nickname"`
 	Photo    string   `json:"photo",omitempty bson:"photo"`
@@ -23,7 +22,6 @@ type UserInfo struct {
 }
 
 type UserInfoTagger struct {
-	UserID   string
 	Name     string
 	NickName string
 	Photo    string
@@ -34,7 +32,6 @@ type UserInfoTagger struct {
 
 func UserInfoTags() UserInfoTagger {
 	return UserInfoTagger{
-		UserID:   "userid",
 		Name:     "name",
 		NickName: "nickname",
 		Photo:    "photo",
